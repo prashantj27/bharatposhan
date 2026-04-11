@@ -11,20 +11,23 @@ interface IndiaMapProps {
   selectedStateName: string | null | undefined;
 }
 
+// State-level average risk scores computed from NFHS-5 (2019-21) district data
 const STATE_RISK_MAP: Record<string, number> = {
-  "Jammu and Kashmir": 0.48, "Jammu & Kashmir": 0.48, "Himachal Pradesh": 0.31, "Punjab": 0.38,
-  "Uttarakhand": 0.36, "Uttaranchal": 0.36, "Haryana": 0.42, "Delhi": 0.33, "NCT of Delhi": 0.33,
-  "Rajasthan": 0.55, "Uttar Pradesh": 0.75, "Bihar": 0.78,
-  "Sikkim": 0.29, "Arunachal Pradesh": 0.58, "Nagaland": 0.45,
-  "Manipur": 0.52, "Mizoram": 0.40, "Tripura": 0.55,
-  "Meghalaya": 0.64, "Assam": 0.62, "West Bengal": 0.58,
-  "Jharkhand": 0.71, "Odisha": 0.68, "Orissa": 0.68, "Chhattisgarh": 0.66,
-  "Madhya Pradesh": 0.61, "Gujarat": 0.45, "Maharashtra": 0.41,
-  "Andhra Pradesh": 0.42, "Karnataka": 0.35, "Telangana": 0.44,
-  "Goa": 0.19, "Kerala": 0.22, "Tamil Nadu": 0.29,
-  "Lakshadweep": 0.21, "Andaman and Nicobar Islands": 0.28, "Andaman and Nicobar": 0.28,
-  "Puducherry": 0.24, "Chandigarh": 0.25, "Ladakh": 0.40,
-  "Dadra and Nagar Haveli and Daman and Diu": 0.33, "Dadra and Nagar Haveli": 0.35, "Daman and Diu": 0.30,
+  "Andaman and Nicobar": 0.19, "Andaman and Nicobar Islands": 0.19,
+  "Andhra Pradesh": 0.28, "Arunachal Pradesh": 0.19, "Assam": 0.30,
+  "Bihar": 0.36, "Chandigarh": 0.19, "Chhattisgarh": 0.29,
+  "Dadra and Nagar Haveli": 0.36, "Dadra and Nagar Haveli and Daman and Diu": 0.32,
+  "Daman and Diu": 0.28, "Delhi": 0.19, "NCT of Delhi": 0.19,
+  "Goa": 0.23, "Gujarat": 0.35, "Haryana": 0.20,
+  "Himachal Pradesh": 0.25, "Jammu and Kashmir": 0.24, "Jammu & Kashmir": 0.24,
+  "Jharkhand": 0.35, "Karnataka": 0.29, "Kerala": 0.20,
+  "Lakshadweep": 0.26, "Madhya Pradesh": 0.30, "Maharashtra": 0.33,
+  "Manipur": 0.17, "Meghalaya": 0.29, "Mizoram": 0.19,
+  "Nagaland": 0.27, "Odisha": 0.27, "Orissa": 0.27,
+  "Puducherry": 0.21, "Punjab": 0.18, "Rajasthan": 0.27,
+  "Sikkim": 0.17, "Tamil Nadu": 0.21, "Telangana": 0.28,
+  "Tripura": 0.26, "Uttar Pradesh": 0.31, "Uttarakhand": 0.20, "Uttaranchal": 0.20,
+  "West Bengal": 0.29, "Ladakh": 0.24,
 };
 
 const districtData = nfhsData as Record<string, { district: string; state: string; stunting: number; wasting: number; underweight: number; risk: number; anemia_children: number; anemia_women: number; breastfeeding: number; immunization: number }>;
