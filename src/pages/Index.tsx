@@ -252,7 +252,7 @@ export default function Index() {
           </div>
 
           <div>
-            <div style={{ fontSize: 9, color: "#6b7fa3", letterSpacing: "0.2em", marginBottom: 8 }}>NUTRITION INDICATORS</div>
+            <div style={{ fontSize: 9, color: "#6b7fa3", letterSpacing: "0.2em", marginBottom: 8 }}>NUTRITION INDICATORS · NFHS-5 (2019-21)</div>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6 }}>
               {[
                 { label: "Stunting", val: selected.stunting, unit: "%", color: "#ef233c" },
