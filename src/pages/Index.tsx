@@ -146,11 +146,11 @@ export default function Index() {
           </div>
           <div>
             <div style={{ fontSize: 9, color: "#6b7fa3", letterSpacing: "0.2em", marginBottom: 8 }}>NATIONAL KPIs</div>
-            {[{ label: "Avg Stunting", val: "35.5%", delta: "▼ 2.5%" }, { label: "Avg Wasting", val: "19.3%", delta: "▼ 1.8%" }, { label: "High Risk Districts", val: "112", delta: "▼ 14" }].map(k => (
+            {[{ label: "Avg Stunting", val: "35.5%", delta: "▼ 2.9% vs NFHS-4" }, { label: "Avg Wasting", val: "19.3%", delta: "▼ 1.7% vs NFHS-4" }, { label: "Avg Underweight", val: "32.1%", delta: "▼ 3.7% vs NFHS-4" }].map(k => (
               <div key={k.label} style={{ padding: "8px 10px", background: "#0d1628", borderRadius: 6, marginBottom: 6, border: "1px solid rgba(255,255,255,0.05)" }}>
                 <div style={{ fontSize: 9, color: "#6b7fa3" }}>{k.label}</div>
                 <div style={{ fontSize: 18, fontWeight: 500, color: "#fff", lineHeight: 1.2 }}>{k.val}</div>
-                <div style={{ fontSize: 10, color: "#52b788" }}>{k.delta} vs NFHS-4</div>
+                <div style={{ fontSize: 10, color: "#52b788" }}>{k.delta}</div>
               </div>
             ))}
           </div>
