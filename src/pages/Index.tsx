@@ -349,6 +349,12 @@ export default function Index() {
           </div>
         ))}
       </div>
+      <div style={{ borderTop: "1px solid rgba(255,255,255,0.04)", padding: "6px 20px", background: "#070d1a", fontSize: 8, color: "#3a5070", display: "flex", gap: 16, flexWrap: "wrap" }}>
+        <span>Data: NFHS-5 (2019-21) · rchiips.org/nfhs</span>
+        <span>Census 2011 · censusindia.gov.in</span>
+        <span>NITI Aayog District Nutrition Profile · niti.gov.in</span>
+        <span>Risk = 0.4×Stunting + 0.3×Wasting + 0.3×Underweight (normalized)</span>
+      </div>
 
       <style>{`
         @keyframes scan { 0%{top:0} 100%{top:100%} }
