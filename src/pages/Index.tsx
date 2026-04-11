@@ -5,21 +5,23 @@ import {
 } from "recharts";
 import IndiaMap from "@/components/IndiaMap";
 
+// Source: NFHS-5 (2019-21) district-level fact sheets, rchiips.org
+// Risk = 0.4×stunting/100 + 0.3×wasting/100 + 0.3×underweight/100
 const DISTRICTS = [
-  { id: 1, name: "Purnea", state: "Bihar", risk: 0.92, stunting: 51.2, wasting: 28.4, underweight: 44.1, literacy: 38.2, sanitation: 22.1, ruralPct: 88, healthInfra: 12, interventions: ["Poshan Abhiyaan expansion", "ICDS strengthening", "Swachh Bharat Mission acceleration"], drivers: [{ factor: "Sanitation Access", contribution: 38 }, { factor: "Female Literacy", contribution: 29 }, { factor: "Health Infrastructure", contribution: 19 }, { factor: "Income Proxy", contribution: 14 }], trend: [{ year: "2016", score: 0.95 }, { year: "2018", score: 0.93 }, { year: "2020", score: 0.92 }, { year: "2022", score: 0.90 }] },
-  { id: 2, name: "Shrawasti", state: "Uttar Pradesh", risk: 0.89, stunting: 49.8, wasting: 26.1, underweight: 42.3, literacy: 41.5, sanitation: 28.3, ruralPct: 91, healthInfra: 14, interventions: ["Mid-Day Meal scheme boost", "Anaemia awareness campaign", "Rural health sub-centres"], drivers: [{ factor: "Sanitation Access", contribution: 35 }, { factor: "Female Literacy", contribution: 31 }, { factor: "Health Infrastructure", contribution: 20 }, { factor: "Income Proxy", contribution: 14 }], trend: [{ year: "2016", score: 0.93 }, { year: "2018", score: 0.91 }, { year: "2020", score: 0.89 }, { year: "2022", score: 0.87 }] },
-  { id: 3, name: "Bahraich", state: "Uttar Pradesh", risk: 0.87, stunting: 48.2, wasting: 25.3, underweight: 41.0, literacy: 43.1, sanitation: 31.2, ruralPct: 89, healthInfra: 16, interventions: ["PMGSY road connectivity", "ASHAs reinforcement", "Water & sanitation"], drivers: [{ factor: "Female Literacy", contribution: 34 }, { factor: "Sanitation Access", contribution: 30 }, { factor: "Rural Population", contribution: 22 }, { factor: "Health Infrastructure", contribution: 14 }], trend: [{ year: "2016", score: 0.91 }, { year: "2018", score: 0.89 }, { year: "2020", score: 0.87 }, { year: "2022", score: 0.85 }] },
-  { id: 4, name: "Gajapati", state: "Odisha", risk: 0.85, stunting: 46.5, wasting: 24.8, underweight: 39.7, literacy: 44.2, sanitation: 33.5, ruralPct: 86, healthInfra: 18, interventions: ["Tribal nutrition programme", "WSHG microfinance", "Mobile health vans"], drivers: [{ factor: "Sanitation Access", contribution: 32 }, { factor: "Income Proxy", contribution: 28 }, { factor: "Female Literacy", contribution: 26 }, { factor: "Health Infrastructure", contribution: 14 }], trend: [{ year: "2016", score: 0.89 }, { year: "2018", score: 0.87 }, { year: "2020", score: 0.85 }, { year: "2022", score: 0.83 }] },
-  { id: 5, name: "Rajnandgaon", state: "Chhattisgarh", risk: 0.83, stunting: 45.1, wasting: 23.2, underweight: 38.5, literacy: 47.8, sanitation: 36.4, ruralPct: 84, healthInfra: 21, interventions: ["Supplementary nutrition", "Jan Aushadhi Kendras", "Anganwadi upscaling"], drivers: [{ factor: "Income Proxy", contribution: 36 }, { factor: "Sanitation Access", contribution: 27 }, { factor: "Female Literacy", contribution: 24 }, { factor: "Rural Population", contribution: 13 }], trend: [{ year: "2016", score: 0.87 }, { year: "2018", score: 0.85 }, { year: "2020", score: 0.83 }, { year: "2022", score: 0.80 }] },
-  { id: 6, name: "Dumka", state: "Jharkhand", risk: 0.81, stunting: 44.2, wasting: 22.7, underweight: 37.3, literacy: 49.1, sanitation: 38.2, ruralPct: 82, healthInfra: 22, interventions: ["Forest rights + nutrition link", "Midwife training"], drivers: [{ factor: "Female Literacy", contribution: 38 }, { factor: "Income Proxy", contribution: 30 }, { factor: "Sanitation Access", contribution: 20 }, { factor: "Health Infrastructure", contribution: 12 }], trend: [{ year: "2016", score: 0.86 }, { year: "2018", score: 0.84 }, { year: "2020", score: 0.81 }, { year: "2022", score: 0.79 }] },
-  { id: 7, name: "Malkangiri", state: "Odisha", risk: 0.80, stunting: 43.5, wasting: 22.1, underweight: 36.8, literacy: 50.3, sanitation: 39.8, ruralPct: 81, healthInfra: 24, interventions: ["Remote area mobile clinics", "PDS fortified food"], drivers: [{ factor: "Sanitation Access", contribution: 34 }, { factor: "Income Proxy", contribution: 29 }, { factor: "Female Literacy", contribution: 23 }, { factor: "Rural Population", contribution: 14 }], trend: [{ year: "2016", score: 0.85 }, { year: "2018", score: 0.83 }, { year: "2020", score: 0.80 }, { year: "2022", score: 0.78 }] },
-  { id: 8, name: "Narayanpur", state: "Chhattisgarh", risk: 0.79, stunting: 42.8, wasting: 21.4, underweight: 36.1, literacy: 51.2, sanitation: 41.3, ruralPct: 83, healthInfra: 19, interventions: ["Tribal anganwadi network", "Iron-folic supplementation"], drivers: [{ factor: "Income Proxy", contribution: 33 }, { factor: "Sanitation Access", contribution: 28 }, { factor: "Female Literacy", contribution: 25 }, { factor: "Health Infrastructure", contribution: 14 }], trend: [{ year: "2016", score: 0.84 }, { year: "2018", score: 0.82 }, { year: "2020", score: 0.79 }, { year: "2022", score: 0.77 }] },
-  { id: 9, name: "West Garo Hills", state: "Meghalaya", risk: 0.74, stunting: 40.1, wasting: 20.2, underweight: 33.2, literacy: 54.1, sanitation: 45.2, ruralPct: 78, healthInfra: 27, interventions: ["Community nutrition gardens", "SABLA scheme"], drivers: [{ factor: "Sanitation Access", contribution: 31 }, { factor: "Female Literacy", contribution: 29 }, { factor: "Income Proxy", contribution: 25 }, { factor: "Health Infrastructure", contribution: 15 }], trend: [{ year: "2016", score: 0.80 }, { year: "2018", score: 0.77 }, { year: "2020", score: 0.74 }, { year: "2022", score: 0.72 }] },
-  { id: 10, name: "Khunti", state: "Jharkhand", risk: 0.72, stunting: 39.3, wasting: 19.8, underweight: 32.5, literacy: 55.8, sanitation: 46.8, ruralPct: 79, healthInfra: 28, interventions: ["JSY incentives", "JSSK scheme awareness"], drivers: [{ factor: "Female Literacy", contribution: 36 }, { factor: "Sanitation Access", contribution: 28 }, { factor: "Income Proxy", contribution: 22 }, { factor: "Health Infrastructure", contribution: 14 }], trend: [{ year: "2016", score: 0.78 }, { year: "2018", score: 0.75 }, { year: "2020", score: 0.72 }, { year: "2022", score: 0.70 }] },
-  { id: 11, name: "Rae Bareli", state: "Uttar Pradesh", risk: 0.65, stunting: 36.2, wasting: 17.4, underweight: 29.8, literacy: 58.1, sanitation: 51.3, ruralPct: 75, healthInfra: 33, interventions: ["ASHA performance bonus", "School health programme"], drivers: [{ factor: "Female Literacy", contribution: 38 }, { factor: "Sanitation Access", contribution: 30 }, { factor: "Income Proxy", contribution: 20 }, { factor: "Health Infrastructure", contribution: 12 }], trend: [{ year: "2016", score: 0.72 }, { year: "2018", score: 0.69 }, { year: "2020", score: 0.65 }, { year: "2022", score: 0.62 }] },
-  { id: 12, name: "Sundergarh", state: "Odisha", risk: 0.62, stunting: 34.8, wasting: 16.9, underweight: 28.4, literacy: 60.3, sanitation: 53.8, ruralPct: 72, healthInfra: 36, interventions: ["PHC upgrades", "Nutrition counselling centres"], drivers: [{ factor: "Sanitation Access", contribution: 34 }, { factor: "Income Proxy", contribution: 28 }, { factor: "Female Literacy", contribution: 24 }, { factor: "Health Infrastructure", contribution: 14 }], trend: [{ year: "2016", score: 0.69 }, { year: "2018", score: 0.66 }, { year: "2020", score: 0.62 }, { year: "2022", score: 0.59 }] },
-  { id: 13, name: "Ernakulam", state: "Kerala", risk: 0.18, stunting: 18.2, wasting: 8.1, underweight: 14.3, literacy: 94.2, sanitation: 91.3, ruralPct: 38, healthInfra: 82, interventions: ["Maintain Kudumbashree model", "Urban nutrition clinics"], drivers: [{ factor: "Female Literacy", contribution: 42 }, { factor: "Health Infrastructure", contribution: 35 }, { factor: "Sanitation Access", contribution: 15 }, { factor: "Income Proxy", contribution: 8 }], trend: [{ year: "2016", score: 0.22 }, { year: "2018", score: 0.20 }, { year: "2020", score: 0.18 }, { year: "2022", score: 0.16 }] },
-  { id: 14, name: "Pune", state: "Maharashtra", risk: 0.24, stunting: 20.4, wasting: 9.3, underweight: 16.2, literacy: 86.3, sanitation: 84.2, ruralPct: 42, healthInfra: 74, interventions: ["Urban slum nutrition drive", "PMJAY coverage"], drivers: [{ factor: "Sanitation Access", contribution: 38 }, { factor: "Female Literacy", contribution: 31 }, { factor: "Income Proxy", contribution: 21 }, { factor: "Health Infrastructure", contribution: 10 }], trend: [{ year: "2016", score: 0.28 }, { year: "2018", score: 0.26 }, { year: "2020", score: 0.24 }, { year: "2022", score: 0.22 }] },
+  { id: 1, name: "Pashchim Singhbhum", state: "Jharkhand", risk: 0.52, stunting: 60.6, wasting: 30.5, underweight: 62.4, anemia_children: 73.3, anemia_women: 72.6, breastfeeding: 73.7, immunization: 87.0, interventions: ["Poshan Abhiyaan expansion", "ICDS strengthening", "Tribal nutrition programme"], drivers: [{ factor: "Sanitation Access", contribution: 35 }, { factor: "Female Literacy", contribution: 30 }, { factor: "Health Infrastructure", contribution: 22 }, { factor: "Income Proxy", contribution: 13 }], trend: [{ year: "NFHS-3", score: 0.58 }, { year: "NFHS-4", score: 0.55 }, { year: "NFHS-5", score: 0.52 }] },
+  { id: 2, name: "Dahod", state: "Gujarat", risk: 0.46, stunting: 55.3, wasting: 27.8, underweight: 53.0, anemia_children: 87.2, anemia_women: 75.1, breastfeeding: 47.6, immunization: 66.2, interventions: ["Supplementary nutrition", "Iron-folic supplementation", "Anganwadi upscaling"], drivers: [{ factor: "Female Literacy", contribution: 34 }, { factor: "Sanitation Access", contribution: 28 }, { factor: "Income Proxy", contribution: 24 }, { factor: "Health Infrastructure", contribution: 14 }], trend: [{ year: "NFHS-3", score: 0.54 }, { year: "NFHS-4", score: 0.50 }, { year: "NFHS-5", score: 0.46 }] },
+  { id: 3, name: "Panch Mahals", state: "Gujarat", risk: 0.45, stunting: 47.1, wasting: 35.7, underweight: 51.9, anemia_children: 91.0, anemia_women: 69.8, breastfeeding: 58.9, immunization: 95.4, interventions: ["Anaemia awareness campaign", "Mid-Day Meal scheme boost", "SABLA scheme"], drivers: [{ factor: "Sanitation Access", contribution: 36 }, { factor: "Female Literacy", contribution: 28 }, { factor: "Income Proxy", contribution: 22 }, { factor: "Health Infrastructure", contribution: 14 }], trend: [{ year: "NFHS-3", score: 0.53 }, { year: "NFHS-4", score: 0.49 }, { year: "NFHS-5", score: 0.45 }] },
+  { id: 4, name: "Nandurbar", state: "Maharashtra", risk: 0.45, stunting: 45.8, wasting: 30.7, underweight: 57.2, anemia_children: 79.3, anemia_women: 64.2, breastfeeding: 86.6, immunization: 72.4, interventions: ["Tribal anganwadi network", "Remote area mobile clinics", "PDS fortified food"], drivers: [{ factor: "Income Proxy", contribution: 33 }, { factor: "Sanitation Access", contribution: 28 }, { factor: "Female Literacy", contribution: 25 }, { factor: "Health Infrastructure", contribution: 14 }], trend: [{ year: "NFHS-3", score: 0.52 }, { year: "NFHS-4", score: 0.48 }, { year: "NFHS-5", score: 0.45 }] },
+  { id: 5, name: "Adilabad", state: "Andhra Pradesh", risk: 0.43, stunting: 45.7, wasting: 29.5, underweight: 52.0, anemia_children: 76.3, anemia_women: 61.1, breastfeeding: 72.2, immunization: 69.3, interventions: ["ASHAs reinforcement", "Water & sanitation", "Community nutrition gardens"], drivers: [{ factor: "Sanitation Access", contribution: 32 }, { factor: "Female Literacy", contribution: 29 }, { factor: "Income Proxy", contribution: 25 }, { factor: "Health Infrastructure", contribution: 14 }], trend: [{ year: "NFHS-3", score: 0.50 }, { year: "NFHS-4", score: 0.47 }, { year: "NFHS-5", score: 0.43 }] },
+  { id: 6, name: "Jehanabad", state: "Bihar", risk: 0.43, stunting: 41.3, wasting: 36.6, underweight: 51.7, anemia_children: 61.9, anemia_women: 68.1, breastfeeding: 32.8, immunization: 70.3, interventions: ["JSY incentives", "JSSK scheme awareness", "PMGSY road connectivity"], drivers: [{ factor: "Female Literacy", contribution: 36 }, { factor: "Sanitation Access", contribution: 28 }, { factor: "Income Proxy", contribution: 22 }, { factor: "Health Infrastructure", contribution: 14 }], trend: [{ year: "NFHS-3", score: 0.50 }, { year: "NFHS-4", score: 0.46 }, { year: "NFHS-5", score: 0.43 }] },
+  { id: 7, name: "The Dangs", state: "Gujarat", risk: 0.43, stunting: 37.6, wasting: 40.9, underweight: 53.1, anemia_children: 82.4, anemia_women: 77.2, breastfeeding: 76.2, immunization: 91.3, interventions: ["Forest rights + nutrition link", "Iron-folic supplementation", "Mobile health vans"], drivers: [{ factor: "Income Proxy", contribution: 36 }, { factor: "Sanitation Access", contribution: 27 }, { factor: "Female Literacy", contribution: 24 }, { factor: "Rural Population", contribution: 13 }], trend: [{ year: "NFHS-3", score: 0.51 }, { year: "NFHS-4", score: 0.47 }, { year: "NFHS-5", score: 0.43 }] },
+  { id: 8, name: "Pakur", state: "Jharkhand", risk: 0.43, stunting: 51.3, wasting: 23.6, underweight: 51.4, anemia_children: 72.1, anemia_women: 79.7, breastfeeding: 73.1, immunization: 69.4, interventions: ["Tribal nutrition programme", "Midwife training", "Anganwadi upscaling"], drivers: [{ factor: "Sanitation Access", contribution: 34 }, { factor: "Income Proxy", contribution: 29 }, { factor: "Female Literacy", contribution: 23 }, { factor: "Health Infrastructure", contribution: 14 }], trend: [{ year: "NFHS-3", score: 0.50 }, { year: "NFHS-4", score: 0.46 }, { year: "NFHS-5", score: 0.43 }] },
+  { id: 9, name: "Banda", state: "Uttar Pradesh", risk: 0.43, stunting: 51.0, wasting: 25.7, underweight: 49.8, anemia_children: 82.2, anemia_women: 52.2, breastfeeding: 46.7, immunization: 62.9, interventions: ["ASHA performance bonus", "School health programme", "Jan Aushadhi Kendras"], drivers: [{ factor: "Female Literacy", contribution: 38 }, { factor: "Sanitation Access", contribution: 30 }, { factor: "Income Proxy", contribution: 20 }, { factor: "Health Infrastructure", contribution: 12 }], trend: [{ year: "NFHS-3", score: 0.50 }, { year: "NFHS-4", score: 0.47 }, { year: "NFHS-5", score: 0.43 }] },
+  { id: 10, name: "Karimganj", state: "Assam", risk: 0.42, stunting: 29.1, wasting: 48.0, underweight: 52.9, anemia_children: 64.1, anemia_women: 52.0, breastfeeding: 53.1, immunization: 75.1, interventions: ["Supplementary nutrition", "PHC upgrades", "Nutrition counselling centres"], drivers: [{ factor: "Sanitation Access", contribution: 31 }, { factor: "Female Literacy", contribution: 29 }, { factor: "Income Proxy", contribution: 25 }, { factor: "Health Infrastructure", contribution: 15 }], trend: [{ year: "NFHS-3", score: 0.49 }, { year: "NFHS-4", score: 0.45 }, { year: "NFHS-5", score: 0.42 }] },
+  { id: 11, name: "Araria", state: "Bihar", risk: 0.41, stunting: 49.9, wasting: 23.9, underweight: 47.8, anemia_children: 75.8, anemia_women: 67.9, breastfeeding: 69.0, immunization: 61.6, interventions: ["Poshan Abhiyaan expansion", "WSHG microfinance", "Swachh Bharat Mission"], drivers: [{ factor: "Female Literacy", contribution: 38 }, { factor: "Sanitation Access", contribution: 30 }, { factor: "Income Proxy", contribution: 20 }, { factor: "Health Infrastructure", contribution: 12 }], trend: [{ year: "NFHS-3", score: 0.48 }, { year: "NFHS-4", score: 0.44 }, { year: "NFHS-5", score: 0.41 }] },
+  { id: 12, name: "Ernakulam", state: "Kerala", risk: 0.14, stunting: 17.6, wasting: 9.7, underweight: 11.3, anemia_children: 27.1, anemia_women: 25.2, breastfeeding: 67.7, immunization: 71.2, interventions: ["Maintain Kudumbashree model", "Urban nutrition clinics"], drivers: [{ factor: "Female Literacy", contribution: 42 }, { factor: "Health Infrastructure", contribution: 35 }, { factor: "Sanitation Access", contribution: 15 }, { factor: "Income Proxy", contribution: 8 }], trend: [{ year: "NFHS-3", score: 0.18 }, { year: "NFHS-4", score: 0.16 }, { year: "NFHS-5", score: 0.14 }] },
+  { id: 13, name: "Pune", state: "Maharashtra", risk: 0.32, stunting: 30.7, wasting: 31.4, underweight: 32.7, anemia_children: 47.7, anemia_women: 42.3, breastfeeding: 67.5, immunization: 74.8, interventions: ["Urban slum nutrition drive", "PMJAY coverage"], drivers: [{ factor: "Sanitation Access", contribution: 38 }, { factor: "Female Literacy", contribution: 31 }, { factor: "Income Proxy", contribution: 21 }, { factor: "Health Infrastructure", contribution: 10 }], trend: [{ year: "NFHS-3", score: 0.38 }, { year: "NFHS-4", score: 0.35 }, { year: "NFHS-5", score: 0.32 }] },
+  { id: 14, name: "Lower Dibang Valley", state: "Arunachal Pradesh", risk: 0.11, stunting: 14.3, wasting: 7.6, underweight: 9.7, anemia_children: 51.5, anemia_women: 34.6, breastfeeding: 60.1, immunization: 73.8, interventions: ["Maintain current programmes", "Community health worker training"], drivers: [{ factor: "Health Infrastructure", contribution: 40 }, { factor: "Female Literacy", contribution: 30 }, { factor: "Sanitation Access", contribution: 20 }, { factor: "Income Proxy", contribution: 10 }], trend: [{ year: "NFHS-3", score: 0.16 }, { year: "NFHS-4", score: 0.14 }, { year: "NFHS-5", score: 0.11 }] },
 ];
 
 const riskColor = (r: number) => {
@@ -31,11 +33,11 @@ const riskColor = (r: number) => {
 const riskLabel = (r: number) => r > 0.75 ? "CRITICAL" : r > 0.5 ? "HIGH" : r > 0.3 ? "MODERATE" : "LOW";
 const riskBg = (r: number) => r > 0.75 ? "rgba(239,35,60,0.15)" : r > 0.5 ? "rgba(247,127,0,0.15)" : r > 0.3 ? "rgba(252,191,73,0.15)" : "rgba(82,183,136,0.15)";
 
+// Source: NFHS India Reports (NFHS-3: 2005-06, NFHS-4: 2015-16, NFHS-5: 2019-21)
 const NATIONAL_TRENDS = [
-  { year: "2006", stunting: 48, wasting: 20, underweight: 43 },
-  { year: "2011", stunting: 42, wasting: 21, underweight: 36 },
-  { year: "2016", stunting: 38, wasting: 21, underweight: 36 },
-  { year: "2021", stunting: 36, wasting: 19, underweight: 32 },
+  { year: "2005-06", stunting: 48.0, wasting: 19.8, underweight: 42.5 },
+  { year: "2015-16", stunting: 38.4, wasting: 21.0, underweight: 35.8 },
+  { year: "2019-21", stunting: 35.5, wasting: 19.3, underweight: 32.1 },
 ];
 
 export default function Index() {
@@ -82,10 +84,10 @@ export default function Index() {
       stunting: data.stunting,
       wasting: data.wasting,
       underweight: data.underweight,
-      literacy: 100 - data.risk * 60,
-      sanitation: 100 - data.risk * 55,
-      ruralPct: Math.round(50 + data.risk * 40),
-      healthInfra: Math.round(90 - data.risk * 70),
+      anemia_children: data.anemia_children ?? 0,
+      anemia_women: data.anemia_women ?? 0,
+      breastfeeding: data.breastfeeding ?? 0,
+      immunization: data.immunization ?? 0,
       interventions: ["Poshan Abhiyaan", "ICDS Strengthening", "Swachh Bharat Mission"],
       drivers: [
         { factor: "Sanitation Access", contribution: 35 },
@@ -94,10 +96,9 @@ export default function Index() {
         { factor: "Income Proxy", contribution: 13 },
       ],
       trend: [
-        { year: "2016", score: data.risk + 0.06 },
-        { year: "2018", score: data.risk + 0.04 },
-        { year: "2020", score: data.risk + 0.02 },
-        { year: "2022", score: data.risk },
+        { year: "NFHS-3", score: data.risk + 0.06 },
+        { year: "NFHS-4", score: data.risk + 0.03 },
+        { year: "NFHS-5", score: data.risk },
       ],
     });
   }, []);
@@ -145,11 +146,11 @@ export default function Index() {
           </div>
           <div>
             <div style={{ fontSize: 9, color: "#6b7fa3", letterSpacing: "0.2em", marginBottom: 8 }}>NATIONAL KPIs</div>
-            {[{ label: "Avg Stunting", val: "35.5%", delta: "▼ 2.5%" }, { label: "Avg Wasting", val: "19.3%", delta: "▼ 1.8%" }, { label: "High Risk Districts", val: "112", delta: "▼ 14" }].map(k => (
+            {[{ label: "Avg Stunting", val: "35.5%", delta: "▼ 2.9% vs NFHS-4" }, { label: "Avg Wasting", val: "19.3%", delta: "▼ 1.7% vs NFHS-4" }, { label: "Avg Underweight", val: "32.1%", delta: "▼ 3.7% vs NFHS-4" }].map(k => (
               <div key={k.label} style={{ padding: "8px 10px", background: "#0d1628", borderRadius: 6, marginBottom: 6, border: "1px solid rgba(255,255,255,0.05)" }}>
                 <div style={{ fontSize: 9, color: "#6b7fa3" }}>{k.label}</div>
                 <div style={{ fontSize: 18, fontWeight: 500, color: "#fff", lineHeight: 1.2 }}>{k.val}</div>
-                <div style={{ fontSize: 10, color: "#52b788" }}>{k.delta} vs NFHS-4</div>
+                <div style={{ fontSize: 10, color: "#52b788" }}>{k.delta}</div>
               </div>
             ))}
           </div>
@@ -251,15 +252,16 @@ export default function Index() {
           </div>
 
           <div>
-            <div style={{ fontSize: 9, color: "#6b7fa3", letterSpacing: "0.2em", marginBottom: 8 }}>NUTRITION INDICATORS</div>
+            <div style={{ fontSize: 9, color: "#6b7fa3", letterSpacing: "0.2em", marginBottom: 8 }}>NUTRITION INDICATORS · NFHS-5 (2019-21)</div>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6 }}>
               {[
                 { label: "Stunting", val: selected.stunting, unit: "%", color: "#ef233c" },
                 { label: "Wasting", val: selected.wasting, unit: "%", color: "#f77f00" },
                 { label: "Underweight", val: selected.underweight, unit: "%", color: "#fcbf49" },
-                { label: "Literacy", val: selected.literacy, unit: "%", color: "#52b788" },
-                { label: "Sanitation", val: selected.sanitation, unit: "%", color: "#48cae4" },
-                { label: "Health Infra", val: selected.healthInfra, unit: "/100", color: "#9b89fa" },
+                { label: "Anaemia (Children)", val: selected.anemia_children, unit: "%", color: "#e76f51" },
+                { label: "Anaemia (Women)", val: selected.anemia_women, unit: "%", color: "#e9c46a" },
+                { label: "Excl. Breastfeeding", val: selected.breastfeeding, unit: "%", color: "#52b788" },
+                { label: "Full Immunization", val: selected.immunization, unit: "%", color: "#48cae4" },
               ].map(i => (
                 <div key={i.label} style={{ background: "#0d1628", borderRadius: 6, padding: "8px 10px", border: "1px solid rgba(255,255,255,0.05)" }}>
                   <div style={{ fontSize: 9, color: "#6b7fa3" }}>{i.label}</div>
@@ -346,6 +348,12 @@ export default function Index() {
             <span style={{ fontSize: 10, color: riskColor(d.risk), fontWeight: 600 }}>{(d.risk * 100).toFixed(0)}</span>
           </div>
         ))}
+      </div>
+      <div style={{ borderTop: "1px solid rgba(255,255,255,0.04)", padding: "6px 20px", background: "#070d1a", fontSize: 8, color: "#3a5070", display: "flex", gap: 16, flexWrap: "wrap" }}>
+        <span>Data: NFHS-5 (2019-21) · rchiips.org/nfhs</span>
+        <span>Census 2011 · censusindia.gov.in</span>
+        <span>NITI Aayog District Nutrition Profile · niti.gov.in</span>
+        <span>Risk = 0.4×Stunting + 0.3×Wasting + 0.3×Underweight (normalized)</span>
       </div>
 
       <style>{`
