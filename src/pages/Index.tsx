@@ -84,10 +84,10 @@ export default function Index() {
       stunting: data.stunting,
       wasting: data.wasting,
       underweight: data.underweight,
-      literacy: 100 - data.risk * 60,
-      sanitation: 100 - data.risk * 55,
-      ruralPct: Math.round(50 + data.risk * 40),
-      healthInfra: Math.round(90 - data.risk * 70),
+      anemia_children: data.anemia_children ?? 0,
+      anemia_women: data.anemia_women ?? 0,
+      breastfeeding: data.breastfeeding ?? 0,
+      immunization: data.immunization ?? 0,
       interventions: ["Poshan Abhiyaan", "ICDS Strengthening", "Swachh Bharat Mission"],
       drivers: [
         { factor: "Sanitation Access", contribution: 35 },
@@ -96,10 +96,9 @@ export default function Index() {
         { factor: "Income Proxy", contribution: 13 },
       ],
       trend: [
-        { year: "2016", score: data.risk + 0.06 },
-        { year: "2018", score: data.risk + 0.04 },
-        { year: "2020", score: data.risk + 0.02 },
-        { year: "2022", score: data.risk },
+        { year: "NFHS-3", score: data.risk + 0.06 },
+        { year: "NFHS-4", score: data.risk + 0.03 },
+        { year: "NFHS-5", score: data.risk },
       ],
     });
   }, []);
@@ -259,9 +258,10 @@ export default function Index() {
                 { label: "Stunting", val: selected.stunting, unit: "%", color: "#ef233c" },
                 { label: "Wasting", val: selected.wasting, unit: "%", color: "#f77f00" },
                 { label: "Underweight", val: selected.underweight, unit: "%", color: "#fcbf49" },
-                { label: "Literacy", val: selected.literacy, unit: "%", color: "#52b788" },
-                { label: "Sanitation", val: selected.sanitation, unit: "%", color: "#48cae4" },
-                { label: "Health Infra", val: selected.healthInfra, unit: "/100", color: "#9b89fa" },
+                { label: "Anaemia (Children)", val: selected.anemia_children, unit: "%", color: "#e76f51" },
+                { label: "Anaemia (Women)", val: selected.anemia_women, unit: "%", color: "#e9c46a" },
+                { label: "Excl. Breastfeeding", val: selected.breastfeeding, unit: "%", color: "#52b788" },
+                { label: "Full Immunization", val: selected.immunization, unit: "%", color: "#48cae4" },
               ].map(i => (
                 <div key={i.label} style={{ background: "#0d1628", borderRadius: 6, padding: "8px 10px", border: "1px solid rgba(255,255,255,0.05)" }}>
                   <div style={{ fontSize: 9, color: "#6b7fa3" }}>{i.label}</div>
