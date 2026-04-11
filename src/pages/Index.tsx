@@ -33,11 +33,11 @@ const riskColor = (r: number) => {
 const riskLabel = (r: number) => r > 0.75 ? "CRITICAL" : r > 0.5 ? "HIGH" : r > 0.3 ? "MODERATE" : "LOW";
 const riskBg = (r: number) => r > 0.75 ? "rgba(239,35,60,0.15)" : r > 0.5 ? "rgba(247,127,0,0.15)" : r > 0.3 ? "rgba(252,191,73,0.15)" : "rgba(82,183,136,0.15)";
 
+// Source: NFHS India Reports (NFHS-3: 2005-06, NFHS-4: 2015-16, NFHS-5: 2019-21)
 const NATIONAL_TRENDS = [
-  { year: "2006", stunting: 48, wasting: 20, underweight: 43 },
-  { year: "2011", stunting: 42, wasting: 21, underweight: 36 },
-  { year: "2016", stunting: 38, wasting: 21, underweight: 36 },
-  { year: "2021", stunting: 36, wasting: 19, underweight: 32 },
+  { year: "2005-06", stunting: 48.0, wasting: 19.8, underweight: 42.5 },
+  { year: "2015-16", stunting: 38.4, wasting: 21.0, underweight: 35.8 },
+  { year: "2019-21", stunting: 35.5, wasting: 19.3, underweight: 32.1 },
 ];
 
 export default function Index() {
