@@ -193,6 +193,7 @@ export default function Index() {
               activeLayer={activeLayer}
               onStateHover={handleStateHover}
               onStateClick={handleStateClick}
+              onDistrictClick={handleDistrictClick}
               hoveredStateName={hoveredState?.name}
               selectedStateName={selected?.state}
             />
