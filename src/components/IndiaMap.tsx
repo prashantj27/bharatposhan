@@ -1,10 +1,12 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import nfhsData from "@/data/nfhsDistrictData.json";
 
 interface IndiaMapProps {
   activeLayer: string;
-  onStateHover: (name: string | null, risk: number | null, pos: number[] | null, rect?: DOMRect) => void;
+  onStateHover: (name: string | null, risk: number | null, pos: number[] | null) => void;
   onStateClick: (name: string, risk: number) => void;
+  onDistrictClick?: (district: string, state: string, data: any) => void;
   hoveredStateName: string | null | undefined;
   selectedStateName: string | null | undefined;
 }
@@ -25,6 +27,8 @@ const STATE_RISK_MAP: Record<string, number> = {
   "Dadra and Nagar Haveli and Daman and Diu": 0.33, "Dadra and Nagar Haveli": 0.35, "Daman and Diu": 0.30,
 };
 
+const districtData = nfhsData as Record<string, { district: string; state: string; stunting: number; wasting: number; underweight: number; risk: number; anemia_children: number; anemia_women: number; breastfeeding: number; immunization: number }>;
+
 const riskColor = (r: number) => {
   if (r > 0.75) return "#ef233c";
   if (r > 0.5) return "#f77f00";
@@ -39,13 +43,15 @@ declare global {
   }
 }
 
-export default function IndiaMap({ activeLayer, onStateHover, onStateClick, hoveredStateName, selectedStateName }: IndiaMapProps) {
+export default function IndiaMap({ activeLayer, onStateHover, onStateClick, onDistrictClick, hoveredStateName, selectedStateName }: IndiaMapProps) {
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<any>(null);
-  const dataLayerRef = useRef<any>(null);
+  const stateLayerRef = useRef<any>(null);
+  const districtLayerRef = useRef<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const hoveredRef = useRef<string | null>(null);
+  const [viewMode, setViewMode] = useState<"states" | "districts">("districts");
 
   const getLayerRisk = useCallback((risk: number) => {
     if (activeLayer === "literacy") return 1 - risk * 0.9;
@@ -53,52 +59,24 @@ export default function IndiaMap({ activeLayer, onStateHover, onStateClick, hove
     return risk;
   }, [activeLayer]);
 
-  // Load Google Maps API
   useEffect(() => {
     let cancelled = false;
 
     const loadMap = async () => {
       try {
-        // Fetch the API key from edge function
         const { data, error: fnError } = await supabase.functions.invoke("get-maps-key");
-        if (fnError || !data?.key) {
-          setError("Failed to load map API key");
-          setLoading(false);
-          return;
-        }
+        if (fnError || !data?.key) { setError("Failed to load map API key"); setLoading(false); return; }
 
-        const apiKey = data.key;
+        if (window.google?.maps) { if (!cancelled) initMap(); return; }
 
-        // Check if Google Maps is already loaded
-        if (window.google?.maps) {
-          if (!cancelled) initMap();
-          return;
-        }
-
-        // Load Google Maps script
         const script = document.createElement("script");
-        script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&callback=initGoogleMap`;
+        script.src = `https://maps.googleapis.com/maps/api/js?key=${data.key}&callback=initGoogleMap`;
         script.async = true;
         script.defer = true;
-
-        window.initGoogleMap = () => {
-          if (!cancelled) initMap();
-        };
-
-        script.onerror = () => {
-          if (!cancelled) {
-            setError("Failed to load Google Maps");
-            setLoading(false);
-          }
-        };
-
+        window.initGoogleMap = () => { if (!cancelled) initMap(); };
+        script.onerror = () => { if (!cancelled) { setError("Failed to load Google Maps"); setLoading(false); } };
         document.head.appendChild(script);
-      } catch (err) {
-        if (!cancelled) {
-          setError("Error initializing map");
-          setLoading(false);
-        }
-      }
+      } catch { if (!cancelled) { setError("Error initializing map"); setLoading(false); } }
     };
 
     const initMap = () => {
@@ -106,15 +84,9 @@ export default function IndiaMap({ activeLayer, onStateHover, onStateClick, hove
 
       const map = new window.google.maps.Map(mapContainerRef.current, {
         center: { lat: 22.5, lng: 82 },
-        zoom: 5,
-        minZoom: 4,
-        maxZoom: 10,
-        mapTypeId: "roadmap",
-        disableDefaultUI: true,
-        zoomControl: true,
-        zoomControlOptions: {
-          position: window.google.maps.ControlPosition.RIGHT_TOP,
-        },
+        zoom: 5, minZoom: 4, maxZoom: 10,
+        mapTypeId: "roadmap", disableDefaultUI: true, zoomControl: true,
+        zoomControlOptions: { position: window.google.maps.ControlPosition.RIGHT_TOP },
         styles: [
           { elementType: "geometry", stylers: [{ color: "#0d1628" }] },
           { elementType: "labels", stylers: [{ visibility: "off" }] },
@@ -123,59 +95,72 @@ export default function IndiaMap({ activeLayer, onStateHover, onStateClick, hove
           { featureType: "poi", stylers: [{ visibility: "off" }] },
           { featureType: "transit", stylers: [{ visibility: "off" }] },
           { featureType: "administrative.country", elementType: "geometry.stroke", stylers: [{ color: "#2a3f5f" }, { weight: 1.5 }] },
-          { featureType: "administrative.province", elementType: "geometry.stroke", stylers: [{ color: "#1a2a44" }, { weight: 0.8 }] },
-          { featureType: "administrative.province", elementType: "labels.text.fill", stylers: [{ color: "#4a6080" }, { visibility: "on" }] },
-          { featureType: "administrative.province", elementType: "labels.text.stroke", stylers: [{ color: "#070d1a" }, { weight: 2 }] },
           { featureType: "landscape", elementType: "geometry", stylers: [{ color: "#0d1628" }] },
         ],
-        restriction: {
-          latLngBounds: { north: 38, south: 6, west: 67, east: 98 },
-          strictBounds: false,
-        },
+        restriction: { latLngBounds: { north: 38, south: 6, west: 67, east: 98 }, strictBounds: false },
       });
-
       mapRef.current = map;
 
-      // Load GeoJSON for state boundaries  
-      const dataLayer = new window.google.maps.Data();
-      dataLayerRef.current = dataLayer;
+      // State layer (boundaries only, thicker stroke)
+      const stateLayer = new window.google.maps.Data();
+      stateLayerRef.current = stateLayer;
+      stateLayer.loadGeoJson("/india-states.json");
+      stateLayer.setMap(map);
+      stateLayer.setStyle(() => ({
+        fillColor: "transparent",
+        fillOpacity: 0,
+        strokeColor: "rgba(255,255,255,0.35)",
+        strokeWeight: 1.5,
+        zIndex: 10,
+        clickable: false,
+      }));
 
-      dataLayer.loadGeoJson("/india-states.json", undefined, () => {
-        applyStyles(dataLayer);
+      // District layer
+      const districtLayer = new window.google.maps.Data();
+      districtLayerRef.current = districtLayer;
+      districtLayer.loadGeoJson("/india-districts.json", undefined, () => {
+        applyDistrictStyles(districtLayer);
         setLoading(false);
       });
+      districtLayer.setMap(map);
 
-      dataLayer.setMap(map);
+      // District events
+      districtLayer.addListener("mouseover", (event: any) => {
+        const district = event.feature.getProperty("district") || "";
+        const state = event.feature.getProperty("state") || "";
+        const key = `${state}|${district}`;
+        const dd = districtData[key];
+        const risk = dd?.risk ?? STATE_RISK_MAP[state] ?? 0.4;
+        hoveredRef.current = key;
 
-      // Event listeners
-      dataLayer.addListener("mouseover", (event: any) => {
-        const name = event.feature.getProperty("name") || event.feature.getProperty("NAME_1") || event.feature.getProperty("st_nm") || "";
-        const risk = STATE_RISK_MAP[name] ?? 0.4;
-        hoveredRef.current = name;
-
-        dataLayer.overrideStyle(event.feature, {
-          strokeWeight: 2,
-          strokeColor: "#ffffff",
-          fillOpacity: 0.9,
-          zIndex: 2,
+        districtLayer.overrideStyle(event.feature, {
+          strokeWeight: 2, strokeColor: "#ffffff", fillOpacity: 0.9, zIndex: 5,
         });
 
         if (event.latLng) {
           const point = getPixelPosition(map, event.latLng);
-          onStateHover(name, risk, point ? [point.x, point.y] : null);
+          const label = `${district}, ${state}`;
+          onStateHover(label, risk, point ? [point.x, point.y] : null);
         }
       });
 
-      dataLayer.addListener("mouseout", (event: any) => {
+      districtLayer.addListener("mouseout", (event: any) => {
         hoveredRef.current = null;
-        dataLayer.revertStyle(event.feature);
+        districtLayer.revertStyle(event.feature);
         onStateHover(null, null, null);
       });
 
-      dataLayer.addListener("click", (event: any) => {
-        const name = event.feature.getProperty("name") || event.feature.getProperty("NAME_1") || event.feature.getProperty("st_nm") || "";
-        const risk = STATE_RISK_MAP[name] ?? 0.4;
-        onStateClick(name, risk);
+      districtLayer.addListener("click", (event: any) => {
+        const district = event.feature.getProperty("district") || "";
+        const state = event.feature.getProperty("state") || "";
+        const key = `${state}|${district}`;
+        const dd = districtData[key];
+        if (onDistrictClick && dd) {
+          onDistrictClick(district, state, dd);
+        } else {
+          const risk = dd?.risk ?? STATE_RISK_MAP[state] ?? 0.4;
+          onStateClick(district || state, risk);
+        }
       });
     };
 
@@ -183,28 +168,28 @@ export default function IndiaMap({ activeLayer, onStateHover, onStateClick, hove
     return () => { cancelled = true; };
   }, []);
 
-  // Update styles when activeLayer changes
   useEffect(() => {
-    if (dataLayerRef.current) {
-      applyStyles(dataLayerRef.current);
-    }
-  }, [activeLayer, getLayerRisk]);
+    if (districtLayerRef.current) applyDistrictStyles(districtLayerRef.current);
+  }, [activeLayer, getLayerRisk, selectedStateName]);
 
-  const applyStyles = useCallback((dataLayer: any) => {
-    dataLayer.setStyle((feature: any) => {
-      const name = feature.getProperty("name") || feature.getProperty("NAME_1") || feature.getProperty("st_nm") || "";
-      const risk = STATE_RISK_MAP[name] ?? 0.4;
+  const applyDistrictStyles = useCallback((layer: any) => {
+    layer.setStyle((feature: any) => {
+      const district = feature.getProperty("district") || "";
+      const state = feature.getProperty("state") || "";
+      const key = `${state}|${district}`;
+      const dd = districtData[key];
+      const risk = dd?.risk ?? STATE_RISK_MAP[state] ?? 0.4;
       const layerRisk = getLayerRisk(risk);
       const color = riskColor(layerRisk);
-      const isHovered = hoveredRef.current === name;
-      const isSelected = selectedStateName && name.toLowerCase().includes((selectedStateName || "").toLowerCase().slice(0, 4));
+      const isHovered = hoveredRef.current === key;
+      const isSelected = selectedStateName && state.toLowerCase().includes((selectedStateName || "").toLowerCase().slice(0, 4));
 
       return {
         fillColor: color,
-        fillOpacity: isHovered ? 0.9 : isSelected ? 0.75 : 0.55,
-        strokeColor: isHovered ? "#ffffff" : isSelected ? color : "rgba(255,255,255,0.25)",
-        strokeWeight: isHovered ? 2 : isSelected ? 1.5 : 0.5,
-        zIndex: isHovered ? 2 : isSelected ? 1 : 0,
+        fillOpacity: isHovered ? 0.9 : isSelected ? 0.75 : 0.5,
+        strokeColor: isHovered ? "#ffffff" : "rgba(255,255,255,0.12)",
+        strokeWeight: isHovered ? 2 : 0.3,
+        zIndex: isHovered ? 5 : isSelected ? 2 : 1,
       };
     });
   }, [activeLayer, getLayerRisk, selectedStateName]);
@@ -213,19 +198,15 @@ export default function IndiaMap({ activeLayer, onStateHover, onStateClick, hove
     const bounds = map.getBounds();
     const projection = map.getProjection();
     if (!bounds || !projection) return null;
-
     const topRight = projection.fromLatLngToPoint(bounds.getNorthEast());
     const bottomLeft = projection.fromLatLngToPoint(bounds.getSouthWest());
     const scale = Math.pow(2, map.getZoom());
     const worldPoint = projection.fromLatLngToPoint(latLng);
-
     const containerEl = mapContainerRef.current;
     if (!containerEl) return null;
-
     const rect = containerEl.getBoundingClientRect();
     const x = ((worldPoint.x - bottomLeft.x) * scale) / (rect.width / 256) * (rect.width / ((topRight.x - bottomLeft.x) * scale));
     const y = ((worldPoint.y - topRight.y) * scale) / (rect.height / 256) * (rect.height / ((bottomLeft.y - topRight.y) * scale));
-
     return { x, y };
   };
 
@@ -240,27 +221,20 @@ export default function IndiaMap({ activeLayer, onStateHover, onStateClick, hove
   return (
     <div style={{ position: "relative", width: "100%", height: "100%" }}>
       {loading && (
-        <div style={{
-          position: "absolute", inset: 0, zIndex: 10,
-          display: "flex", alignItems: "center", justifyContent: "center",
-          background: "rgba(7,13,26,0.95)", color: "#6b7fa3", fontSize: 12,
-        }}>
-          Loading Google Maps…
+        <div style={{ position: "absolute", inset: 0, zIndex: 10, display: "flex", alignItems: "center", justifyContent: "center", background: "rgba(7,13,26,0.95)", color: "#6b7fa3", fontSize: 12 }}>
+          Loading Map with 594 Districts…
         </div>
       )}
-
       <div ref={mapContainerRef} style={{ width: "100%", height: "100%" }} />
 
       {/* Legend */}
       <div style={{
         position: "absolute", bottom: 14, left: 14,
-        background: "rgba(7,13,26,0.92)",
-        border: "1px solid rgba(255,255,255,0.08)",
-        borderRadius: 8, padding: "10px 14px",
-        backdropFilter: "blur(12px)", zIndex: 5,
+        background: "rgba(7,13,26,0.92)", border: "1px solid rgba(255,255,255,0.08)",
+        borderRadius: 8, padding: "10px 14px", backdropFilter: "blur(12px)", zIndex: 5,
       }}>
         <div style={{ fontSize: 9, color: "#6b7fa3", marginBottom: 6, letterSpacing: "0.15em" }}>
-          {activeLayer.toUpperCase()} RISK
+          {activeLayer.toUpperCase()} RISK · DISTRICT LEVEL
         </div>
         {[["CRITICAL", "#ef233c", "> 75"], ["HIGH", "#f77f00", "50–75"], ["MODERATE", "#fcbf49", "30–50"], ["LOW", "#52b788", "< 30"]].map(([l, c, r]) => (
           <div key={l} style={{ display: "flex", gap: 7, alignItems: "center", marginBottom: 4 }}>
@@ -269,6 +243,9 @@ export default function IndiaMap({ activeLayer, onStateHover, onStateClick, hove
             <span style={{ fontSize: 8, color: "#4a5f7a" }}>{r}</span>
           </div>
         ))}
+        <div style={{ fontSize: 8, color: "#4a5f7a", marginTop: 4, borderTop: "1px solid rgba(255,255,255,0.06)", paddingTop: 4 }}>
+          Source: NFHS-5 (2019-21) · 594 Districts
+        </div>
       </div>
     </div>
   );
