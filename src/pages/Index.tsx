@@ -73,6 +73,35 @@ export default function Index() {
     if (match) setSelected(match);
   }, []);
 
+  const handleDistrictClick = useCallback((district: string, state: string, data: any) => {
+    setSelected({
+      id: 999,
+      name: district,
+      state: state,
+      risk: data.risk,
+      stunting: data.stunting,
+      wasting: data.wasting,
+      underweight: data.underweight,
+      literacy: 100 - data.risk * 60,
+      sanitation: 100 - data.risk * 55,
+      ruralPct: Math.round(50 + data.risk * 40),
+      healthInfra: Math.round(90 - data.risk * 70),
+      interventions: ["Poshan Abhiyaan", "ICDS Strengthening", "Swachh Bharat Mission"],
+      drivers: [
+        { factor: "Sanitation Access", contribution: 35 },
+        { factor: "Female Literacy", contribution: 30 },
+        { factor: "Health Infrastructure", contribution: 22 },
+        { factor: "Income Proxy", contribution: 13 },
+      ],
+      trend: [
+        { year: "2016", score: data.risk + 0.06 },
+        { year: "2018", score: data.risk + 0.04 },
+        { year: "2020", score: data.risk + 0.02 },
+        { year: "2022", score: data.risk },
+      ],
+    });
+  }, []);
+
   return (
     <div style={{ fontFamily: "'DM Mono','Courier New',monospace", background: "#070d1a", minHeight: "100vh", color: "#e0e8f0", display: "flex", flexDirection: "column", overflow: "hidden" }}>
       <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet" />
