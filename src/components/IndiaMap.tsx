@@ -53,7 +53,7 @@ export interface IndiaMapHandle {
 const IndiaMap = forwardRef<IndiaMapHandle, IndiaMapProps>(function IndiaMap({ activeLayer, onStateHover, onStateClick, onDistrictClick, hoveredStateName, selectedStateName }, ref) {
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<any>(null);
-  const stateLayerRef = useRef<any>(null);
+  
   const districtLayerRef = useRef<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -211,21 +211,6 @@ const IndiaMap = forwardRef<IndiaMapHandle, IndiaMapProps>(function IndiaMap({ a
     });
   }, [activeLayer, getLayerRisk, selectedStateName]);
 
-  const getPixelPosition = (map: any, latLng: any) => {
-    const bounds = map.getBounds();
-    const projection = map.getProjection();
-    if (!bounds || !projection) return null;
-    const topRight = projection.fromLatLngToPoint(bounds.getNorthEast());
-    const bottomLeft = projection.fromLatLngToPoint(bounds.getSouthWest());
-    const scale = Math.pow(2, map.getZoom());
-    const worldPoint = projection.fromLatLngToPoint(latLng);
-    const containerEl = mapContainerRef.current;
-    if (!containerEl) return null;
-    const rect = containerEl.getBoundingClientRect();
-    const x = ((worldPoint.x - bottomLeft.x) * scale) / (rect.width / 256) * (rect.width / ((topRight.x - bottomLeft.x) * scale));
-    const y = ((worldPoint.y - topRight.y) * scale) / (rect.height / 256) * (rect.height / ((bottomLeft.y - topRight.y) * scale));
-    return { x, y };
-  };
 
   if (error) {
     return (
