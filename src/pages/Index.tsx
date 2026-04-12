@@ -3,7 +3,8 @@ import {
   BarChart, Bar, AreaChart, Area, XAxis, YAxis,
   Tooltip, ResponsiveContainer,
 } from "recharts";
-import IndiaMap from "@/components/IndiaMap";
+import IndiaMap, { type IndiaMapHandle } from "@/components/IndiaMap";
+import DistrictSearch from "@/components/DistrictSearch";
 
 // Source: NFHS-5 (2019-21) district-level fact sheets, rchiips.org
 // Risk = 0.4×stunting/100 + 0.3×wasting/100 + 0.3×underweight/100
@@ -47,6 +48,11 @@ export default function Index() {
   const [activeLayer, setActiveLayer] = useState("malnutrition");
   const [hoveredState, setHoveredState] = useState<{ name: string; risk: number } | null>(null);
   const [tooltip, setTooltip] = useState<{ name: string; risk: number; x: number; y: number } | null>(null);
+  const mapRef = useRef<IndiaMapHandle>(null);
+
+  const handleDistrictSearch = useCallback((district: string, state: string) => {
+    mapRef.current?.zoomToDistrict(district, state);
+  }, []);
 
   const states = [...new Set(DISTRICTS.map(d => d.state))].sort();
   const filtered = DISTRICTS.filter(d =>
@@ -191,6 +197,7 @@ export default function Index() {
             <div style={{ position: "absolute", inset: 0, backgroundImage: "linear-gradient(rgba(255,255,255,0.012) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.012) 1px,transparent 1px)", backgroundSize: "40px 40px", pointerEvents: "none" }} />
 
             <IndiaMap
+              ref={mapRef}
               activeLayer={activeLayer}
               onStateHover={handleStateHover}
               onStateClick={handleStateClick}
@@ -198,6 +205,11 @@ export default function Index() {
               hoveredStateName={hoveredState?.name}
               selectedStateName={selected?.state}
             />
+
+            {/* District Search */}
+            <div style={{ position: "absolute", top: 14, left: 14, zIndex: 20, width: 260 }}>
+              <DistrictSearch onSelect={handleDistrictSearch} />
+            </div>
 
             {tooltip && (
               <div style={{

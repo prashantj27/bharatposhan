@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useImperativeHandle, forwardRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import nfhsData from "@/data/nfhsDistrictData.json";
 
@@ -46,7 +46,11 @@ declare global {
   }
 }
 
-export default function IndiaMap({ activeLayer, onStateHover, onStateClick, onDistrictClick, hoveredStateName, selectedStateName }: IndiaMapProps) {
+export interface IndiaMapHandle {
+  zoomToDistrict: (district: string, state: string) => void;
+}
+
+const IndiaMap = forwardRef<IndiaMapHandle, IndiaMapProps>(function IndiaMap({ activeLayer, onStateHover, onStateClick, onDistrictClick, hoveredStateName, selectedStateName }, ref) {
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<any>(null);
   const stateLayerRef = useRef<any>(null);
@@ -171,6 +175,26 @@ export default function IndiaMap({ activeLayer, onStateHover, onStateClick, onDi
     return () => { cancelled = true; };
   }, []);
 
+  useImperativeHandle(ref, () => ({
+    zoomToDistrict(district: string, state: string) {
+      const layer = districtLayerRef.current;
+      const map = mapRef.current;
+      if (!layer || !map) return;
+      layer.forEach((feature: any) => {
+        const fd = feature.getProperty("district") || "";
+        const fs = feature.getProperty("state") || "";
+        if (fd.toLowerCase() === district.toLowerCase() && fs.toLowerCase() === state.toLowerCase()) {
+          const bounds = new window.google.maps.LatLngBounds();
+          feature.getGeometry().forEachLatLng((latlng: any) => bounds.extend(latlng));
+          map.fitBounds(bounds, 60);
+          const key = `${fs}|${fd}`;
+          const dd = districtData[key];
+          if (onDistrictClick && dd) onDistrictClick(fd, fs, dd);
+        }
+      });
+    }
+  }), [onDistrictClick]);
+
   useEffect(() => {
     if (districtLayerRef.current) applyDistrictStyles(districtLayerRef.current);
   }, [activeLayer, getLayerRisk, selectedStateName]);
@@ -252,4 +276,6 @@ export default function IndiaMap({ activeLayer, onStateHover, onStateClick, onDi
       </div>
     </div>
   );
-}
+});
+
+export default IndiaMap;
