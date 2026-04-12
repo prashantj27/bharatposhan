@@ -132,10 +132,12 @@ const IndiaMap = forwardRef<IndiaMapHandle, IndiaMapProps>(function IndiaMap({ a
           strokeWeight: 2, strokeColor: "#ffffff", fillOpacity: 0.9, zIndex: 5,
         });
 
-        if (event.latLng) {
-          const point = getPixelPosition(map, event.latLng);
+        if (event.domEvent && mapContainerRef.current) {
+          const rect = mapContainerRef.current.getBoundingClientRect();
+          const x = event.domEvent.clientX - rect.left;
+          const y = event.domEvent.clientY - rect.top;
           const label = `${district}, ${state}`;
-          onStateHover(label, risk, point ? [point.x, point.y] : null);
+          onStateHover(label, risk, [x, y]);
         }
       });
 
