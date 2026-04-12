@@ -102,25 +102,13 @@ const IndiaMap = forwardRef<IndiaMapHandle, IndiaMapProps>(function IndiaMap({ a
           { featureType: "poi", stylers: [{ visibility: "off" }] },
           { featureType: "transit", stylers: [{ visibility: "off" }] },
           { featureType: "administrative.country", elementType: "geometry.stroke", stylers: [{ color: "#2a3f5f" }, { weight: 1.5 }] },
+          { featureType: "administrative.province", elementType: "geometry.stroke", stylers: [{ color: "#3a5a8a" }, { weight: 2 }, { visibility: "on" }] },
+          { featureType: "administrative.province", elementType: "labels", stylers: [{ visibility: "off" }] },
           { featureType: "landscape", elementType: "geometry", stylers: [{ color: "#0d1628" }] },
         ],
         restriction: { latLngBounds: { north: 38, south: 6, west: 67, east: 98 }, strictBounds: false },
       });
       mapRef.current = map;
-
-      // State layer (boundaries only, thicker stroke)
-      const stateLayer = new window.google.maps.Data();
-      stateLayerRef.current = stateLayer;
-      stateLayer.loadGeoJson("/india-states.json");
-      stateLayer.setMap(map);
-      stateLayer.setStyle(() => ({
-        fillColor: "transparent",
-        fillOpacity: 0,
-        strokeColor: "rgba(255,255,255,0.35)",
-        strokeWeight: 1.5,
-        zIndex: 10,
-        clickable: false,
-      }));
 
       // District layer
       const districtLayer = new window.google.maps.Data();
