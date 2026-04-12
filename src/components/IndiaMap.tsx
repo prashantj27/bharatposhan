@@ -256,4 +256,6 @@ const IndiaMap = forwardRef<IndiaMapHandle, IndiaMapProps>(function IndiaMap({ a
       </div>
     </div>
   );
-}
+});
+
+export default IndiaMap;
