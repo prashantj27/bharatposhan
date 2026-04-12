@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useImperativeHandle, forwardRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import nfhsData from "@/data/nfhsDistrictData.json";
 
@@ -46,7 +46,11 @@ declare global {
   }
 }
 
-export default function IndiaMap({ activeLayer, onStateHover, onStateClick, onDistrictClick, hoveredStateName, selectedStateName }: IndiaMapProps) {
+export interface IndiaMapHandle {
+  zoomToDistrict: (district: string, state: string) => void;
+}
+
+const IndiaMap = forwardRef<IndiaMapHandle, IndiaMapProps>(function IndiaMap({ activeLayer, onStateHover, onStateClick, onDistrictClick, hoveredStateName, selectedStateName }, ref) {
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<any>(null);
   const stateLayerRef = useRef<any>(null);
