@@ -175,6 +175,26 @@ const IndiaMap = forwardRef<IndiaMapHandle, IndiaMapProps>(function IndiaMap({ a
     return () => { cancelled = true; };
   }, []);
 
+  useImperativeHandle(ref, () => ({
+    zoomToDistrict(district: string, state: string) {
+      const layer = districtLayerRef.current;
+      const map = mapRef.current;
+      if (!layer || !map) return;
+      layer.forEach((feature: any) => {
+        const fd = feature.getProperty("district") || "";
+        const fs = feature.getProperty("state") || "";
+        if (fd.toLowerCase() === district.toLowerCase() && fs.toLowerCase() === state.toLowerCase()) {
+          const bounds = new window.google.maps.LatLngBounds();
+          feature.getGeometry().forEachLatLng((latlng: any) => bounds.extend(latlng));
+          map.fitBounds(bounds, 60);
+          const key = `${fs}|${fd}`;
+          const dd = districtData[key];
+          if (onDistrictClick && dd) onDistrictClick(fd, fs, dd);
+        }
+      });
+    }
+  }), [onDistrictClick]);
+
   useEffect(() => {
     if (districtLayerRef.current) applyDistrictStyles(districtLayerRef.current);
   }, [activeLayer, getLayerRisk, selectedStateName]);
