@@ -89,6 +89,16 @@ export default function Index() {
   }, []);
 
   const handleDistrictClick = useCallback((district: string, state: string, data: any) => {
+    const { drivers, interventions } = computeDistrictDrivers({
+      stunting: data.stunting,
+      wasting: data.wasting,
+      underweight: data.underweight,
+      anemia_children: data.anemia_children ?? 67,
+      anemia_women: data.anemia_women ?? 57,
+      breastfeeding: data.breastfeeding ?? 64,
+      immunization: data.immunization ?? 76,
+      risk: data.risk,
+    });
     setSelected({
       id: 999,
       name: district,
@@ -101,13 +111,8 @@ export default function Index() {
       anemia_women: data.anemia_women ?? 0,
       breastfeeding: data.breastfeeding ?? 0,
       immunization: data.immunization ?? 0,
-      interventions: ["Poshan Abhiyaan", "ICDS Strengthening", "Swachh Bharat Mission"],
-      drivers: [
-        { factor: "Sanitation Access", contribution: 35 },
-        { factor: "Female Literacy", contribution: 30 },
-        { factor: "Health Infrastructure", contribution: 22 },
-        { factor: "Income Proxy", contribution: 13 },
-      ],
+      interventions,
+      drivers,
       trend: [
         { year: "NFHS-3", score: data.risk + 0.06 },
         { year: "NFHS-4", score: data.risk + 0.03 },
