@@ -214,15 +214,14 @@ export default function Index() {
             {tooltip && (
               <div style={{
                 position: "absolute",
-                left: tooltip.x, top: tooltip.y,
-                transform: "translate(-50%, calc(-100% - 14px))",
+                left: tooltip.x + 16, top: tooltip.y + 16,
                 background: "rgba(5,10,22,0.96)",
                 border: `1px solid ${riskColor(tooltip.risk)}55`,
                 borderRadius: 9, padding: "10px 14px",
                 pointerEvents: "none", zIndex: 50,
                 backdropFilter: "blur(14px)",
                 boxShadow: `0 8px 32px ${riskColor(tooltip.risk)}25`,
-                minWidth: 155,
+                minWidth: 155, maxWidth: 220,
               }}>
                 <div style={{ fontSize: 12, color: "#fff", fontWeight: 600, marginBottom: 6, fontFamily: "'Syne',sans-serif" }}>{tooltip.name}</div>
                 <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 3 }}>
@@ -237,7 +236,6 @@ export default function Index() {
                   <div style={{ height: "100%", width: `${tooltip.risk * 100}%`, background: `linear-gradient(90deg,${riskColor(tooltip.risk)}55,${riskColor(tooltip.risk)})`, borderRadius: 99 }} />
                 </div>
                 <div style={{ fontSize: 8, color: "#3a5070", marginTop: 5, letterSpacing: "0.06em" }}>Click to view NFHS data</div>
-                <div style={{ position: "absolute", bottom: -6, left: "50%", transform: "translateX(-50%)", borderLeft: "6px solid transparent", borderRight: "6px solid transparent", borderTop: `6px solid ${riskColor(tooltip.risk)}55` }} />
               </div>
             )}
 

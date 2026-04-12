@@ -53,7 +53,7 @@ export interface IndiaMapHandle {
 const IndiaMap = forwardRef<IndiaMapHandle, IndiaMapProps>(function IndiaMap({ activeLayer, onStateHover, onStateClick, onDistrictClick, hoveredStateName, selectedStateName }, ref) {
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<any>(null);
-  const stateLayerRef = useRef<any>(null);
+  
   const districtLayerRef = useRef<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -102,25 +102,13 @@ const IndiaMap = forwardRef<IndiaMapHandle, IndiaMapProps>(function IndiaMap({ a
           { featureType: "poi", stylers: [{ visibility: "off" }] },
           { featureType: "transit", stylers: [{ visibility: "off" }] },
           { featureType: "administrative.country", elementType: "geometry.stroke", stylers: [{ color: "#2a3f5f" }, { weight: 1.5 }] },
+          { featureType: "administrative.province", elementType: "geometry.stroke", stylers: [{ color: "#3a5a8a" }, { weight: 2 }, { visibility: "on" }] },
+          { featureType: "administrative.province", elementType: "labels", stylers: [{ visibility: "off" }] },
           { featureType: "landscape", elementType: "geometry", stylers: [{ color: "#0d1628" }] },
         ],
         restriction: { latLngBounds: { north: 38, south: 6, west: 67, east: 98 }, strictBounds: false },
       });
       mapRef.current = map;
-
-      // State layer (boundaries only, thicker stroke)
-      const stateLayer = new window.google.maps.Data();
-      stateLayerRef.current = stateLayer;
-      stateLayer.loadGeoJson("/india-states.json");
-      stateLayer.setMap(map);
-      stateLayer.setStyle(() => ({
-        fillColor: "transparent",
-        fillOpacity: 0,
-        strokeColor: "rgba(255,255,255,0.35)",
-        strokeWeight: 1.5,
-        zIndex: 10,
-        clickable: false,
-      }));
 
       // District layer
       const districtLayer = new window.google.maps.Data();
@@ -144,10 +132,12 @@ const IndiaMap = forwardRef<IndiaMapHandle, IndiaMapProps>(function IndiaMap({ a
           strokeWeight: 2, strokeColor: "#ffffff", fillOpacity: 0.9, zIndex: 5,
         });
 
-        if (event.latLng) {
-          const point = getPixelPosition(map, event.latLng);
+        if (event.domEvent && mapContainerRef.current) {
+          const rect = mapContainerRef.current.getBoundingClientRect();
+          const x = event.domEvent.clientX - rect.left;
+          const y = event.domEvent.clientY - rect.top;
           const label = `${district}, ${state}`;
-          onStateHover(label, risk, point ? [point.x, point.y] : null);
+          onStateHover(label, risk, [x, y]);
         }
       });
 
@@ -221,21 +211,6 @@ const IndiaMap = forwardRef<IndiaMapHandle, IndiaMapProps>(function IndiaMap({ a
     });
   }, [activeLayer, getLayerRisk, selectedStateName]);
 
-  const getPixelPosition = (map: any, latLng: any) => {
-    const bounds = map.getBounds();
-    const projection = map.getProjection();
-    if (!bounds || !projection) return null;
-    const topRight = projection.fromLatLngToPoint(bounds.getNorthEast());
-    const bottomLeft = projection.fromLatLngToPoint(bounds.getSouthWest());
-    const scale = Math.pow(2, map.getZoom());
-    const worldPoint = projection.fromLatLngToPoint(latLng);
-    const containerEl = mapContainerRef.current;
-    if (!containerEl) return null;
-    const rect = containerEl.getBoundingClientRect();
-    const x = ((worldPoint.x - bottomLeft.x) * scale) / (rect.width / 256) * (rect.width / ((topRight.x - bottomLeft.x) * scale));
-    const y = ((worldPoint.y - topRight.y) * scale) / (rect.height / 256) * (rect.height / ((bottomLeft.y - topRight.y) * scale));
-    return { x, y };
-  };
 
   if (error) {
     return (
