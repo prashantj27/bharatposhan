@@ -3,7 +3,8 @@ import {
   BarChart, Bar, AreaChart, Area, XAxis, YAxis,
   Tooltip, ResponsiveContainer,
 } from "recharts";
-import IndiaMap from "@/components/IndiaMap";
+import IndiaMap, { type IndiaMapHandle } from "@/components/IndiaMap";
+import DistrictSearch from "@/components/DistrictSearch";
 
 // Source: NFHS-5 (2019-21) district-level fact sheets, rchiips.org
 // Risk = 0.4×stunting/100 + 0.3×wasting/100 + 0.3×underweight/100
