@@ -307,7 +307,7 @@ export default function Index() {
               </div>
             ))}
             <div style={{ fontSize: 9, color: "#4a5f7a", marginTop: 4, padding: "6px 8px", background: "rgba(255,107,53,0.05)", borderRadius: 4, borderLeft: "2px solid #ff6b3540" }}>
-              Source: SHAP feature attribution · Random Forest v2.1
+              Source: Decomposition analysis of NFHS-5 (2019-21) indicators · Census 2011 · NITI Aayog DNP 2022
             </div>
           </div>
 
