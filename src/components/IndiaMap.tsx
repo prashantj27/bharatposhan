@@ -342,9 +342,12 @@ const IndiaMap = forwardRef<IndiaMapHandle, IndiaMapProps>(function IndiaMap({ a
         <button
           onClick={() => {
             const map = mapRef.current;
-            if (map) {
-              map.setCenter({ lat: 23, lng: 82 });
-              map.setZoom(5);
+            if (map && window.google) {
+              const indiaBounds = new window.google.maps.LatLngBounds(
+                { lat: 7, lng: 68 },
+                { lat: 36, lng: 97 }
+              );
+              map.fitBounds(indiaBounds, 0);
             }
             clearLabels();
           }}
