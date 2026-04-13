@@ -346,11 +346,14 @@ const IndiaMap = forwardRef<IndiaMapHandle, IndiaMapProps>(function IndiaMap({ a
           onClick={() => {
             const map = mapRef.current;
             if (map && window.google) {
+              const mapDiv = map.getDiv();
+              const mapHeight = mapDiv.offsetHeight;
+              const bottomPad = Math.round(mapHeight * 0.25);
               const indiaBounds = new window.google.maps.LatLngBounds(
                 { lat: 7, lng: 68 },
-                { lat: 36, lng: 97 }
+                { lat: 37, lng: 97.5 }
               );
-              map.fitBounds(indiaBounds, 0);
+              map.fitBounds(indiaBounds, { top: 10, bottom: bottomPad, left: 0, right: 0 });
             }
             clearLabels();
           }}
