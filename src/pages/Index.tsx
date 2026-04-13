@@ -58,6 +58,30 @@ export default function Index() {
   const [hoveredState, setHoveredState] = useState<{ name: string; risk: number } | null>(null);
   const [tooltip, setTooltip] = useState<{ name: string; risk: number; x: number; y: number } | null>(null);
   const mapRef = useRef<IndiaMapHandle>(null);
+  const [aiAnalysis, setAiAnalysis] = useState<any>(null);
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiError, setAiError] = useState<string | null>(null);
+
+  const fetchAiAnalysis = useCallback(async (district: string, state: string, indicators: any) => {
+    setAiLoading(true);
+    setAiError(null);
+    setAiAnalysis(null);
+    try {
+      const { data, error } = await supabase.functions.invoke("analyze-district", {
+        body: { district, state, indicators },
+      });
+      if (error) throw new Error(error.message || "AI analysis failed");
+      if (data?.error) throw new Error(data.error);
+      if (data?.analysis) {
+        setAiAnalysis(data.analysis);
+      }
+    } catch (e: any) {
+      console.error("AI analysis error:", e);
+      setAiError(e.message || "Failed to generate AI analysis");
+    } finally {
+      setAiLoading(false);
+    }
+  }, []);
 
   const handleDistrictSearch = useCallback((district: string, state: string) => {
     mapRef.current?.zoomToDistrict(district, state);
@@ -101,7 +125,7 @@ export default function Index() {
       immunization: data.immunization ?? 76,
       risk: data.risk,
     });
-    setSelected({
+    const districtObj = {
       id: 999,
       name: district,
       state: state,
@@ -120,8 +144,20 @@ export default function Index() {
         { year: "NFHS-4", score: data.risk + 0.03 },
         { year: "NFHS-5", score: data.risk },
       ],
+    };
+    setSelected(districtObj);
+    // Trigger AI analysis
+    fetchAiAnalysis(district, state, {
+      stunting: data.stunting,
+      wasting: data.wasting,
+      underweight: data.underweight,
+      anemia_children: data.anemia_children,
+      anemia_women: data.anemia_women,
+      breastfeeding: data.breastfeeding,
+      immunization: data.immunization,
+      risk: data.risk,
     });
-  }, []);
+  }, [fetchAiAnalysis]);
 
   return (
     <div style={{ fontFamily: "'DM Mono','Courier New',monospace", background: "#070d1a", minHeight: "100vh", color: "#e0e8f0", display: "flex", flexDirection: "column", overflow: "hidden" }}>
