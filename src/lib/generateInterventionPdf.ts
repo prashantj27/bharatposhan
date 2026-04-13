@@ -675,10 +675,12 @@ export function generateInterventionPdf(intervention: string, district: District
     doc.setFontSize(9);
     doc.setTextColor(50, 50, 50);
     const lines = doc.splitTextToSize(text, CW - indent - 6);
-    checkPage(lines.length * 4.5);
+    checkPage(Math.min(lines.length, 3) * 4.2 + 1);
+    // Draw circle aligned to first line baseline
     doc.setFillColor(theme.accent[0], theme.accent[1], theme.accent[2]);
-    doc.circle(M + indent + 1, y - 1.2, 1, "F");
-    lines.forEach((line: string, i: number) => {
+    doc.circle(M + indent + 1, y - 1.5, 1, "F");
+    lines.forEach((line: string, idx: number) => {
+      checkPage(5);
       doc.text(line, M + indent + 5, y);
       y += 4.2;
     });
@@ -928,11 +930,11 @@ export function generateInterventionPdf(intervention: string, district: District
     "         |                        |                         |",
     "    Aadhaar Auth           Predictive Alerts          Policy Decisions",
   ];
-  arch.forEach(line => {
-    doc.text(line, M + 4, y + 4);
-    y += 3.2;
+  const archStartY = y + 4;
+  arch.forEach((line, idx) => {
+    doc.text(line, M + 4, archStartY + idx * 3.2);
   });
-  y += 8;
+  y += arch.length * 3.2 + 8;
 
   // =========== FINANCIAL MODEL ===========
   sectionHeading("7. Financial Model");
@@ -1048,11 +1050,11 @@ export function generateInterventionPdf(intervention: string, district: District
     "| [Bar: Monthly SNP dist.]  [Alert: SAM cases]|",
     "+---------------------------------------------+",
   ];
-  dash.forEach(line => {
-    doc.text(line, M + 8, y + 4);
-    y += 3;
+  const dashStartY = y + 4;
+  dash.forEach((line, idx) => {
+    doc.text(line, M + 8, dashStartY + idx * 3);
   });
-  y += 8;
+  y += dash.length * 3 + 8;
 
   // =========== CASE STUDIES ===========
   sectionHeading("11. Case Studies & Benchmarks");
@@ -1068,16 +1070,20 @@ export function generateInterventionPdf(intervention: string, district: District
   sectionHeading("12. Policy Recommendations");
 
   details.policyRec.forEach((rec, i) => {
-    checkPage(10);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(9);
+    const lines = doc.splitTextToSize(rec, CW - 14);
+    checkPage(lines.length * 4.5 + 3);
+    // Draw number aligned to first line
     doc.setFont("helvetica", "bold");
     doc.setFontSize(9);
     doc.setTextColor(theme.primary[0], theme.primary[1], theme.primary[2]);
     doc.text(`${i + 1}.`, M + 2, y);
+    // Draw all text lines starting at same x
     doc.setFont("helvetica", "normal");
     doc.setTextColor(50, 50, 50);
-    const lines = doc.splitTextToSize(rec, CW - 12);
     lines.forEach((line: string) => {
-      doc.text(line, M + 10, y);
+      doc.text(line, M + 12, y);
       y += 4.5;
     });
     y += 3;
