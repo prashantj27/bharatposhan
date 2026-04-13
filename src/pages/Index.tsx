@@ -7,6 +7,7 @@ import IndiaMap, { type IndiaMapHandle } from "@/components/IndiaMap";
 import DistrictSearch from "@/components/DistrictSearch";
 import { computeDistrictDrivers } from "@/lib/districtDrivers";
 import { generateInterventionPdf } from "@/lib/generateInterventionPdf";
+import { supabase } from "@/integrations/supabase/client";
 
 // Source: NFHS-5 (2019-21) district-level fact sheets, rchiips.org
 // Risk = 0.4×stunting/100 + 0.3×wasting/100 + 0.3×underweight/100
