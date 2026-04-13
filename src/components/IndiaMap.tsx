@@ -332,7 +332,7 @@ const IndiaMap = forwardRef<IndiaMapHandle, IndiaMapProps>(function IndiaMap({ a
       <div ref={mapContainerRef} style={{ width: "100%", height: "100%" }} />
 
       {/* Reset Map button */}
-      {currentLabelStateRef.current !== null && !loading && (
+      {showResetButton && !loading && (
         <button
           onClick={() => {
             const map = mapRef.current;
