@@ -211,12 +211,12 @@ const IndiaMap = forwardRef<IndiaMapHandle, IndiaMapProps>(function IndiaMap({ a
       districtLayerRef.current = districtLayer;
       districtLayer.loadGeoJson("/india-districts.json", undefined, () => {
         applyDistrictStyles(districtLayer);
-        // Fit map to show full India filling the viewport
-        const indiaBounds = new window.google.maps.LatLngBounds(
-          { lat: 7, lng: 68 },    // SW corner
-          { lat: 36, lng: 97 }    // NE corner
-        );
-        map.fitBounds(indiaBounds, 0);
+        // Compute actual bounds of all district features
+        const allBounds = new window.google.maps.LatLngBounds();
+        districtLayer.forEach((feature: any) => {
+          feature.getGeometry().forEachLatLng((latlng: any) => allBounds.extend(latlng));
+        });
+        map.fitBounds(allBounds, { top: 10, bottom: 10, left: 10, right: 10 });
         setLoading(false);
       });
       districtLayer.setMap(map);
