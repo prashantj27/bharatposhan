@@ -336,17 +336,9 @@ const IndiaMap = forwardRef<IndiaMapHandle, IndiaMapProps>(function IndiaMap({ a
         <button
           onClick={() => {
             const map = mapRef.current;
-            if (map && window.google) {
-              const indiaBounds = new window.google.maps.LatLngBounds(
-                { lat: 7, lng: 68 },
-                { lat: 37, lng: 97.5 }
-              );
-              map.fitBounds(indiaBounds, 0);
-              window.google.maps.event.addListenerOnce(map, 'bounds_changed', () => {
-                const mapDiv = map.getDiv();
-                const panUp = Math.round(mapDiv.offsetHeight * 0.18);
-                map.panBy(0, -panUp);
-              });
+            if (map) {
+              map.setCenter({ lat: 20, lng: 80 });
+              map.setZoom(5);
             }
             clearLabels();
           }}
