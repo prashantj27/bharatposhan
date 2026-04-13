@@ -305,12 +305,15 @@ export function generateInterventionPdf(intervention: string, district: District
   doc.setFillColor(theme.primary[0], theme.primary[1], theme.primary[2]);
   doc.rect(0, 0, W, H, "F");
 
-  // Decorative elements
-  doc.setFillColor(255, 255, 255);
-  doc.setGState(new (jsPDF as any).GState({ opacity: 0.05 }));
+  // Decorative elements (subtle lighter circles)
+  doc.setFillColor(
+    Math.min(theme.primary[0] + 20, 255),
+    Math.min(theme.primary[1] + 20, 255),
+    Math.min(theme.primary[2] + 20, 255)
+  );
   doc.circle(160, 50, 80, "F");
   doc.circle(40, 250, 60, "F");
-  doc.setGState(new (jsPDF as any).GState({ opacity: 1 }));
+  doc.setFillColor(theme.primary[0], theme.primary[1], theme.primary[2]);
 
   // Top line
   doc.setFillColor(255, 255, 255);
@@ -338,10 +341,12 @@ export function generateInterventionPdf(intervention: string, district: District
   doc.text(details.subtitle, M, ty + 8);
 
   // District context box
-  doc.setGState(new (jsPDF as any).GState({ opacity: 0.15 }));
-  doc.setFillColor(0, 0, 0);
+  doc.setFillColor(
+    Math.max(theme.primary[0] - 30, 0),
+    Math.max(theme.primary[1] - 30, 0),
+    Math.max(theme.primary[2] - 30, 0)
+  );
   doc.roundedRect(M, ty + 22, CW, 40, 4, 4, "F");
-  doc.setGState(new (jsPDF as any).GState({ opacity: 1 }));
 
   doc.setFontSize(10);
   doc.setTextColor(255, 255, 255);
