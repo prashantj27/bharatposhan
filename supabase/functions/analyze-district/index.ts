@@ -127,14 +127,28 @@ RULES:
     // Strip markdown code fences if present
     content = content.replace(/```json\s*/g, "").replace(/```\s*/g, "").trim();
     
+    // Try to extract JSON from the content if it's wrapped in other text
     let parsed;
     try {
       parsed = JSON.parse(content);
     } catch {
-      console.error("Failed to parse AI response:", content.substring(0, 500));
-      return new Response(JSON.stringify({ error: "Failed to parse AI analysis" }), {
-        status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      // Try to find JSON object in the content
+      const jsonMatch = content.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        try {
+          parsed = JSON.parse(jsonMatch[0]);
+        } catch {
+          console.error("Failed to parse AI response:", content.substring(0, 500));
+          return new Response(JSON.stringify({ error: "Failed to parse AI analysis. Please try again." }), {
+            status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
+      } else {
+        console.error("No JSON found in AI response:", content.substring(0, 500));
+        return new Response(JSON.stringify({ error: "Failed to parse AI analysis. Please try again." }), {
+          status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
     }
 
     return new Response(JSON.stringify({ success: true, analysis: parsed }), {

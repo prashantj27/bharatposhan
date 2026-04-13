@@ -59,12 +59,93 @@ const IndiaMap = forwardRef<IndiaMapHandle, IndiaMapProps>(function IndiaMap({ a
   const [error, setError] = useState<string | null>(null);
   const hoveredRef = useRef<string | null>(null);
   const [viewMode, setViewMode] = useState<"states" | "districts">("districts");
+  const labelsRef = useRef<any[]>([]);
+  const currentLabelStateRef = useRef<string | null>(null);
 
   const getLayerRisk = useCallback((risk: number) => {
     if (activeLayer === "literacy") return 1 - risk * 0.9;
     if (activeLayer === "sanitation") return 1 - risk * 0.85;
     return risk;
   }, [activeLayer]);
+
+  // Clear all existing district labels
+  const clearLabels = useCallback(() => {
+    labelsRef.current.forEach(marker => marker.setMap(null));
+    labelsRef.current = [];
+    currentLabelStateRef.current = null;
+  }, []);
+
+  // Add district name labels for a given state
+  const showStateDistrictLabels = useCallback((stateName: string) => {
+    const map = mapRef.current;
+    const layer = districtLayerRef.current;
+    if (!map || !layer || !window.google) return;
+    if (currentLabelStateRef.current === stateName) return; // already showing
+
+    clearLabels();
+    currentLabelStateRef.current = stateName;
+
+    layer.forEach((feature: any) => {
+      const fs = feature.getProperty("state") || "";
+      if (fs.toLowerCase() !== stateName.toLowerCase()) return;
+
+      const fd = feature.getProperty("district") || "";
+      if (!fd) return;
+
+      // Compute centroid of feature geometry
+      const bounds = new window.google.maps.LatLngBounds();
+      feature.getGeometry().forEachLatLng((latlng: any) => bounds.extend(latlng));
+      const center = bounds.getCenter();
+
+      const key = `${fs}|${fd}`;
+      const dd = districtData[key];
+      const risk = dd?.risk ?? 0.3;
+
+      const marker = new window.google.maps.Marker({
+        position: center,
+        map: map,
+        icon: {
+          path: window.google.maps.SymbolPath.CIRCLE,
+          scale: 0,
+        },
+        label: {
+          text: fd,
+          color: "#c8d6e5",
+          fontSize: "9px",
+          fontWeight: "500",
+          fontFamily: "'DM Mono', monospace",
+          className: "district-label",
+        },
+        clickable: false,
+        zIndex: 10,
+      });
+
+      labelsRef.current.push(marker);
+    });
+  }, [clearLabels]);
+
+  // Zoom to state bounds and show labels
+  const zoomToState = useCallback((stateName: string) => {
+    const map = mapRef.current;
+    const layer = districtLayerRef.current;
+    if (!map || !layer || !window.google) return;
+
+    const stateBounds = new window.google.maps.LatLngBounds();
+    let found = false;
+
+    layer.forEach((feature: any) => {
+      const fs = feature.getProperty("state") || "";
+      if (fs.toLowerCase() === stateName.toLowerCase()) {
+        found = true;
+        feature.getGeometry().forEachLatLng((latlng: any) => stateBounds.extend(latlng));
+      }
+    });
+
+    if (found) {
+      map.fitBounds(stateBounds, 40);
+      showStateDistrictLabels(stateName);
+    }
+  }, [showStateDistrictLabels]);
 
   useEffect(() => {
     let cancelled = false;
@@ -110,6 +191,14 @@ const IndiaMap = forwardRef<IndiaMapHandle, IndiaMapProps>(function IndiaMap({ a
       });
       mapRef.current = map;
 
+      // Clear labels when user zooms out to country level
+      map.addListener("zoom_changed", () => {
+        const zoom = map.getZoom();
+        if (zoom !== undefined && zoom < 6) {
+          clearLabels();
+        }
+      });
+
       // District layer
       const districtLayer = new window.google.maps.Data();
       districtLayerRef.current = districtLayer;
@@ -153,10 +242,8 @@ const IndiaMap = forwardRef<IndiaMapHandle, IndiaMapProps>(function IndiaMap({ a
         const key = `${state}|${district}`;
         const dd = districtData[key];
 
-        // Zoom and center on the clicked district
-        const bounds = new window.google.maps.LatLngBounds();
-        event.feature.getGeometry().forEachLatLng((latlng: any) => bounds.extend(latlng));
-        map.fitBounds(bounds, 60);
+        // Zoom to state level (not district) and show district labels
+        zoomToState(state);
 
         if (onDistrictClick && dd) {
           onDistrictClick(district, state, dd);
@@ -176,20 +263,22 @@ const IndiaMap = forwardRef<IndiaMapHandle, IndiaMapProps>(function IndiaMap({ a
       const layer = districtLayerRef.current;
       const map = mapRef.current;
       if (!layer || !map) return;
+
+      // Zoom to state level and show labels
+      zoomToState(state);
+
+      // Find the specific district and trigger its click callback
       layer.forEach((feature: any) => {
         const fd = feature.getProperty("district") || "";
         const fs = feature.getProperty("state") || "";
         if (fd.toLowerCase() === district.toLowerCase() && fs.toLowerCase() === state.toLowerCase()) {
-          const bounds = new window.google.maps.LatLngBounds();
-          feature.getGeometry().forEachLatLng((latlng: any) => bounds.extend(latlng));
-          map.fitBounds(bounds, 60);
           const key = `${fs}|${fd}`;
           const dd = districtData[key];
           if (onDistrictClick && dd) onDistrictClick(fd, fs, dd);
         }
       });
     }
-  }), [onDistrictClick]);
+  }), [onDistrictClick, zoomToState]);
 
   useEffect(() => {
     if (districtLayerRef.current) applyDistrictStyles(districtLayerRef.current);
