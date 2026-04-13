@@ -178,7 +178,7 @@ const IndiaMap = forwardRef<IndiaMapHandle, IndiaMapProps>(function IndiaMap({ a
       if (!mapContainerRef.current || !window.google) return;
 
       const map = new window.google.maps.Map(mapContainerRef.current, {
-        center: { lat: 23, lng: 82 },
+        center: { lat: 20, lng: 80 },
         zoom: 5, minZoom: 4, maxZoom: 10,
         mapTypeId: "roadmap", disableDefaultUI: true, zoomControl: true,
         zoomControlOptions: { position: window.google.maps.ControlPosition.RIGHT_TOP },
@@ -211,18 +211,6 @@ const IndiaMap = forwardRef<IndiaMapHandle, IndiaMapProps>(function IndiaMap({ a
       districtLayerRef.current = districtLayer;
       districtLayer.loadGeoJson("/india-districts.json", undefined, () => {
         applyDistrictStyles(districtLayer);
-        // Fit India bounds then pan upward so the top of India starts near the top
-        const indiaBounds = new window.google.maps.LatLngBounds(
-          { lat: 7, lng: 68 },
-          { lat: 37, lng: 97.5 }
-        );
-        map.fitBounds(indiaBounds, 0);
-        // After fitBounds completes, pan the map up by ~20% of viewport height
-        window.google.maps.event.addListenerOnce(map, 'bounds_changed', () => {
-          const mapDiv = map.getDiv();
-          const panUp = Math.round(mapDiv.offsetHeight * 0.18);
-          map.panBy(0, -panUp);
-        });
         setLoading(false);
       });
       districtLayer.setMap(map);
