@@ -128,18 +128,15 @@ const IndiaMap = forwardRef<IndiaMapHandle, IndiaMapProps>(function IndiaMap({ a
     });
   }, [clearLabels]);
 
-  // Show India filling the panel from top to bottom
+  // Show all of India in the panel — use setCenter/setZoom directly
+  // because fitBounds over-zooms in narrow-tall panels
   const fitToIndia = useCallback(() => {
     const map = mapRef.current;
     if (!map || !window.google) return;
     clearLabels();
-    // Use fitBounds on mainland India (excluding Andaman/Nicobar/Lakshadweep)
-    // so the colored districts fill the panel better
-    const mainlandBounds = new window.google.maps.LatLngBounds(
-      { lat: 8, lng: 68 },    // SW - southern tip of mainland
-      { lat: 36, lng: 97 }    // NE - top of J&K/Ladakh
-    );
-    map.fitBounds(mainlandBounds, { top: 10, right: 10, bottom: 10, left: 10 });
+    // Center of mainland India, zoom 5 shows full country in most viewports
+    map.setCenter({ lat: 22, lng: 82 });
+    map.setZoom(5);
   }, [clearLabels]);
 
   // Zoom to state bounds and show labels
