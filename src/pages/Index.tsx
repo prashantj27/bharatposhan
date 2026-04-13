@@ -359,23 +359,33 @@ export default function Index() {
             </div>
           </div>
 
-          <div>
-            <div style={{ fontSize: 9, color: "#6b7fa3", letterSpacing: "0.2em", marginBottom: 8 }}>RISK TREND</div>
-            <ResponsiveContainer width="100%" height={100}>
-              <AreaChart data={selected.trend} margin={{ top: 8, right: 4, left: 0, bottom: 0 }}>
-                <defs>
-                  <linearGradient id="riskGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor={riskColor(selected.risk)} stopOpacity={0.55} />
-                    <stop offset="95%" stopColor={riskColor(selected.risk)} stopOpacity={0.04} />
-                  </linearGradient>
-                </defs>
-                <XAxis dataKey="year" tick={{ fill: "#6b7fa3", fontSize: 9 }} axisLine={false} tickLine={false} />
-                <YAxis domain={[0, 1]} hide />
-                <Tooltip contentStyle={{ background: "#0d1628", border: `1px solid ${riskColor(selected.risk)}55`, borderRadius: 6, fontSize: 10 }} formatter={(v: number) => [(v * 100).toFixed(0) + "%", "Risk Score"]} labelStyle={{ color: "#a0b4cc" }} />
-                <Area type="monotone" dataKey="score" stroke={riskColor(selected.risk)} strokeWidth={2.5} fill="url(#riskGrad)" dot={{ r: 4, fill: riskColor(selected.risk), stroke: "#070d1a", strokeWidth: 1.5 }} />
-              </AreaChart>
-            </ResponsiveContainer>
-          </div>
+          {(() => {
+            const scores = selected.trend.map((t: any) => t.score);
+            const minScore = Math.min(...scores);
+            const maxScore = Math.max(...scores);
+            const padding = Math.max((maxScore - minScore) * 0.3, 0.02);
+            const yMin = Math.max(0, Math.floor((minScore - padding) * 100) / 100);
+            const yMax = Math.min(1, Math.ceil((maxScore + padding) * 100) / 100);
+            const baseline = selected.risk; // current NFHS-5 score as reference
+            return (
+              <div>
+                <div style={{ fontSize: 9, color: "#6b7fa3", letterSpacing: "0.2em", marginBottom: 8 }}>RISK TREND · YoY VARIATION</div>
+                <ResponsiveContainer width="100%" height={130}>
+                  <LineChart data={selected.trend} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
+                    <XAxis dataKey="year" tick={{ fill: "#6b7fa3", fontSize: 9 }} axisLine={{ stroke: "rgba(255,255,255,0.1)" }} tickLine={false} />
+                    <YAxis domain={[yMin, yMax]} tick={{ fill: "#6b7fa3", fontSize: 9 }} axisLine={false} tickLine={false} tickFormatter={(v: number) => `${(v * 100).toFixed(0)}%`} width={40} />
+                    <ReferenceLine y={baseline} stroke="#ff6b3566" strokeDasharray="5 3" label={{ value: `Current: ${(baseline * 100).toFixed(0)}%`, position: "right", fill: "#ff6b35", fontSize: 8 }} />
+                    <Tooltip contentStyle={{ background: "#0d1628", border: `1px solid ${riskColor(selected.risk)}55`, borderRadius: 6, fontSize: 10 }} formatter={(v: number) => [(v * 100).toFixed(1) + "%", "Risk Score"]} labelStyle={{ color: "#a0b4cc" }} />
+                    <Line type="monotone" dataKey="score" stroke={riskColor(selected.risk)} strokeWidth={2.5} dot={{ r: 5, fill: riskColor(selected.risk), stroke: "#070d1a", strokeWidth: 2 }} activeDot={{ r: 7, stroke: "#fff", strokeWidth: 2 }} />
+                  </LineChart>
+                </ResponsiveContainer>
+                <div style={{ fontSize: 8, color: "#4a5f7a", marginTop: 4, textAlign: "center" }}>
+                  Change: {((scores[0] - scores[scores.length - 1]) * 100).toFixed(1)}% improvement from {selected.trend[0]?.year} → {selected.trend[selected.trend.length - 1]?.year}
+                </div>
+              </div>
+            );
+          })()}
 
           <div>
             <div style={{ fontSize: 9, color: "#6b7fa3", letterSpacing: "0.2em", marginBottom: 8, display: "flex", alignItems: "center", gap: 6 }}>
