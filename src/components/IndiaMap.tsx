@@ -61,6 +61,7 @@ const IndiaMap = forwardRef<IndiaMapHandle, IndiaMapProps>(function IndiaMap({ a
   const [viewMode, setViewMode] = useState<"states" | "districts">("districts");
   const labelsRef = useRef<any[]>([]);
   const currentLabelStateRef = useRef<string | null>(null);
+  const zoomToStateRef = useRef<(stateName: string) => void>(() => {});
 
   const getLayerRisk = useCallback((risk: number) => {
     if (activeLayer === "literacy") return 1 - risk * 0.9;
@@ -146,6 +147,9 @@ const IndiaMap = forwardRef<IndiaMapHandle, IndiaMapProps>(function IndiaMap({ a
       showStateDistrictLabels(stateName);
     }
   }, [showStateDistrictLabels]);
+
+  // Keep ref in sync
+  zoomToStateRef.current = zoomToState;
 
   useEffect(() => {
     let cancelled = false;
@@ -243,7 +247,7 @@ const IndiaMap = forwardRef<IndiaMapHandle, IndiaMapProps>(function IndiaMap({ a
         const dd = districtData[key];
 
         // Zoom to state level (not district) and show district labels
-        zoomToState(state);
+        zoomToStateRef.current(state);
 
         if (onDistrictClick && dd) {
           onDistrictClick(district, state, dd);
@@ -265,7 +269,7 @@ const IndiaMap = forwardRef<IndiaMapHandle, IndiaMapProps>(function IndiaMap({ a
       if (!layer || !map) return;
 
       // Zoom to state level and show labels
-      zoomToState(state);
+      zoomToStateRef.current(state);
 
       // Find the specific district and trigger its click callback
       layer.forEach((feature: any) => {
