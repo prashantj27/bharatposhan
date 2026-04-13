@@ -1,7 +1,7 @@
 import { useState, useRef, useCallback, useMemo } from "react";
 import {
-  BarChart, Bar, AreaChart, Area, XAxis, YAxis,
-  Tooltip, ResponsiveContainer,
+  BarChart, Bar, LineChart, Line, AreaChart, Area, XAxis, YAxis,
+  Tooltip, ResponsiveContainer, ReferenceLine, CartesianGrid,
 } from "recharts";
 import IndiaMap, { type IndiaMapHandle } from "@/components/IndiaMap";
 import DistrictSearch from "@/components/DistrictSearch";
