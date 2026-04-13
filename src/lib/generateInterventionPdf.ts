@@ -14,6 +14,9 @@ interface DistrictData {
   immunization: number;
   drivers: { factor: string; contribution: number }[];
   interventions: string[];
+  aiAnalysis?: any;
+  districtContext?: any;
+  fiveYearProjection?: any;
 }
 
 // Theme colors
