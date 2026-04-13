@@ -75,6 +75,7 @@ const IndiaMap = forwardRef<IndiaMapHandle, IndiaMapProps>(function IndiaMap({ a
     labelsRef.current.forEach(marker => marker.setMap(null));
     labelsRef.current = [];
     currentLabelStateRef.current = null;
+    setShowResetButton(false);
   }, []);
 
   // Add district name labels for a given state
