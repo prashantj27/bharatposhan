@@ -152,6 +152,12 @@ const IndiaMap = forwardRef<IndiaMapHandle, IndiaMapProps>(function IndiaMap({ a
         const state = event.feature.getProperty("state") || "";
         const key = `${state}|${district}`;
         const dd = districtData[key];
+
+        // Zoom and center on the clicked district
+        const bounds = new window.google.maps.LatLngBounds();
+        event.feature.getGeometry().forEachLatLng((latlng: any) => bounds.extend(latlng));
+        map.fitBounds(bounds, 60);
+
         if (onDistrictClick && dd) {
           onDistrictClick(district, state, dd);
         } else {
