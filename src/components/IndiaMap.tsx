@@ -148,6 +148,9 @@ const IndiaMap = forwardRef<IndiaMapHandle, IndiaMapProps>(function IndiaMap({ a
     }
   }, [showStateDistrictLabels]);
 
+  // Keep ref in sync
+  zoomToStateRef.current = zoomToState;
+
   useEffect(() => {
     let cancelled = false;
 
