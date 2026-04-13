@@ -61,6 +61,7 @@ const IndiaMap = forwardRef<IndiaMapHandle, IndiaMapProps>(function IndiaMap({ a
   const [viewMode, setViewMode] = useState<"states" | "districts">("districts");
   const labelsRef = useRef<any[]>([]);
   const currentLabelStateRef = useRef<string | null>(null);
+  const [showResetButton, setShowResetButton] = useState(false);
   const zoomToStateRef = useRef<(stateName: string) => void>(() => {});
 
   const getLayerRisk = useCallback((risk: number) => {
@@ -74,6 +75,7 @@ const IndiaMap = forwardRef<IndiaMapHandle, IndiaMapProps>(function IndiaMap({ a
     labelsRef.current.forEach(marker => marker.setMap(null));
     labelsRef.current = [];
     currentLabelStateRef.current = null;
+    setShowResetButton(false);
   }, []);
 
   // Add district name labels for a given state
@@ -85,6 +87,7 @@ const IndiaMap = forwardRef<IndiaMapHandle, IndiaMapProps>(function IndiaMap({ a
 
     clearLabels();
     currentLabelStateRef.current = stateName;
+    setShowResetButton(true);
 
     layer.forEach((feature: any) => {
       const fs = feature.getProperty("state") || "";
@@ -327,6 +330,33 @@ const IndiaMap = forwardRef<IndiaMapHandle, IndiaMapProps>(function IndiaMap({ a
         </div>
       )}
       <div ref={mapContainerRef} style={{ width: "100%", height: "100%" }} />
+
+      {/* Reset Map button */}
+      {showResetButton && !loading && (
+        <button
+          onClick={() => {
+            const map = mapRef.current;
+            if (map) {
+              map.setCenter({ lat: 25.5, lng: 82 });
+              map.setZoom(5);
+            }
+            clearLabels();
+          }}
+          style={{
+            position: "absolute", top: 14, left: 14, zIndex: 10,
+            background: "rgba(7,13,26,0.92)", border: "1px solid rgba(255,255,255,0.12)",
+            borderRadius: 6, padding: "6px 12px", cursor: "pointer",
+            color: "#c8d6e5", fontSize: 10, fontFamily: "'DM Mono', monospace",
+            letterSpacing: "0.1em", backdropFilter: "blur(12px)",
+            display: "flex", alignItems: "center", gap: 6,
+            transition: "all 0.2s ease",
+          }}
+          onMouseEnter={(e) => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.3)"; e.currentTarget.style.color = "#ffffff"; }}
+          onMouseLeave={(e) => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.12)"; e.currentTarget.style.color = "#c8d6e5"; }}
+        >
+          <span style={{ fontSize: 12 }}>←</span> RESET MAP
+        </button>
+      )}
 
       {/* Legend */}
       <div style={{
