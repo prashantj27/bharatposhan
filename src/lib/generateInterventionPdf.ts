@@ -982,15 +982,24 @@ export function generateInterventionPdf(intervention: string, district: District
   addPage();
   sectionHeading("8. Impact Simulation (5-Year Projection)");
 
-  bodyText("Based on evidence from similar interventions in India and globally, the following improvements are projected:");
+  bodyText("Based on AI analysis of this district and evidence from similar interventions in India and globally, the following improvements are projected:");
+
+  const proj = district.fiveYearProjection;
+  const stTarget = proj?.stunting_target ?? district.stunting * 0.70;
+  const waTarget = proj?.wasting_target ?? district.wasting * 0.72;
+  const uwTarget = proj?.underweight_target ?? district.underweight * 0.70;
+  const anTarget = proj?.anemia_children_target ?? district.anemia_children * 0.78;
+  const imTarget = proj?.immunization_target ?? Math.min(district.immunization * 1.18, 98);
+
+  const lerp = (base: number, target: number, t: number) => (base + (target - base) * t).toFixed(1);
 
   const projections = [
-    ["Indicator", "Baseline (2021)", "Year 1", "Year 3", "Year 5"],
-    ["Stunting (%)", `${district.stunting}`, `${(district.stunting * 0.95).toFixed(1)}`, `${(district.stunting * 0.82).toFixed(1)}`, `${(district.stunting * 0.70).toFixed(1)}`],
-    ["Wasting (%)", `${district.wasting}`, `${(district.wasting * 0.92).toFixed(1)}`, `${(district.wasting * 0.80).toFixed(1)}`, `${(district.wasting * 0.72).toFixed(1)}`],
-    ["Underweight (%)", `${district.underweight}`, `${(district.underweight * 0.93).toFixed(1)}`, `${(district.underweight * 0.80).toFixed(1)}`, `${(district.underweight * 0.70).toFixed(1)}`],
-    ["Child Anemia (%)", `${district.anemia_children}`, `${(district.anemia_children * 0.95).toFixed(1)}`, `${(district.anemia_children * 0.87).toFixed(1)}`, `${(district.anemia_children * 0.78).toFixed(1)}`],
-    ["Immunization (%)", `${district.immunization}`, `${Math.min(district.immunization * 1.05, 98).toFixed(1)}`, `${Math.min(district.immunization * 1.12, 98).toFixed(1)}`, `${Math.min(district.immunization * 1.18, 98).toFixed(1)}`],
+    ["Indicator", "Baseline (2021)", "Year 1", "Year 3", "Year 5 (Target)"],
+    ["Stunting (%)", `${district.stunting}`, lerp(district.stunting, stTarget, 0.15), lerp(district.stunting, stTarget, 0.55), `${Number(stTarget).toFixed(1)}`],
+    ["Wasting (%)", `${district.wasting}`, lerp(district.wasting, waTarget, 0.2), lerp(district.wasting, waTarget, 0.6), `${Number(waTarget).toFixed(1)}`],
+    ["Underweight (%)", `${district.underweight}`, lerp(district.underweight, uwTarget, 0.15), lerp(district.underweight, uwTarget, 0.55), `${Number(uwTarget).toFixed(1)}`],
+    ["Child Anemia (%)", `${district.anemia_children}`, lerp(district.anemia_children, anTarget, 0.1), lerp(district.anemia_children, anTarget, 0.45), `${Number(anTarget).toFixed(1)}`],
+    ["Immunization (%)", `${district.immunization}`, lerp(district.immunization, imTarget, 0.25), lerp(district.immunization, imTarget, 0.65), `${Number(imTarget).toFixed(1)}`],
   ];
 
   autoTable(doc, {
