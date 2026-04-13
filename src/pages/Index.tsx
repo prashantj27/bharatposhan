@@ -89,6 +89,18 @@ export default function Index() {
   }, []);
 
   const states = [...new Set(DISTRICTS.map(d => d.state))].sort();
+
+  // Build state-specific top-10 districts from full NFHS data
+  const allNfhsDistricts = nfhsData as Record<string, { district: string; state: string; stunting: number; wasting: number; underweight: number; risk: number; anemia_children: number; anemia_women: number; breastfeeding: number; immunization: number }>;
+
+  const stateDistricts = useMemo(() => {
+    const currentState = selected.state;
+    return Object.values(allNfhsDistricts)
+      .filter(d => d.state === currentState)
+      .sort((a, b) => b.risk - a.risk)
+      .slice(0, 10);
+  }, [selected.state]);
+
   const filtered = DISTRICTS.filter(d =>
     (filterState === "All" || d.state === filterState) &&
     (filterRisk === "All" ||
