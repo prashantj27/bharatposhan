@@ -211,6 +211,12 @@ const IndiaMap = forwardRef<IndiaMapHandle, IndiaMapProps>(function IndiaMap({ a
       districtLayerRef.current = districtLayer;
       districtLayer.loadGeoJson("/india-districts.json", undefined, () => {
         applyDistrictStyles(districtLayer);
+        // Fit map to India's full extent
+        const indiaBounds = new window.google.maps.LatLngBounds(
+          { lat: 6.5, lng: 68 },   // SW corner
+          { lat: 37.5, lng: 97.5 }  // NE corner
+        );
+        map.fitBounds(indiaBounds, { top: 10, bottom: 10, left: 0, right: 0 });
         setLoading(false);
       });
       districtLayer.setMap(map);
