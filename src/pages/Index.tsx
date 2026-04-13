@@ -204,7 +204,6 @@ export default function Index() {
         {/* Left sidebar */}
         <div style={{ width: 220, borderRight: "1px solid rgba(255,255,255,0.06)", padding: "16px 12px", display: "flex", flexDirection: "column", gap: 16, overflowY: "auto" }}>
           <div>
-          <div>
             <div style={{ fontSize: 9, color: "#6b7fa3", letterSpacing: "0.2em", marginBottom: 8 }}>NATIONAL KPIs</div>
             {[{ label: "Avg Stunting", val: "35.5%", delta: "▼ 2.9% vs NFHS-4" }, { label: "Avg Wasting", val: "19.3%", delta: "▼ 1.7% vs NFHS-4" }, { label: "Avg Underweight", val: "32.1%", delta: "▼ 3.7% vs NFHS-4" }].map(k => (
               <div key={k.label} style={{ padding: "8px 10px", background: "#0d1628", borderRadius: 6, marginBottom: 6, border: "1px solid rgba(255,255,255,0.05)" }}>
