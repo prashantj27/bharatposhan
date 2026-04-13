@@ -128,6 +128,20 @@ const IndiaMap = forwardRef<IndiaMapHandle, IndiaMapProps>(function IndiaMap({ a
     });
   }, [clearLabels]);
 
+  // Show India filling the panel from top to bottom
+  const fitToIndia = useCallback(() => {
+    const map = mapRef.current;
+    if (!map || !window.google) return;
+    clearLabels();
+    // Use fitBounds on mainland India (excluding Andaman/Nicobar/Lakshadweep)
+    // so the colored districts fill the panel better
+    const mainlandBounds = new window.google.maps.LatLngBounds(
+      { lat: 8, lng: 68 },    // SW - southern tip of mainland
+      { lat: 36, lng: 97 }    // NE - top of J&K/Ladakh
+    );
+    map.fitBounds(mainlandBounds, { top: 10, right: 10, bottom: 10, left: 10 });
+  }, [clearLabels]);
+
   // Zoom to state bounds and show labels
   const zoomToState = useCallback((stateName: string) => {
     const map = mapRef.current;
@@ -178,8 +192,8 @@ const IndiaMap = forwardRef<IndiaMapHandle, IndiaMapProps>(function IndiaMap({ a
       if (!mapContainerRef.current || !window.google) return;
 
       const map = new window.google.maps.Map(mapContainerRef.current, {
-        center: { lat: 25, lng: 82 },
-        zoom: 5, minZoom: 4, maxZoom: 10,
+        center: { lat: 22, lng: 82 },
+        zoom: 4, minZoom: 4, maxZoom: 10,
         mapTypeId: "roadmap", disableDefaultUI: true, zoomControl: true,
         zoomControlOptions: { position: window.google.maps.ControlPosition.RIGHT_TOP },
         styles: [
@@ -211,6 +225,7 @@ const IndiaMap = forwardRef<IndiaMapHandle, IndiaMapProps>(function IndiaMap({ a
       districtLayerRef.current = districtLayer;
       districtLayer.loadGeoJson("/india-districts.json", undefined, () => {
         applyDistrictStyles(districtLayer);
+        fitToIndia();
         setLoading(false);
       });
       districtLayer.setMap(map);
@@ -335,12 +350,7 @@ const IndiaMap = forwardRef<IndiaMapHandle, IndiaMapProps>(function IndiaMap({ a
       {showResetButton && !loading && (
         <button
           onClick={() => {
-            const map = mapRef.current;
-            if (map) {
-              map.setCenter({ lat: 25, lng: 82 });
-              map.setZoom(5);
-            }
-            clearLabels();
+            fitToIndia();
           }}
           style={{
             position: "absolute", top: 14, left: 14, zIndex: 10,
