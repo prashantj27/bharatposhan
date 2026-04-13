@@ -178,7 +178,7 @@ const IndiaMap = forwardRef<IndiaMapHandle, IndiaMapProps>(function IndiaMap({ a
       if (!mapContainerRef.current || !window.google) return;
 
       const map = new window.google.maps.Map(mapContainerRef.current, {
-        center: { lat: 23.5, lng: 82 },
+        center: { lat: 25, lng: 82 },
         zoom: 5, minZoom: 4, maxZoom: 10,
         mapTypeId: "roadmap", disableDefaultUI: true, zoomControl: true,
         zoomControlOptions: { position: window.google.maps.ControlPosition.RIGHT_TOP },
@@ -337,7 +337,7 @@ const IndiaMap = forwardRef<IndiaMapHandle, IndiaMapProps>(function IndiaMap({ a
           onClick={() => {
             const map = mapRef.current;
             if (map) {
-              map.setCenter({ lat: 23.5, lng: 82 });
+              map.setCenter({ lat: 25, lng: 82 });
               map.setZoom(5);
             }
             clearLabels();
