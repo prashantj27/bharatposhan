@@ -894,6 +894,19 @@ export function generateInterventionPdf(intervention: string, district: District
   addPage();
   sectionHeading("5. Implementation Strategy");
 
+  // If AI analysis provides key activities, show them first
+  if (district.aiAnalysis?.key_activities?.length) {
+    subHeading("AI-Recommended Key Activities for " + district.name);
+    district.aiAnalysis.key_activities.forEach((a: string) => bullet(a, 6));
+    y += 4;
+  }
+
+  // If AI analysis provides risks, note implementing agency
+  if (district.aiAnalysis?.implementing_agency) {
+    subHeading("Lead Implementing Agency");
+    bodyText(district.aiAnalysis.implementing_agency);
+  }
+
   details.phases.forEach((phase, i) => {
     checkPage(50);
     subHeading(`Phase ${i + 1}: ${phase.name} (${phase.duration})`);
