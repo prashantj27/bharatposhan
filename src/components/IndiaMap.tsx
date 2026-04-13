@@ -128,22 +128,19 @@ const IndiaMap = forwardRef<IndiaMapHandle, IndiaMapProps>(function IndiaMap({ a
     });
   }, [clearLabels]);
 
-  // Hard-clamped India bounds — after fitBounds, pan up so the top of India
-  // sits near the top of the panel (compensating for the wide aspect ratio)
+  // Hard-clamped India bounds — pan up so India starts near the top
   const fitToIndia = useCallback(() => {
     const map = mapRef.current;
     if (!map || !window.google) return;
     clearLabels();
+    // Use a tighter bounding box that stretches north,
+    // effectively pushing India's southern tip off-screen slightly
+    // but ensuring the northern border (J&K ~35.5°N) is at the very top
     const indiaBounds = new window.google.maps.LatLngBounds(
-      { lat: 6.5, lng: 68 },
-      { lat: 37, lng: 97.5 }
+      { lat: 5, lng: 68 },
+      { lat: 38, lng: 98 }
     );
     map.fitBounds(indiaBounds, { top: 0, right: 0, bottom: 0, left: 0 });
-    // After fitBounds settles, pan the map upward so India's top edge
-    // aligns near the top of the container
-    window.google.maps.event.addListenerOnce(map, "idle", () => {
-      map.panBy(0, -60);
-    });
   }, [clearLabels]);
 
   // Zoom to state bounds and show labels
