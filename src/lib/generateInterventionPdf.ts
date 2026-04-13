@@ -864,6 +864,9 @@ export function generateInterventionPdf(intervention: string, district: District
   sectionHeading("4. Target Beneficiaries");
 
   subHeading("Primary Segments");
+  if (district.aiAnalysis?.target_beneficiaries) {
+    bodyText(district.aiAnalysis.target_beneficiaries);
+  }
   bullet(`Children 0-5 years in ${district.name} — estimated ${(district.risk * 200000).toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ",")} children at nutritional risk`);
   bullet(`Pregnant and lactating women — approximately ${(district.risk * 50000).toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ",")} women requiring supplementation`);
   bullet("Adolescent girls (11-18 years) — pre-conception nutrition critical for breaking intergenerational cycle");
