@@ -337,7 +337,7 @@ const IndiaMap = forwardRef<IndiaMapHandle, IndiaMapProps>(function IndiaMap({ a
           onClick={() => {
             const map = mapRef.current;
             if (map) {
-              map.setCenter({ lat: 20, lng: 80 });
+              map.setCenter({ lat: 22, lng: 80 });
               map.setZoom(5);
             }
             clearLabels();
