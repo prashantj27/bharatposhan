@@ -211,32 +211,15 @@ const IndiaMap = forwardRef<IndiaMapHandle, IndiaMapProps>(function IndiaMap({ a
       districtLayerRef.current = districtLayer;
       districtLayer.loadGeoJson("/india-districts.json", undefined, () => {
         applyDistrictStyles(districtLayer);
-        // Compute actual bounds of all district features
-        const allBounds = new window.google.maps.LatLngBounds();
-        districtLayer.forEach((feature: any) => {
-          feature.getGeometry().forEachLatLng((latlng: any) => allBounds.extend(latlng));
-        });
-        map.fitBounds(allBounds, { top: 10, bottom: 10, left: 10, right: 10 });
-        // After fitBounds, pan so the top of India is near the top of the viewport
-        window.google.maps.event.addListenerOnce(map, 'idle', () => {
-          const ne = allBounds.getNorthEast();
-          const sw = allBounds.getSouthWest();
-          const currentCenter = map.getCenter();
-          if (currentCenter) {
-            // Shift center north so top of India aligns near top of map viewport
-            const mapDiv = map.getDiv();
-            const mapHeight = mapDiv.offsetHeight;
-            const boundsHeight = ne.lat() - sw.lat();
-            const zoom = map.getZoom() || 5;
-            // Calculate degrees per pixel at this zoom
-            const degreesPerPixel = 360 / (256 * Math.pow(2, zoom));
-            const viewportDegreesHeight = mapHeight * degreesPerPixel;
-            // Current center is at midpoint of bounds; shift up so top of bounds is ~40px from top
-            const topMarginDegrees = 40 * degreesPerPixel;
-            const newCenterLat = ne.lat() - (viewportDegreesHeight / 2) + topMarginDegrees;
-            map.panTo({ lat: newCenterLat, lng: currentCenter.lng() });
-          }
-        });
+        // Use asymmetric padding: small top, large bottom to push India upward in the viewport
+        const mapDiv = map.getDiv();
+        const mapHeight = mapDiv.offsetHeight;
+        const bottomPad = Math.round(mapHeight * 0.25); // push map content up by 25% of viewport
+        const indiaBounds = new window.google.maps.LatLngBounds(
+          { lat: 7, lng: 68 },
+          { lat: 37, lng: 97.5 }
+        );
+        map.fitBounds(indiaBounds, { top: 10, bottom: bottomPad, left: 0, right: 0 });
         setLoading(false);
       });
       districtLayer.setMap(map);
