@@ -6,6 +6,7 @@ import {
 import IndiaMap, { type IndiaMapHandle } from "@/components/IndiaMap";
 import DistrictSearch from "@/components/DistrictSearch";
 import { computeDistrictDrivers } from "@/lib/districtDrivers";
+import { generateInterventionPdf } from "@/lib/generateInterventionPdf";
 
 // Source: NFHS-5 (2019-21) district-level fact sheets, rchiips.org
 // Risk = 0.4×stunting/100 + 0.3×wasting/100 + 0.3×underweight/100
@@ -332,9 +333,17 @@ export default function Index() {
           <div>
             <div style={{ fontSize: 9, color: "#6b7fa3", letterSpacing: "0.2em", marginBottom: 8 }}>💡 RECOMMENDED INTERVENTIONS</div>
             {selected.interventions.map((inv, i) => (
-              <div key={i} style={{ padding: "8px 10px", borderRadius: 6, marginBottom: 5, background: "#0d1628", border: "1px solid rgba(255,255,255,0.05)", fontSize: 10, color: "#a0b4cc", display: "flex", gap: 8, alignItems: "flex-start" }}>
+              <div key={i} style={{ padding: "8px 10px", borderRadius: 6, marginBottom: 5, background: "#0d1628", border: "1px solid rgba(255,255,255,0.05)", fontSize: 10, color: "#a0b4cc", display: "flex", gap: 8, alignItems: "center" }}>
                 <span style={{ color: "#52b788", flexShrink: 0 }}>→</span>
-                <span>{inv}</span>
+                <span style={{ flex: 1 }}>{inv}</span>
+                <button
+                  onClick={(e) => { e.stopPropagation(); generateInterventionPdf(inv, selected); }}
+                  style={{ flexShrink: 0, padding: "3px 8px", borderRadius: 4, border: "1px solid rgba(82,183,136,0.3)", background: "rgba(82,183,136,0.1)", color: "#52b788", fontSize: 8, cursor: "pointer", letterSpacing: "0.1em", fontWeight: 600, transition: "all 0.2s" }}
+                  onMouseEnter={e => { (e.target as HTMLElement).style.background = "rgba(82,183,136,0.25)"; }}
+                  onMouseLeave={e => { (e.target as HTMLElement).style.background = "rgba(82,183,136,0.1)"; }}
+                >
+                  ↓ PDF
+                </button>
               </div>
             ))}
           </div>
