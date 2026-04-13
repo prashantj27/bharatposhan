@@ -158,6 +158,13 @@ const IndiaMap = forwardRef<IndiaMapHandle, IndiaMapProps>(function IndiaMap({ a
 
     if (found) {
       map.fitBounds(stateBounds, 40);
+      // Cap zoom to prevent over-zooming on small states/UTs
+      window.google.maps.event.addListenerOnce(map, "idle", () => {
+        const zoom = map.getZoom();
+        if (zoom !== undefined && zoom > 9) {
+          map.setZoom(9);
+        }
+      });
       showStateDistrictLabels(stateName);
     }
   }, [showStateDistrictLabels]);
