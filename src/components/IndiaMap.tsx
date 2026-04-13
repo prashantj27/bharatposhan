@@ -128,6 +128,18 @@ const IndiaMap = forwardRef<IndiaMapHandle, IndiaMapProps>(function IndiaMap({ a
     });
   }, [clearLabels]);
 
+  // Hard-clamped India bounds from GeoJSON extents
+  const fitToIndia = useCallback(() => {
+    const map = mapRef.current;
+    if (!map || !window.google) return;
+    clearLabels();
+    const indiaBounds = new window.google.maps.LatLngBounds(
+      { lat: 6.5, lng: 68 },   // SW corner
+      { lat: 35.5, lng: 97.5 }  // NE corner
+    );
+    map.fitBounds(indiaBounds, { top: 8, right: 8, bottom: 8, left: 8 });
+  }, [clearLabels]);
+
   // Zoom to state bounds and show labels
   const zoomToState = useCallback((stateName: string) => {
     const map = mapRef.current;
