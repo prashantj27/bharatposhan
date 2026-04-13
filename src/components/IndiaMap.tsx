@@ -128,21 +128,18 @@ const IndiaMap = forwardRef<IndiaMapHandle, IndiaMapProps>(function IndiaMap({ a
     });
   }, [clearLabels]);
 
-  // Show all of India with the top (J&K) near the top of the panel
+  // Show India filling the panel from top to bottom
   const fitToIndia = useCallback(() => {
     const map = mapRef.current;
-    const container = mapContainerRef.current;
-    if (!map || !window.google || !container) return;
+    if (!map || !window.google) return;
     clearLabels();
-    const h = container.clientHeight;
-    const w = container.clientWidth;
-    // For tall-narrow panels, shift center north so J&K is near top edge
-    // At zoom 5, ~0.044° per pixel vertically
-    const degreesVisible = h * 0.044;
-    // We want the top of the viewport at ~36°N (top of J&K)
-    const desiredCenter = 36 - degreesVisible / 2;
-    map.setCenter({ lat: Math.max(desiredCenter, 18), lng: 82 });
-    map.setZoom(w < 400 ? 4 : 5);
+    // Use fitBounds on mainland India (excluding Andaman/Nicobar/Lakshadweep)
+    // so the colored districts fill the panel better
+    const mainlandBounds = new window.google.maps.LatLngBounds(
+      { lat: 8, lng: 68 },    // SW - southern tip of mainland
+      { lat: 36, lng: 97 }    // NE - top of J&K/Ladakh
+    );
+    map.fitBounds(mainlandBounds, { top: 10, right: 10, bottom: 10, left: 10 });
   }, [clearLabels]);
 
   // Zoom to state bounds and show labels
