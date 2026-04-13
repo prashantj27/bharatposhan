@@ -204,15 +204,6 @@ export default function Index() {
         {/* Left sidebar */}
         <div style={{ width: 220, borderRight: "1px solid rgba(255,255,255,0.06)", padding: "16px 12px", display: "flex", flexDirection: "column", gap: 16, overflowY: "auto" }}>
           <div>
-            <div style={{ fontSize: 9, color: "#6b7fa3", letterSpacing: "0.2em", marginBottom: 8 }}>FILTERS</div>
-            <select value={filterState} onChange={e => setFilterState(e.target.value)} style={{ width: "100%", padding: "6px 8px", background: "#0d1628", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 4, color: "#e0e8f0", fontSize: 11, marginBottom: 6 }}>
-              <option>All</option>
-              {states.map(s => <option key={s}>{s}</option>)}
-            </select>
-            <select value={filterRisk} onChange={e => setFilterRisk(e.target.value)} style={{ width: "100%", padding: "6px 8px", background: "#0d1628", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 4, color: "#e0e8f0", fontSize: 11 }}>
-              {["All", "Critical", "High", "Moderate", "Low"].map(r => <option key={r}>{r}</option>)}
-            </select>
-          </div>
           <div>
             <div style={{ fontSize: 9, color: "#6b7fa3", letterSpacing: "0.2em", marginBottom: 8 }}>NATIONAL KPIs</div>
             {[{ label: "Avg Stunting", val: "35.5%", delta: "▼ 2.9% vs NFHS-4" }, { label: "Avg Wasting", val: "19.3%", delta: "▼ 1.7% vs NFHS-4" }, { label: "Avg Underweight", val: "32.1%", delta: "▼ 3.7% vs NFHS-4" }].map(k => (
