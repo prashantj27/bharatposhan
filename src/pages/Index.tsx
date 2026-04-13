@@ -224,19 +224,26 @@ export default function Index() {
             ))}
           </div>
           <div style={{ flex: 1 }}>
-            <div style={{ fontSize: 9, color: "#6b7fa3", letterSpacing: "0.2em", marginBottom: 8 }}>DISTRICTS · {filtered.length}</div>
-            {filtered.map(d => (
-              <div key={d.id} onClick={() => setSelected(d)} style={{ padding: "8px 10px", borderRadius: 6, marginBottom: 4, cursor: "pointer", border: `1px solid ${selected.id === d.id ? "rgba(255,107,53,0.4)" : "rgba(255,255,255,0.04)"}`, background: selected.id === d.id ? "rgba(255,107,53,0.1)" : "#0d1628", transition: "all 0.15s" }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                  <div style={{ fontSize: 11, color: "#e0e8f0", fontWeight: 500 }}>{d.name}</div>
-                  <div style={{ fontSize: 10, color: riskColor(d.risk), fontWeight: 500 }}>{(d.risk * 100).toFixed(0)}</div>
+            <div style={{ fontSize: 9, color: "#6b7fa3", letterSpacing: "0.2em", marginBottom: 8 }}>TOP 10 · {selected.state.toUpperCase()}</div>
+            {stateDistricts.map((d, i) => {
+              const isSelected = selected.name === d.district && selected.state === d.state;
+              return (
+                <div key={`${d.state}|${d.district}`} onClick={() => {
+                  mapRef.current?.zoomToDistrict(d.district, d.state);
+                }} style={{ padding: "8px 10px", borderRadius: 6, marginBottom: 4, cursor: "pointer", border: `1px solid ${isSelected ? "rgba(255,107,53,0.4)" : "rgba(255,255,255,0.04)"}`, background: isSelected ? "rgba(255,107,53,0.1)" : "#0d1628", transition: "all 0.15s" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                      <span style={{ fontSize: 9, color: "#4a5f7a", fontWeight: 600, minWidth: 14 }}>#{i + 1}</span>
+                      <div style={{ fontSize: 11, color: "#e0e8f0", fontWeight: 500 }}>{d.district}</div>
+                    </div>
+                    <div style={{ fontSize: 10, color: riskColor(d.risk), fontWeight: 500 }}>{(d.risk * 100).toFixed(0)}</div>
+                  </div>
+                  <div style={{ height: 2, borderRadius: 1, background: "#1a2340", marginTop: 6 }}>
+                    <div style={{ height: "100%", width: `${d.risk * 100}%`, background: riskColor(d.risk), borderRadius: 1, transition: "width 0.5s" }} />
+                  </div>
                 </div>
-                <div style={{ fontSize: 9, color: "#6b7fa3", marginTop: 2 }}>{d.state}</div>
-                <div style={{ height: 2, borderRadius: 1, background: "#1a2340", marginTop: 6 }}>
-                  <div style={{ height: "100%", width: `${d.risk * 100}%`, background: riskColor(d.risk), borderRadius: 1, transition: "width 0.5s" }} />
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
 
