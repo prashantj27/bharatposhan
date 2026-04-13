@@ -757,16 +757,28 @@ export function generateInterventionPdf(intervention: string, district: District
   sectionHeading("1. Executive Summary");
 
   subHeading("Problem Statement");
-  bodyText(details.problem);
+  bodyText(district.aiAnalysis?.rationale || details.problem);
 
   subHeading("Why This Intervention Matters");
-  bodyText(`India accounts for approximately one-third of the world's stunted children. ${district.state} has ${district.stunting > NATIONAL_AVG.stunting ? "above" : "below"}-national-average stunting at ${district.stunting}% vs ${NATIONAL_AVG.stunting}% nationally. The intergenerational cycle of malnutrition costs India an estimated 4% of GDP annually through lost productivity and increased healthcare expenditure (World Bank, 2024).`);
+  if (district.districtContext) {
+    bodyText(`${district.districtContext.geography || ""} ${district.districtContext.population_profile || ""} ${district.name} has ${district.stunting > NATIONAL_AVG.stunting ? "above" : "below"}-national-average stunting at ${district.stunting}% vs ${NATIONAL_AVG.stunting}% nationally. ${district.districtContext.infrastructure_gaps || ""}`);
+  } else {
+    bodyText(`India accounts for approximately one-third of the world's stunted children. ${district.state} has ${district.stunting > NATIONAL_AVG.stunting ? "above" : "below"}-national-average stunting at ${district.stunting}% vs ${NATIONAL_AVG.stunting}% nationally. The intergenerational cycle of malnutrition costs India an estimated 4% of GDP annually through lost productivity and increased healthcare expenditure (World Bank, 2024).`);
+  }
 
   subHeading("Key Expected Outcomes");
-  details.outcomes.forEach(o => bullet(o));
+  if (district.aiAnalysis?.success_indicators) {
+    district.aiAnalysis.success_indicators.forEach((o: string) => bullet(o));
+  } else {
+    details.outcomes.forEach(o => bullet(o));
+  }
 
   subHeading("Estimated Impact");
-  bodyText(`Based on evidence from similar interventions across India and globally, this blueprint projects a ${district.risk > 0.4 ? "25-35%" : "15-25%"} improvement in composite nutrition indicators within 5 years, translating to an estimated ₹${(district.risk * 500).toFixed(0)} crore in averted healthcare costs and productivity gains for ${district.name} district.`);
+  if (district.aiAnalysis?.expected_impact) {
+    bodyText(district.aiAnalysis.expected_impact);
+  } else {
+    bodyText(`Based on evidence from similar interventions across India and globally, this blueprint projects a ${district.risk > 0.4 ? "25-35%" : "15-25%"} improvement in composite nutrition indicators within 5 years, translating to an estimated ₹${(district.risk * 500).toFixed(0)} crore in averted healthcare costs and productivity gains for ${district.name} district.`);
+  }
 
   // =========== PAGE 3: PROBLEM LANDSCAPE ===========
   addPage();
