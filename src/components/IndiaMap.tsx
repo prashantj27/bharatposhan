@@ -90,7 +90,7 @@ const IndiaMap = forwardRef<IndiaMapHandle, IndiaMapProps>(function IndiaMap({ a
       if (!mapContainerRef.current || !window.google) return;
 
       const map = new window.google.maps.Map(mapContainerRef.current, {
-        center: { lat: 22.5, lng: 82 },
+        center: { lat: 25.5, lng: 82 },
         zoom: 5, minZoom: 4, maxZoom: 10,
         mapTypeId: "roadmap", disableDefaultUI: true, zoomControl: true,
         zoomControlOptions: { position: window.google.maps.ControlPosition.RIGHT_TOP },
