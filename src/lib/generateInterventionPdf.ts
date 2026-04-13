@@ -14,6 +14,9 @@ interface DistrictData {
   immunization: number;
   drivers: { factor: string; contribution: number }[];
   interventions: string[];
+  aiAnalysis?: any;
+  districtContext?: any;
+  fiveYearProjection?: any;
 }
 
 // Theme colors
@@ -754,16 +757,28 @@ export function generateInterventionPdf(intervention: string, district: District
   sectionHeading("1. Executive Summary");
 
   subHeading("Problem Statement");
-  bodyText(details.problem);
+  bodyText(district.aiAnalysis?.rationale || details.problem);
 
   subHeading("Why This Intervention Matters");
-  bodyText(`India accounts for approximately one-third of the world's stunted children. ${district.state} has ${district.stunting > NATIONAL_AVG.stunting ? "above" : "below"}-national-average stunting at ${district.stunting}% vs ${NATIONAL_AVG.stunting}% nationally. The intergenerational cycle of malnutrition costs India an estimated 4% of GDP annually through lost productivity and increased healthcare expenditure (World Bank, 2024).`);
+  if (district.districtContext) {
+    bodyText(`${district.districtContext.geography || ""} ${district.districtContext.population_profile || ""} ${district.name} has ${district.stunting > NATIONAL_AVG.stunting ? "above" : "below"}-national-average stunting at ${district.stunting}% vs ${NATIONAL_AVG.stunting}% nationally. ${district.districtContext.infrastructure_gaps || ""}`);
+  } else {
+    bodyText(`India accounts for approximately one-third of the world's stunted children. ${district.state} has ${district.stunting > NATIONAL_AVG.stunting ? "above" : "below"}-national-average stunting at ${district.stunting}% vs ${NATIONAL_AVG.stunting}% nationally. The intergenerational cycle of malnutrition costs India an estimated 4% of GDP annually through lost productivity and increased healthcare expenditure (World Bank, 2024).`);
+  }
 
   subHeading("Key Expected Outcomes");
-  details.outcomes.forEach(o => bullet(o));
+  if (district.aiAnalysis?.success_indicators) {
+    district.aiAnalysis.success_indicators.forEach((o: string) => bullet(o));
+  } else {
+    details.outcomes.forEach(o => bullet(o));
+  }
 
   subHeading("Estimated Impact");
-  bodyText(`Based on evidence from similar interventions across India and globally, this blueprint projects a ${district.risk > 0.4 ? "25-35%" : "15-25%"} improvement in composite nutrition indicators within 5 years, translating to an estimated ₹${(district.risk * 500).toFixed(0)} crore in averted healthcare costs and productivity gains for ${district.name} district.`);
+  if (district.aiAnalysis?.expected_impact) {
+    bodyText(district.aiAnalysis.expected_impact);
+  } else {
+    bodyText(`Based on evidence from similar interventions across India and globally, this blueprint projects a ${district.risk > 0.4 ? "25-35%" : "15-25%"} improvement in composite nutrition indicators within 5 years, translating to an estimated ₹${(district.risk * 500).toFixed(0)} crore in averted healthcare costs and productivity gains for ${district.name} district.`);
+  }
 
   // =========== PAGE 3: PROBLEM LANDSCAPE ===========
   addPage();
@@ -849,6 +864,9 @@ export function generateInterventionPdf(intervention: string, district: District
   sectionHeading("4. Target Beneficiaries");
 
   subHeading("Primary Segments");
+  if (district.aiAnalysis?.target_beneficiaries) {
+    bodyText(district.aiAnalysis.target_beneficiaries);
+  }
   bullet(`Children 0-5 years in ${district.name} — estimated ${(district.risk * 200000).toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ",")} children at nutritional risk`);
   bullet(`Pregnant and lactating women — approximately ${(district.risk * 50000).toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ",")} women requiring supplementation`);
   bullet("Adolescent girls (11-18 years) — pre-conception nutrition critical for breaking intergenerational cycle");
@@ -875,6 +893,19 @@ export function generateInterventionPdf(intervention: string, district: District
   // =========== IMPLEMENTATION STRATEGY ===========
   addPage();
   sectionHeading("5. Implementation Strategy");
+
+  // If AI analysis provides key activities, show them first
+  if (district.aiAnalysis?.key_activities?.length) {
+    subHeading("AI-Recommended Key Activities for " + district.name);
+    district.aiAnalysis.key_activities.forEach((a: string) => bullet(a, 6));
+    y += 4;
+  }
+
+  // If AI analysis provides risks, note implementing agency
+  if (district.aiAnalysis?.implementing_agency) {
+    subHeading("Lead Implementing Agency");
+    bodyText(district.aiAnalysis.implementing_agency);
+  }
 
   details.phases.forEach((phase, i) => {
     checkPage(50);
@@ -939,6 +970,12 @@ export function generateInterventionPdf(intervention: string, district: District
   // =========== FINANCIAL MODEL ===========
   sectionHeading("7. Financial Model");
 
+  // If AI provides budget, add it as a note
+  if (district.aiAnalysis?.budget_cr) {
+    bodyText(`AI-estimated total budget for this intervention in ${district.name}: ₹${district.aiAnalysis.budget_cr} Crore over ${district.aiAnalysis.timeline_months || 36} months.`);
+    y += 2;
+  }
+
   autoTable(doc, {
     startY: y,
     margin: { left: M, right: M },
@@ -950,7 +987,7 @@ export function generateInterventionPdf(intervention: string, district: District
   });
   y = (doc as any).lastAutoTable.finalY + 6;
 
-  const totalBudget = parseInt(details.budget[details.budget.length - 1][1]);
+  const totalBudget = district.aiAnalysis?.budget_cr || parseInt(details.budget[details.budget.length - 1][1]);
   const estBeneficiaries = Math.round(district.risk * 300000);
   const costPerBenef = ((totalBudget * 10000000) / estBeneficiaries).toFixed(0);
 
@@ -964,15 +1001,24 @@ export function generateInterventionPdf(intervention: string, district: District
   addPage();
   sectionHeading("8. Impact Simulation (5-Year Projection)");
 
-  bodyText("Based on evidence from similar interventions in India and globally, the following improvements are projected:");
+  bodyText("Based on AI analysis of this district and evidence from similar interventions in India and globally, the following improvements are projected:");
+
+  const proj = district.fiveYearProjection;
+  const stTarget = proj?.stunting_target ?? district.stunting * 0.70;
+  const waTarget = proj?.wasting_target ?? district.wasting * 0.72;
+  const uwTarget = proj?.underweight_target ?? district.underweight * 0.70;
+  const anTarget = proj?.anemia_children_target ?? district.anemia_children * 0.78;
+  const imTarget = proj?.immunization_target ?? Math.min(district.immunization * 1.18, 98);
+
+  const lerp = (base: number, target: number, t: number) => (base + (target - base) * t).toFixed(1);
 
   const projections = [
-    ["Indicator", "Baseline (2021)", "Year 1", "Year 3", "Year 5"],
-    ["Stunting (%)", `${district.stunting}`, `${(district.stunting * 0.95).toFixed(1)}`, `${(district.stunting * 0.82).toFixed(1)}`, `${(district.stunting * 0.70).toFixed(1)}`],
-    ["Wasting (%)", `${district.wasting}`, `${(district.wasting * 0.92).toFixed(1)}`, `${(district.wasting * 0.80).toFixed(1)}`, `${(district.wasting * 0.72).toFixed(1)}`],
-    ["Underweight (%)", `${district.underweight}`, `${(district.underweight * 0.93).toFixed(1)}`, `${(district.underweight * 0.80).toFixed(1)}`, `${(district.underweight * 0.70).toFixed(1)}`],
-    ["Child Anemia (%)", `${district.anemia_children}`, `${(district.anemia_children * 0.95).toFixed(1)}`, `${(district.anemia_children * 0.87).toFixed(1)}`, `${(district.anemia_children * 0.78).toFixed(1)}`],
-    ["Immunization (%)", `${district.immunization}`, `${Math.min(district.immunization * 1.05, 98).toFixed(1)}`, `${Math.min(district.immunization * 1.12, 98).toFixed(1)}`, `${Math.min(district.immunization * 1.18, 98).toFixed(1)}`],
+    ["Indicator", "Baseline (2021)", "Year 1", "Year 3", "Year 5 (Target)"],
+    ["Stunting (%)", `${district.stunting}`, lerp(district.stunting, stTarget, 0.15), lerp(district.stunting, stTarget, 0.55), `${Number(stTarget).toFixed(1)}`],
+    ["Wasting (%)", `${district.wasting}`, lerp(district.wasting, waTarget, 0.2), lerp(district.wasting, waTarget, 0.6), `${Number(waTarget).toFixed(1)}`],
+    ["Underweight (%)", `${district.underweight}`, lerp(district.underweight, uwTarget, 0.15), lerp(district.underweight, uwTarget, 0.55), `${Number(uwTarget).toFixed(1)}`],
+    ["Child Anemia (%)", `${district.anemia_children}`, lerp(district.anemia_children, anTarget, 0.1), lerp(district.anemia_children, anTarget, 0.45), `${Number(anTarget).toFixed(1)}`],
+    ["Immunization (%)", `${district.immunization}`, lerp(district.immunization, imTarget, 0.25), lerp(district.immunization, imTarget, 0.65), `${Number(imTarget).toFixed(1)}`],
   ];
 
   autoTable(doc, {
@@ -990,6 +1036,13 @@ export function generateInterventionPdf(intervention: string, district: District
 
   // =========== RISK ASSESSMENT ===========
   sectionHeading("9. Risk Assessment & Mitigation");
+
+  // Add AI-identified risks if available
+  if (district.aiAnalysis?.risks?.length) {
+    subHeading("AI-Identified District-Specific Risks");
+    district.aiAnalysis.risks.forEach((r: string) => bullet(r, 4));
+    y += 4;
+  }
 
   autoTable(doc, {
     startY: y,
@@ -1058,6 +1111,12 @@ export function generateInterventionPdf(intervention: string, district: District
 
   // =========== CASE STUDIES ===========
   sectionHeading("11. Case Studies & Benchmarks");
+
+  if (district.districtContext?.existing_schemes?.length) {
+    subHeading("Existing Schemes in " + district.state);
+    district.districtContext.existing_schemes.forEach((s: string) => bullet(s, 4));
+    y += 4;
+  }
 
   subHeading("Indian State Success Model");
   bodyText(details.caseStudy);

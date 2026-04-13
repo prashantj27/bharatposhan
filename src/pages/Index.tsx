@@ -7,6 +7,7 @@ import IndiaMap, { type IndiaMapHandle } from "@/components/IndiaMap";
 import DistrictSearch from "@/components/DistrictSearch";
 import { computeDistrictDrivers } from "@/lib/districtDrivers";
 import { generateInterventionPdf } from "@/lib/generateInterventionPdf";
+import { supabase } from "@/integrations/supabase/client";
 
 // Source: NFHS-5 (2019-21) district-level fact sheets, rchiips.org
 // Risk = 0.4×stunting/100 + 0.3×wasting/100 + 0.3×underweight/100
@@ -57,6 +58,30 @@ export default function Index() {
   const [hoveredState, setHoveredState] = useState<{ name: string; risk: number } | null>(null);
   const [tooltip, setTooltip] = useState<{ name: string; risk: number; x: number; y: number } | null>(null);
   const mapRef = useRef<IndiaMapHandle>(null);
+  const [aiAnalysis, setAiAnalysis] = useState<any>(null);
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiError, setAiError] = useState<string | null>(null);
+
+  const fetchAiAnalysis = useCallback(async (district: string, state: string, indicators: any) => {
+    setAiLoading(true);
+    setAiError(null);
+    setAiAnalysis(null);
+    try {
+      const { data, error } = await supabase.functions.invoke("analyze-district", {
+        body: { district, state, indicators },
+      });
+      if (error) throw new Error(error.message || "AI analysis failed");
+      if (data?.error) throw new Error(data.error);
+      if (data?.analysis) {
+        setAiAnalysis(data.analysis);
+      }
+    } catch (e: any) {
+      console.error("AI analysis error:", e);
+      setAiError(e.message || "Failed to generate AI analysis");
+    } finally {
+      setAiLoading(false);
+    }
+  }, []);
 
   const handleDistrictSearch = useCallback((district: string, state: string) => {
     mapRef.current?.zoomToDistrict(district, state);
@@ -100,7 +125,7 @@ export default function Index() {
       immunization: data.immunization ?? 76,
       risk: data.risk,
     });
-    setSelected({
+    const districtObj = {
       id: 999,
       name: district,
       state: state,
@@ -119,8 +144,20 @@ export default function Index() {
         { year: "NFHS-4", score: data.risk + 0.03 },
         { year: "NFHS-5", score: data.risk },
       ],
+    };
+    setSelected(districtObj);
+    // Trigger AI analysis
+    fetchAiAnalysis(district, state, {
+      stunting: data.stunting,
+      wasting: data.wasting,
+      underweight: data.underweight,
+      anemia_children: data.anemia_children,
+      anemia_women: data.anemia_women,
+      breastfeeding: data.breastfeeding,
+      immunization: data.immunization,
+      risk: data.risk,
     });
-  }, []);
+  }, [fetchAiAnalysis]);
 
   return (
     <div style={{ fontFamily: "'DM Mono','Courier New',monospace", background: "#070d1a", minHeight: "100vh", color: "#e0e8f0", display: "flex", flexDirection: "column", overflow: "hidden" }}>
@@ -331,21 +368,66 @@ export default function Index() {
           </div>
 
           <div>
-            <div style={{ fontSize: 9, color: "#6b7fa3", letterSpacing: "0.2em", marginBottom: 8 }}>💡 RECOMMENDED INTERVENTIONS</div>
-            {selected.interventions.map((inv, i) => (
-              <div key={i} style={{ padding: "8px 10px", borderRadius: 6, marginBottom: 5, background: "#0d1628", border: "1px solid rgba(255,255,255,0.05)", fontSize: 10, color: "#a0b4cc", display: "flex", gap: 8, alignItems: "center" }}>
-                <span style={{ color: "#52b788", flexShrink: 0 }}>→</span>
-                <span style={{ flex: 1 }}>{inv}</span>
-                <button
-                  onClick={(e) => { e.stopPropagation(); generateInterventionPdf(inv, selected); }}
-                  style={{ flexShrink: 0, padding: "3px 8px", borderRadius: 4, border: "1px solid rgba(82,183,136,0.3)", background: "rgba(82,183,136,0.1)", color: "#52b788", fontSize: 8, cursor: "pointer", letterSpacing: "0.1em", fontWeight: 600, transition: "all 0.2s" }}
-                  onMouseEnter={e => { (e.target as HTMLElement).style.background = "rgba(82,183,136,0.25)"; }}
-                  onMouseLeave={e => { (e.target as HTMLElement).style.background = "rgba(82,183,136,0.1)"; }}
-                >
-                  ↓ PDF
-                </button>
+            <div style={{ fontSize: 9, color: "#6b7fa3", letterSpacing: "0.2em", marginBottom: 8, display: "flex", alignItems: "center", gap: 6 }}>
+              💡 AI-POWERED INTERVENTIONS
+              {aiLoading && <span style={{ color: "#ff6b35", fontSize: 8, animation: "pulse 1s infinite" }}>● ANALYZING...</span>}
+            </div>
+            {aiLoading && (
+              <div style={{ padding: "16px 10px", textAlign: "center", color: "#6b7fa3", fontSize: 10 }}>
+                <div style={{ marginBottom: 8 }}>🔬 AI is researching {selected.name}, {selected.state}...</div>
+                <div style={{ fontSize: 8, color: "#4a5f7a" }}>Analyzing NFHS-5 data, geography, demographics & existing schemes</div>
+                <div style={{ height: 2, background: "#1a2340", borderRadius: 2, marginTop: 10, overflow: "hidden" }}>
+                  <div style={{ height: "100%", width: "60%", background: "linear-gradient(90deg, #ff6b35, #f7c59f)", borderRadius: 2, animation: "scan 2s linear infinite" }} />
+                </div>
               </div>
-            ))}
+            )}
+            {aiError && (
+              <div style={{ padding: "10px", borderRadius: 6, background: "rgba(239,35,60,0.1)", border: "1px solid rgba(239,35,60,0.2)", fontSize: 10, color: "#ef233c", marginBottom: 8 }}>
+                {aiError}
+                <div style={{ fontSize: 8, color: "#6b7fa3", marginTop: 4 }}>Showing fallback recommendations below</div>
+              </div>
+            )}
+            {aiAnalysis?.district_context && (
+              <div style={{ padding: "8px 10px", borderRadius: 6, marginBottom: 8, background: "rgba(255,107,53,0.05)", border: "1px solid rgba(255,107,53,0.1)", fontSize: 9, color: "#a0b4cc" }}>
+                <div style={{ color: "#ff6b35", fontWeight: 600, marginBottom: 4, fontSize: 8, letterSpacing: "0.15em" }}>DISTRICT CONTEXT</div>
+                <div style={{ marginBottom: 3 }}>{aiAnalysis.district_context.geography}</div>
+                <div style={{ marginBottom: 3 }}>{aiAnalysis.district_context.population_profile}</div>
+                {aiAnalysis.district_context.key_challenges?.slice(0, 2).map((c: string, i: number) => (
+                  <div key={i} style={{ color: "#6b7fa3", fontSize: 8 }}>⚠ {c}</div>
+                ))}
+              </div>
+            )}
+            {(aiAnalysis?.interventions || selected.interventions).map((inv: any, i: number) => {
+              const isAi = typeof inv === "object" && inv.name;
+              const name = isAi ? inv.name : inv;
+              const desc = isAi ? inv.description : null;
+              const priority = isAi ? inv.priority : null;
+              const impact = isAi ? inv.expected_impact : null;
+              const priorityColor = priority === "critical" ? "#ef233c" : priority === "high" ? "#f77f00" : "#52b788";
+              return (
+                <div key={i} style={{ padding: "8px 10px", borderRadius: 6, marginBottom: 5, background: "#0d1628", border: `1px solid ${isAi ? "rgba(255,107,53,0.12)" : "rgba(255,255,255,0.05)"}`, fontSize: 10, color: "#a0b4cc" }}>
+                  <div style={{ display: "flex", gap: 8, alignItems: "flex-start" }}>
+                    <span style={{ color: isAi ? "#ff6b35" : "#52b788", flexShrink: 0, marginTop: 1 }}>{isAi ? "🤖" : "→"}</span>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 4 }}>
+                        <span style={{ fontWeight: 500, color: "#e0e8f0" }}>{name}</span>
+                        {priority && <span style={{ fontSize: 7, color: priorityColor, padding: "1px 5px", borderRadius: 3, border: `1px solid ${priorityColor}40`, textTransform: "uppercase", letterSpacing: "0.1em", flexShrink: 0 }}>{priority}</span>}
+                      </div>
+                      {desc && <div style={{ fontSize: 9, color: "#6b7fa3", marginTop: 3 }}>{desc}</div>}
+                      {impact && <div style={{ fontSize: 8, color: "#52b788", marginTop: 3 }}>📈 {impact}</div>}
+                    </div>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); generateInterventionPdf(name, { ...selected, aiAnalysis: isAi ? inv : null, districtContext: aiAnalysis?.district_context, fiveYearProjection: aiAnalysis?.five_year_projection }); }}
+                      style={{ flexShrink: 0, padding: "3px 8px", borderRadius: 4, border: "1px solid rgba(82,183,136,0.3)", background: "rgba(82,183,136,0.1)", color: "#52b788", fontSize: 8, cursor: "pointer", letterSpacing: "0.1em", fontWeight: 600, transition: "all 0.2s", marginTop: 1 }}
+                      onMouseEnter={e => { (e.target as HTMLElement).style.background = "rgba(82,183,136,0.25)"; }}
+                      onMouseLeave={e => { (e.target as HTMLElement).style.background = "rgba(82,183,136,0.1)"; }}
+                    >
+                      ↓ PDF
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
           </div>
 
           <div>
