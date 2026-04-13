@@ -1112,6 +1112,12 @@ export function generateInterventionPdf(intervention: string, district: District
   // =========== CASE STUDIES ===========
   sectionHeading("11. Case Studies & Benchmarks");
 
+  if (district.districtContext?.existing_schemes?.length) {
+    subHeading("Existing Schemes in " + district.state);
+    district.districtContext.existing_schemes.forEach((s: string) => bullet(s, 4));
+    y += 4;
+  }
+
   subHeading("Indian State Success Model");
   bodyText(details.caseStudy);
 
