@@ -223,6 +223,7 @@ const IndiaMap = forwardRef<IndiaMapHandle, IndiaMapProps>(function IndiaMap({ a
       districtLayerRef.current = districtLayer;
       districtLayer.loadGeoJson("/india-districts.json", undefined, () => {
         applyDistrictStyles(districtLayer);
+        fitToIndia();
         setLoading(false);
       });
       districtLayer.setMap(map);
@@ -347,12 +348,7 @@ const IndiaMap = forwardRef<IndiaMapHandle, IndiaMapProps>(function IndiaMap({ a
       {showResetButton && !loading && (
         <button
           onClick={() => {
-            const map = mapRef.current;
-            if (map) {
-              map.setCenter({ lat: 25, lng: 82 });
-              map.setZoom(5);
-            }
-            clearLabels();
+            fitToIndia();
           }}
           style={{
             position: "absolute", top: 14, left: 14, zIndex: 10,
