@@ -61,6 +61,7 @@ const IndiaMap = forwardRef<IndiaMapHandle, IndiaMapProps>(function IndiaMap({ a
   const [viewMode, setViewMode] = useState<"states" | "districts">("districts");
   const labelsRef = useRef<any[]>([]);
   const currentLabelStateRef = useRef<string | null>(null);
+  const [showResetButton, setShowResetButton] = useState(false);
   const zoomToStateRef = useRef<(stateName: string) => void>(() => {});
 
   const getLayerRisk = useCallback((risk: number) => {
