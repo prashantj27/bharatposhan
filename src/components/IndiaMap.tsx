@@ -128,19 +128,25 @@ const IndiaMap = forwardRef<IndiaMapHandle, IndiaMapProps>(function IndiaMap({ a
     });
   }, [clearLabels]);
 
-  // Hard-clamped India bounds — pan up so India starts near the top
+  // Show all of India with the top (J&K) near the top of the panel.
+  // The center panel is taller than wide, so we set center north of
+  // geographic center so India's northern border is near the top edge.
   const fitToIndia = useCallback(() => {
     const map = mapRef.current;
-    if (!map || !window.google) return;
+    const container = mapContainerRef.current;
+    if (!map || !window.google || !container) return;
     clearLabels();
-    // Use a tighter bounding box that stretches north,
-    // effectively pushing India's southern tip off-screen slightly
-    // but ensuring the northern border (J&K ~35.5°N) is at the very top
-    const indiaBounds = new window.google.maps.LatLngBounds(
-      { lat: 5, lng: 68 },
-      { lat: 38, lng: 98 }
-    );
-    map.fitBounds(indiaBounds, { top: 0, right: 0, bottom: 0, left: 0 });
+    const h = container.clientHeight;
+    const w = container.clientWidth;
+    const aspect = h / w;
+    // For tall containers, shift center north so India fills from top
+    // India's geographic center is ~21°N; we shift based on aspect ratio
+    const centerLat = aspect > 1.2 ? 24 : aspect > 0.9 ? 22.5 : 21;
+    map.setCenter({ lat: centerLat, lng: 82 });
+    // Choose zoom so the ~30° longitude span fits the container width
+    // At zoom 5, each tile covers ~11.25° lng → 256px * 2^5 / 360 ≈ 28px/deg
+    // For 450px wide panel: 450/30 ≈ 15px/deg → zoom ~4.7, round to 5
+    map.setZoom(w < 500 ? 4 : 5);
   }, [clearLabels]);
 
   // Zoom to state bounds and show labels
