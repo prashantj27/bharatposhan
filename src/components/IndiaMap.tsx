@@ -87,6 +87,7 @@ const IndiaMap = forwardRef<IndiaMapHandle, IndiaMapProps>(function IndiaMap({ a
 
     clearLabels();
     currentLabelStateRef.current = stateName;
+    setShowResetButton(true);
 
     layer.forEach((feature: any) => {
       const fs = feature.getProperty("state") || "";
