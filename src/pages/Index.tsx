@@ -6,7 +6,7 @@ import {
 import IndiaMap, { type IndiaMapHandle } from "@/components/IndiaMap";
 import DistrictSearch from "@/components/DistrictSearch";
 import { computeDistrictDrivers } from "@/lib/districtDrivers";
-import { generateInterventionPdf } from "@/lib/generateInterventionPdf";
+import { generateInterventionPdf, generateFullDistrictReport } from "@/lib/generateInterventionPdf";
 import { supabase } from "@/integrations/supabase/client";
 
 // Source: NFHS-5 (2019-21) district-level fact sheets, rchiips.org
