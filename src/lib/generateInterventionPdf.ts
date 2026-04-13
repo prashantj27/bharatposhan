@@ -970,6 +970,12 @@ export function generateInterventionPdf(intervention: string, district: District
   // =========== FINANCIAL MODEL ===========
   sectionHeading("7. Financial Model");
 
+  // If AI provides budget, add it as a note
+  if (district.aiAnalysis?.budget_cr) {
+    bodyText(`AI-estimated total budget for this intervention in ${district.name}: ₹${district.aiAnalysis.budget_cr} Crore over ${district.aiAnalysis.timeline_months || 36} months.`);
+    y += 2;
+  }
+
   autoTable(doc, {
     startY: y,
     margin: { left: M, right: M },
@@ -981,7 +987,7 @@ export function generateInterventionPdf(intervention: string, district: District
   });
   y = (doc as any).lastAutoTable.finalY + 6;
 
-  const totalBudget = parseInt(details.budget[details.budget.length - 1][1]);
+  const totalBudget = district.aiAnalysis?.budget_cr || parseInt(details.budget[details.budget.length - 1][1]);
   const estBeneficiaries = Math.round(district.risk * 300000);
   const costPerBenef = ((totalBudget * 10000000) / estBeneficiaries).toFixed(0);
 
