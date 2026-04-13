@@ -269,7 +269,7 @@ const IndiaMap = forwardRef<IndiaMapHandle, IndiaMapProps>(function IndiaMap({ a
       if (!layer || !map) return;
 
       // Zoom to state level and show labels
-      zoomToState(state);
+      zoomToStateRef.current(state);
 
       // Find the specific district and trigger its click callback
       layer.forEach((feature: any) => {
