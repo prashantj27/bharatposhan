@@ -247,7 +247,7 @@ const IndiaMap = forwardRef<IndiaMapHandle, IndiaMapProps>(function IndiaMap({ a
         const dd = districtData[key];
 
         // Zoom to state level (not district) and show district labels
-        zoomToState(state);
+        zoomToStateRef.current(state);
 
         if (onDistrictClick && dd) {
           onDistrictClick(district, state, dd);
