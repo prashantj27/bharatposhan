@@ -211,15 +211,18 @@ const IndiaMap = forwardRef<IndiaMapHandle, IndiaMapProps>(function IndiaMap({ a
       districtLayerRef.current = districtLayer;
       districtLayer.loadGeoJson("/india-districts.json", undefined, () => {
         applyDistrictStyles(districtLayer);
-        // Use asymmetric padding: small top, large bottom to push India upward in the viewport
-        const mapDiv = map.getDiv();
-        const mapHeight = mapDiv.offsetHeight;
-        const bottomPad = Math.round(mapHeight * 0.25); // push map content up by 25% of viewport
+        // Fit India bounds then pan upward so the top of India starts near the top
         const indiaBounds = new window.google.maps.LatLngBounds(
           { lat: 7, lng: 68 },
           { lat: 37, lng: 97.5 }
         );
-        map.fitBounds(indiaBounds, { top: 10, bottom: bottomPad, left: 0, right: 0 });
+        map.fitBounds(indiaBounds, 0);
+        // After fitBounds completes, pan the map up by ~20% of viewport height
+        window.google.maps.event.addListenerOnce(map, 'bounds_changed', () => {
+          const mapDiv = map.getDiv();
+          const panUp = Math.round(mapDiv.offsetHeight * 0.18);
+          map.panBy(0, -panUp);
+        });
         setLoading(false);
       });
       districtLayer.setMap(map);
