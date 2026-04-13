@@ -1037,6 +1037,13 @@ export function generateInterventionPdf(intervention: string, district: District
   // =========== RISK ASSESSMENT ===========
   sectionHeading("9. Risk Assessment & Mitigation");
 
+  // Add AI-identified risks if available
+  if (district.aiAnalysis?.risks?.length) {
+    subHeading("AI-Identified District-Specific Risks");
+    district.aiAnalysis.risks.forEach((r: string) => bullet(r, 4));
+    y += 4;
+  }
+
   autoTable(doc, {
     startY: y,
     margin: { left: M, right: M },
