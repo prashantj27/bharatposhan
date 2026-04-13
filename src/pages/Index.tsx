@@ -6,7 +6,7 @@ import {
 import IndiaMap, { type IndiaMapHandle } from "@/components/IndiaMap";
 import DistrictSearch from "@/components/DistrictSearch";
 import { computeDistrictDrivers } from "@/lib/districtDrivers";
-import { generateInterventionPdf } from "@/lib/generateInterventionPdf";
+import { generateInterventionPdf, generateFullDistrictReport } from "@/lib/generateInterventionPdf";
 import { supabase } from "@/integrations/supabase/client";
 
 // Source: NFHS-5 (2019-21) district-level fact sheets, rchiips.org
@@ -428,6 +428,42 @@ export default function Index() {
                 </div>
               );
             })}
+            {/* Download Full District Report button */}
+            {(aiAnalysis?.interventions?.length > 0 || selected.interventions?.length > 0) && (
+              <button
+                onClick={() => generateFullDistrictReport({
+                  ...selected,
+                  aiAnalysis: aiAnalysis,
+                  districtContext: aiAnalysis?.district_context,
+                  fiveYearProjection: aiAnalysis?.five_year_projection,
+                })}
+                disabled={aiLoading}
+                style={{
+                  width: "100%",
+                  padding: "10px 14px",
+                  borderRadius: 8,
+                  border: "1px solid rgba(255,107,53,0.4)",
+                  background: "linear-gradient(135deg, rgba(255,107,53,0.15), rgba(247,197,159,0.1))",
+                  color: "#ff6b35",
+                  fontSize: 11,
+                  fontWeight: 700,
+                  cursor: aiLoading ? "not-allowed" : "pointer",
+                  letterSpacing: "0.08em",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: 8,
+                  marginTop: 4,
+                  transition: "all 0.2s",
+                  opacity: aiLoading ? 0.5 : 1,
+                  fontFamily: "'Syne',sans-serif",
+                }}
+                onMouseEnter={e => { if (!aiLoading) (e.target as HTMLElement).style.background = "linear-gradient(135deg, rgba(255,107,53,0.3), rgba(247,197,159,0.2))"; }}
+                onMouseLeave={e => { (e.target as HTMLElement).style.background = "linear-gradient(135deg, rgba(255,107,53,0.15), rgba(247,197,159,0.1))"; }}
+              >
+                📄 Download Full District Report
+              </button>
+            )}
           </div>
 
           <div>
