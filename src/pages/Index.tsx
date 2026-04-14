@@ -335,7 +335,7 @@ export default function Index() {
         <div style={{ position: "absolute", top: 0, right: 0, width: 120, height: 120, background: `radial-gradient(circle at top right, ${riskColor(selected.risk)}10, transparent 70%)`, pointerEvents: "none" }} />
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", position: "relative" }}>
           <div>
-            <div style={{ fontSize: isMobile ? 18 : 22, fontWeight: 800, color: "hsl(210,25%,96%)", letterSpacing: "-0.02em" }}>{selected.name}</div>
+            <div style={{ fontSize: isMobile ? 16 : 18, fontWeight: 800, color: "hsl(210,25%,96%)", letterSpacing: "-0.02em", lineHeight: 1.2, wordBreak: "break-word" }}>{selected.name}</div>
             <div style={{ fontSize: 11, color: "hsl(215,18%,50%)", marginTop: 3, fontFamily: "'JetBrains Mono', monospace" }}>{selected.state} · District</div>
           </div>
           <div style={{ textAlign: "right" }}>
