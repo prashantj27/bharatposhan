@@ -188,7 +188,7 @@ export default function Index() {
   // ---- LAYER BUTTONS (map overlay) ----
   const renderLayerButtons = () => (
     <div style={{
-      position: "absolute", top: 10, right: 14, zIndex: 20,
+      position: "absolute", top: 12, left: 14, zIndex: 20,
       display: "flex", gap: 5,
     }}>
       {["malnutrition", "literacy", "sanitation"].map(l => (
