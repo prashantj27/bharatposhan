@@ -220,7 +220,9 @@ export default function Index() {
       <div style={{
         padding: "10px 10px 8px", borderBottom: "1px solid hsl(220,15%,14%)",
         display: "flex", justifyContent: "center", flexShrink: 0,
-        background: "hsl(225,22%,4%)",
+        background: "linear-gradient(135deg, hsla(225,24%,8%,0.85), hsla(225,22%,5%,0.95))",
+        backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)",
+        boxShadow: "0 4px 20px rgba(0,0,0,0.4), 0 1px 0 hsla(220,15%,18%,0.3)",
       }}>
         <img src={logoImg} alt="PoshanAtlas AI" style={{ height: isMobile ? 54 : 70, width: "auto" }} />
       </div>
