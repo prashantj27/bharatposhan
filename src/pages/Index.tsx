@@ -164,6 +164,7 @@ export default function Index() {
       stunting: data.stunting, wasting: data.wasting, underweight: data.underweight,
       anemia_children: data.anemia_children ?? 0, anemia_women: data.anemia_women ?? 0,
       breastfeeding: data.breastfeeding ?? 0, immunization: data.immunization ?? 0,
+      female_literacy: data.female_literacy ?? null, sanitation: data.sanitation ?? null,
       interventions, drivers,
       trend: [
         { year: "NFHS-3", score: data.risk + 0.06 },
@@ -320,6 +321,8 @@ export default function Index() {
             { label: "Anaemia (W)", val: selected.anemia_women, color: "#fbbf24" },
             { label: "Breastfeed", val: selected.breastfeeding, color: "#22c55e" },
             { label: "Immunization", val: selected.immunization, color: "#38bdf8" },
+            ...(selected.female_literacy != null ? [{ label: "Fem. Literacy", val: selected.female_literacy, color: "#a78bfa" }] : []),
+            ...(selected.sanitation != null ? [{ label: "Sanitation", val: selected.sanitation, color: "#2dd4bf" }] : []),
           ].map(i => (
             <div key={i.label} className="glass-card" style={{ padding: "10px 12px" }}>
               <div style={{ fontSize: 9, color: "hsl(215,18%,48%)", fontWeight: 500, marginBottom: 2 }}>{i.label}</div>
