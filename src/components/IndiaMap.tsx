@@ -33,10 +33,10 @@ const STATE_RISK_MAP: Record<string, number> = {
 const districtData = nfhsData as Record<string, { district: string; state: string; stunting: number; wasting: number; underweight: number; risk: number; anemia_children: number; anemia_women: number; breastfeeding: number; immunization: number }>;
 
 const riskColor = (r: number) => {
-  if (r > 0.75) return "#ef233c";
-  if (r > 0.5) return "#f77f00";
-  if (r > 0.3) return "#fcbf49";
-  return "#52b788";
+  if (r > 0.75) return "#ef4444";
+  if (r > 0.5) return "#f97316";
+  if (r > 0.3) return "#eab308";
+  return "#22c55e";
 };
 
 declare global {
