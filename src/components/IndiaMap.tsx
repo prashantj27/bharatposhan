@@ -200,7 +200,7 @@ const IndiaMap = forwardRef<IndiaMapHandle, IndiaMapProps>(function IndiaMap({ a
 
       const map = new window.google.maps.Map(mapContainerRef.current, {
         center: { lat: 22, lng: 82 },
-        zoom: 4, minZoom: 3, maxZoom: 10,
+        zoom: 4, minZoom: 2, maxZoom: 10,
         mapTypeId: "roadmap", disableDefaultUI: true, zoomControl: true,
         zoomControlOptions: { position: window.google.maps.ControlPosition.RIGHT_TOP },
         styles: [
@@ -353,8 +353,8 @@ const IndiaMap = forwardRef<IndiaMapHandle, IndiaMapProps>(function IndiaMap({ a
       )}
       <div ref={mapContainerRef} style={{ width: "100%", height: "100%" }} />
 
-      {/* Reset Map button */}
-      {showResetButton && !loading && (
+      {/* Reset Map button - always visible when not loading */}
+      {!loading && (
         <button
           onClick={() => {
             fitToIndia();
