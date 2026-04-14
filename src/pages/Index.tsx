@@ -231,33 +231,6 @@ export default function Index() {
             {isMobile ? l.slice(0, 3).toUpperCase() : l}
           </button>
         ))}
-        {!isMobile && (
-          <>
-            <div style={{ width: 1, height: 28, background: t.panelBorder, margin: "0 8px" }} />
-            <div style={{ display: "flex", gap: 7, alignItems: "center", padding: "5px 12px", borderRadius: 8, background: "hsla(155,55%,48%,0.08)", border: "1px solid hsla(155,55%,48%,0.15)" }}>
-              <div style={{ width: 7, height: 7, borderRadius: "50%", background: "#22c55e", boxShadow: "0 0 8px #22c55e80", animation: "pulse 2s infinite" }} />
-              <span style={{ fontSize: 10, color: "#22c55e", letterSpacing: "0.08em", fontWeight: 600, fontFamily: "'JetBrains Mono', monospace" }}>LIVE · NFHS-5</span>
-            </div>
-          </>
-        )}
-        <div style={{ width: 1, height: 28, background: t.panelBorder, margin: "0 4px" }} />
-        {/* Theme toggle */}
-        <button
-          onClick={toggleTheme}
-          style={{
-            padding: "6px 10px", borderRadius: 8,
-            border: `1px solid ${t.btnInactiveBorder}`,
-            background: t.btnInactive,
-            color: t.btnInactiveText,
-            fontSize: 14, cursor: "pointer",
-            transition: "all 0.2s ease",
-            display: "flex", alignItems: "center", justifyContent: "center",
-            width: 36, height: 36,
-          }}
-          title={isDark ? "Switch to Light Mode" : "Switch to Dark Mode"}
-        >
-          {isDark ? "☀️" : "🌙"}
-        </button>
       </div>
     </header>
   );
