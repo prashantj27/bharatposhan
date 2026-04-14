@@ -185,37 +185,26 @@ export default function Index() {
     });
   }, [fetchAiAnalysis, isMobile]);
 
-  // ---- HEADER ----
-  const renderHeader = () => (
-    <header style={{
-      padding: isMobile ? "10px 14px" : "12px 24px",
-      borderBottom: "1px solid hsla(220,20%,30%,0.2)",
-      display: "flex", alignItems: "center", justifyContent: "space-between",
-      background: "hsla(220,20%,8%,0.45)",
-      backdropFilter: "blur(40px)", WebkitBackdropFilter: "blur(40px)",
-      position: "sticky", top: 0, zIndex: 100, gap: 8,
-      boxShadow: "0 4px 30px hsla(0,0%,0%,0.3)",
-      flexWrap: isMobile ? "wrap" : "nowrap",
+  // ---- LAYER BUTTONS (map overlay) ----
+  const renderLayerButtons = () => (
+    <div style={{
+      position: "absolute", top: 10, right: 14, zIndex: 20,
+      display: "flex", gap: 5,
     }}>
-      <div style={{ display: "flex", alignItems: "center", flex: 1 }}>
-        <img src={logoImg} alt="PoshanAtlas AI" style={{ height: isMobile ? 45 : 62, width: "auto" }} />
-      </div>
-      <div style={{ display: "flex", gap: isMobile ? 4 : 6, alignItems: "center", justifyContent: "center", flex: 1 }}>
-        {["malnutrition", "literacy", "sanitation"].map(l => (
-          <button key={l} onClick={() => setActiveLayer(l)} style={{
-            padding: isMobile ? "4px 9px" : "5px 14px", borderRadius: 7,
-            border: `1px solid ${activeLayer === l ? "hsl(25,95%,55%)" : t.btnInactiveBorder}`,
-            background: activeLayer === l ? "hsla(25,95%,55%,0.12)" : t.btnInactive,
-            color: activeLayer === l ? "hsl(25,95%,60%)" : t.btnInactiveText,
-            fontSize: isMobile ? 8 : 10, fontWeight: 600, letterSpacing: "0.06em",
-            cursor: "pointer", textTransform: "uppercase", transition: "all 0.2s ease",
-          }}>
-            {isMobile ? l.slice(0, 3).toUpperCase() : l}
-          </button>
-        ))}
-      </div>
-      <div style={{ flex: 1 }} />
-    </header>
+      {["malnutrition", "literacy", "sanitation"].map(l => (
+        <button key={l} onClick={() => setActiveLayer(l)} style={{
+          padding: isMobile ? "4px 9px" : "5px 14px", borderRadius: 7,
+          border: `1px solid ${activeLayer === l ? "hsl(25,95%,55%)" : "hsla(220,15%,40%,0.4)"}`,
+          background: activeLayer === l ? "hsla(25,95%,55%,0.18)" : "hsla(225,24%,8%,0.75)",
+          color: activeLayer === l ? "hsl(25,95%,60%)" : "hsl(215,18%,60%)",
+          fontSize: isMobile ? 8 : 10, fontWeight: 600, letterSpacing: "0.06em",
+          cursor: "pointer", textTransform: "uppercase", transition: "all 0.2s ease",
+          backdropFilter: "blur(12px)",
+        }}>
+          {isMobile ? l.slice(0, 3).toUpperCase() : l}
+        </button>
+      ))}
+    </div>
   );
 
   // ---- LEFT SIDEBAR ----
@@ -228,6 +217,9 @@ export default function Index() {
       display: "flex", flexDirection: "column", gap: 18, overflowY: "auto",
       ...(isMobile ? { maxHeight: "calc(100vh - 100px)" } : {}),
     }}>
+      <div style={{ padding: "12px 10px 6px", borderBottom: "1px solid hsl(220,15%,14%)", marginBottom: 4 }}>
+        <img src={logoImg} alt="PoshanAtlas AI" style={{ height: isMobile ? 40 : 52, width: "auto" }} />
+      </div>
       <div>
         <SectionLabel>National KPIs</SectionLabel>
         <div style={{ display: isMobile ? "grid" : "flex", gridTemplateColumns: isMobile ? "1fr 1fr 1fr" : undefined, flexDirection: isMobile ? undefined : "column", gap: 8 }}>
@@ -508,6 +500,7 @@ export default function Index() {
           hoveredStateName={hoveredState?.name}
           selectedStateName={selected?.state}
         />
+        {renderLayerButtons()}
         <div style={{ position: "absolute", top: 50, left: 14, zIndex: 20, width: isMobile ? "calc(100% - 28px)" : 280 }}>
           <DistrictSearch onSelect={handleDistrictSearch} />
         </div>
@@ -542,7 +535,7 @@ export default function Index() {
   if (isMobile) {
     return (
       <div style={{ fontFamily: "'Inter', sans-serif", background: t.bg, minHeight: "100vh", color: t.text2, display: "flex", flexDirection: "column", overflow: "hidden" }}>
-        {renderHeader()}
+        
         <div style={{ flex: 1, overflow: "hidden", display: "flex", flexDirection: "column" }}>
           {mobilePanel === "map" && (
             <div style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
@@ -590,8 +583,7 @@ export default function Index() {
   // ---- DESKTOP / TABLET LAYOUT ----
   return (
     <div style={{ fontFamily: "'Inter', sans-serif", background: t.bg, minHeight: "100vh", color: t.text2, display: "flex", flexDirection: "column", overflow: "hidden" }}>
-      {renderHeader()}
-      <div style={{ display: "flex", flex: 1, overflow: "hidden", height: "calc(100vh - 61px)" }}>
+      <div style={{ display: "flex", flex: 1, overflow: "hidden", height: "100vh" }}>
         {renderLeftSidebar()}
         {renderMapArea()}
         {renderRightPanel()}
