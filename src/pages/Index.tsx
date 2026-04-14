@@ -218,11 +218,13 @@ export default function Index() {
     }}>
       {/* Fixed logo header */}
       <div style={{
-        padding: "10px 10px 8px", borderBottom: "1px solid hsl(220,15%,14%)",
-        display: "flex", justifyContent: "center", flexShrink: 0,
+        padding: "10px 10px 8px", 
+        borderBottom: "2px solid transparent",
+        borderImage: "linear-gradient(90deg, transparent, hsl(25,95%,55%), hsl(200,70%,55%), transparent) 1",
+        display: "flex", justifyContent: "center", flexShrink: 0, position: "relative" as const,
         background: "linear-gradient(135deg, hsla(225,24%,8%,0.85), hsla(225,22%,5%,0.95))",
         backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)",
-        boxShadow: "0 4px 20px rgba(0,0,0,0.4), 0 1px 0 hsla(220,15%,18%,0.3)",
+        boxShadow: "0 4px 24px rgba(0,0,0,0.4), 0 6px 16px -4px hsla(25,95%,55%,0.15)",
       }}>
         <img src={logoImg} alt="PoshanAtlas AI" style={{ height: isMobile ? 54 : 70, width: "auto" }} />
       </div>
