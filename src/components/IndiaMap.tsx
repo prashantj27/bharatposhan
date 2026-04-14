@@ -326,7 +326,7 @@ const IndiaMap = forwardRef<IndiaMapHandle, IndiaMapProps>(function IndiaMap({ a
       const key = `${state}|${district}`;
       const dd = districtData[key];
       const risk = dd?.risk ?? STATE_RISK_MAP[state] ?? 0.4;
-      const layerRisk = getLayerRisk(risk);
+      const layerRisk = getLayerRisk(risk, dd);
       const color = riskColor(layerRisk);
       const isHovered = hoveredRef.current === key;
       const isSelected = selectedStateName && state.toLowerCase().includes((selectedStateName || "").toLowerCase().slice(0, 4));
