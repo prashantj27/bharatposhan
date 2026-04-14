@@ -525,22 +525,29 @@ export default function Index() {
         </div>
         {(aiAnalysis?.interventions?.length > 0 || selected.interventions?.length > 0) && (
           <button
-            onClick={() => generateAiEnhancedFullReport({ ...selected, aiAnalysis, districtContext: aiAnalysis?.district_context, fiveYearProjection: aiAnalysis?.five_year_projection })}
-            disabled={aiLoading}
+            onClick={async () => { setPdfLoading("full"); try { await generateAiEnhancedFullReport({ ...selected, aiAnalysis, districtContext: aiAnalysis?.district_context, fiveYearProjection: aiAnalysis?.five_year_projection }); } finally { setPdfLoading(null); } }}
+            disabled={aiLoading || pdfLoading === "full"}
             style={{
               width: "100%", padding: "12px 16px", borderRadius: 12,
               border: "1px solid hsla(25,95%,55%,0.3)",
-              background: "linear-gradient(135deg, hsla(25,95%,55%,0.1), hsla(35,90%,65%,0.06))",
+              background: pdfLoading === "full"
+                ? "linear-gradient(135deg, hsla(25,95%,55%,0.2), hsla(35,90%,65%,0.12))"
+                : "linear-gradient(135deg, hsla(25,95%,55%,0.1), hsla(35,90%,65%,0.06))",
               color: "hsl(25,95%,60%)", fontSize: 12, fontWeight: 700,
-              cursor: aiLoading ? "not-allowed" : "pointer",
+              cursor: aiLoading || pdfLoading === "full" ? "not-allowed" : "pointer",
               letterSpacing: "0.04em",
               display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
               marginTop: 8, transition: "all 0.2s",
-              opacity: aiLoading ? 0.5 : 1,
+              opacity: aiLoading || pdfLoading === "full" ? 0.7 : 1,
               boxShadow: "0 4px 16px hsla(25,95%,55%,0.1)",
             }}
           >
-            📄 Download Full Report
+            {pdfLoading === "full" ? (
+              <>
+                <span style={{ display: "inline-block", width: 14, height: 14, border: "2px solid hsl(25,95%,60%)", borderTopColor: "transparent", borderRadius: "50%", animation: "spin 0.8s linear infinite" }} />
+                🤖 AI Generating Report...
+              </>
+            ) : "📄 Download Full Report"}
           </button>
         )}
       </div>
