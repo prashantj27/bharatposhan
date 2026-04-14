@@ -189,11 +189,12 @@ export default function Index() {
   const renderHeader = () => (
     <header style={{
       padding: isMobile ? "10px 14px" : "12px 24px",
-      borderBottom: `1px solid ${t.panelBorder}`,
+      borderBottom: "1px solid hsla(220,20%,30%,0.2)",
       display: "flex", alignItems: "center", justifyContent: "space-between",
-      background: t.headerBg,
-      backdropFilter: "blur(20px)",
+      background: "hsla(220,20%,8%,0.45)",
+      backdropFilter: "blur(40px)", WebkitBackdropFilter: "blur(40px)",
       position: "sticky", top: 0, zIndex: 100, gap: 8,
+      boxShadow: "0 4px 30px hsla(0,0%,0%,0.3)",
       flexWrap: isMobile ? "wrap" : "nowrap",
     }}>
       <div style={{ display: "flex", alignItems: "center", flex: 1 }}>
