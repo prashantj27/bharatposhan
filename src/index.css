@@ -104,24 +104,48 @@
 }
 
 /* Glass panel utility */
-.glass-panel {
+.dark .glass-panel {
   background: linear-gradient(135deg, hsla(225, 24%, 10%, 0.95), hsla(225, 22%, 8%, 0.98));
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border: 1px solid hsla(220, 15%, 20%, 0.5);
 }
+.light .glass-panel {
+  background: linear-gradient(135deg, hsla(220, 20%, 100%, 0.95), hsla(220, 20%, 98%, 0.98));
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid hsla(220, 15%, 88%, 0.6);
+}
 
-.glass-card {
+.dark .glass-card {
   background: hsla(225, 22%, 11%, 0.8);
   backdrop-filter: blur(12px);
   border: 1px solid hsla(220, 15%, 18%, 0.6);
   border-radius: 10px;
   transition: all 0.2s ease;
 }
-.glass-card:hover {
+.dark .glass-card:hover {
   border-color: hsla(220, 15%, 24%, 0.8);
   background: hsla(225, 22%, 13%, 0.85);
 }
+.light .glass-card {
+  background: hsla(220, 20%, 98%, 0.9);
+  backdrop-filter: blur(12px);
+  border: 1px solid hsla(220, 15%, 88%, 0.7);
+  border-radius: 10px;
+  transition: all 0.2s ease;
+}
+.light .glass-card:hover {
+  border-color: hsla(220, 15%, 78%, 0.9);
+  background: hsla(220, 20%, 96%, 0.95);
+}
+
+/* Light theme scrollbar */
+.light {
+  scrollbar-color: hsl(220 15% 82%) transparent;
+}
+.light ::-webkit-scrollbar-thumb { background: hsl(220 15% 82%); }
+.light ::-webkit-scrollbar-thumb:hover { background: hsl(220 15% 72%); }
 
 /* District label override */
 .district-label {
