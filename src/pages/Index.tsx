@@ -498,19 +498,25 @@ export default function Index() {
                     {impact && <div style={{ fontSize: 9, color: "#22c55e", marginTop: 4, fontWeight: 500 }}>📈 {impact}</div>}
                   </div>
                   <button
-                    onClick={(e) => { e.stopPropagation(); generateAiEnhancedInterventionPdf(name, { ...selected, aiAnalysis: isAi ? inv : null, districtContext: aiAnalysis?.district_context, fiveYearProjection: aiAnalysis?.five_year_projection }); }}
+                    onClick={async (e) => { e.stopPropagation(); setPdfLoading(name); try { await generateAiEnhancedInterventionPdf(name, { ...selected, aiAnalysis: isAi ? inv : null, districtContext: aiAnalysis?.district_context, fiveYearProjection: aiAnalysis?.five_year_projection }); } finally { setPdfLoading(null); } }}
+                    disabled={pdfLoading === name}
                     style={{
                       flexShrink: 0, padding: "5px 10px", borderRadius: 7,
                       border: "1px solid hsla(155,55%,48%,0.25)",
-                      background: "hsla(155,55%,48%,0.08)",
-                      color: "#22c55e", fontSize: 9, cursor: "pointer",
+                      background: pdfLoading === name ? "hsla(155,55%,48%,0.18)" : "hsla(155,55%,48%,0.08)",
+                      color: "#22c55e", fontSize: 9, cursor: pdfLoading === name ? "wait" : "pointer",
                       fontWeight: 700, transition: "all 0.2s",
                       fontFamily: "'JetBrains Mono', monospace",
+                      opacity: pdfLoading === name ? 0.7 : 1,
                     }}
-                    onMouseEnter={e => { (e.target as HTMLElement).style.background = "hsla(155,55%,48%,0.18)"; }}
-                    onMouseLeave={e => { (e.target as HTMLElement).style.background = "hsla(155,55%,48%,0.08)"; }}
+                    onMouseEnter={e => { if (pdfLoading !== name) (e.target as HTMLElement).style.background = "hsla(155,55%,48%,0.18)"; }}
+                    onMouseLeave={e => { if (pdfLoading !== name) (e.target as HTMLElement).style.background = "hsla(155,55%,48%,0.08)"; }}
                   >
-                    ↓ PDF
+                    {pdfLoading === name ? (
+                      <span style={{ display: "inline-flex", alignItems: "center", gap: 4 }}>
+                        <span style={{ display: "inline-block", width: 8, height: 8, border: "2px solid #22c55e", borderTopColor: "transparent", borderRadius: "50%", animation: "spin 0.8s linear infinite" }} /> AI...
+                      </span>
+                    ) : "↓ PDF"}
                   </button>
                 </div>
               </div>
