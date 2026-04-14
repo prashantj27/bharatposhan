@@ -142,6 +142,7 @@ export default function Index() {
   const [aiAnalysis, setAiAnalysis] = useState<any>(null);
   const [aiLoading, setAiLoading] = useState(false);
   const [aiError, setAiError] = useState<string | null>(null);
+  const [pdfLoading, setPdfLoading] = useState<string | null>(null); // tracks which PDF is generating (intervention name or "full");
   const { isMobile, isTablet, w } = useScreenSize();
   const [mobilePanel, setMobilePanel] = useState<"map" | "districts" | "details">("map");
   const [mobileDetailOpen, setMobileDetailOpen] = useState(false);
@@ -497,19 +498,25 @@ export default function Index() {
                     {impact && <div style={{ fontSize: 9, color: "#22c55e", marginTop: 4, fontWeight: 500 }}>📈 {impact}</div>}
                   </div>
                   <button
-                    onClick={(e) => { e.stopPropagation(); generateAiEnhancedInterventionPdf(name, { ...selected, aiAnalysis: isAi ? inv : null, districtContext: aiAnalysis?.district_context, fiveYearProjection: aiAnalysis?.five_year_projection }); }}
+                    onClick={async (e) => { e.stopPropagation(); setPdfLoading(name); try { await generateAiEnhancedInterventionPdf(name, { ...selected, aiAnalysis: isAi ? inv : null, districtContext: aiAnalysis?.district_context, fiveYearProjection: aiAnalysis?.five_year_projection }); } finally { setPdfLoading(null); } }}
+                    disabled={pdfLoading === name}
                     style={{
                       flexShrink: 0, padding: "5px 10px", borderRadius: 7,
                       border: "1px solid hsla(155,55%,48%,0.25)",
-                      background: "hsla(155,55%,48%,0.08)",
-                      color: "#22c55e", fontSize: 9, cursor: "pointer",
+                      background: pdfLoading === name ? "hsla(155,55%,48%,0.18)" : "hsla(155,55%,48%,0.08)",
+                      color: "#22c55e", fontSize: 9, cursor: pdfLoading === name ? "wait" : "pointer",
                       fontWeight: 700, transition: "all 0.2s",
                       fontFamily: "'JetBrains Mono', monospace",
+                      opacity: pdfLoading === name ? 0.7 : 1,
                     }}
-                    onMouseEnter={e => { (e.target as HTMLElement).style.background = "hsla(155,55%,48%,0.18)"; }}
-                    onMouseLeave={e => { (e.target as HTMLElement).style.background = "hsla(155,55%,48%,0.08)"; }}
+                    onMouseEnter={e => { if (pdfLoading !== name) (e.target as HTMLElement).style.background = "hsla(155,55%,48%,0.18)"; }}
+                    onMouseLeave={e => { if (pdfLoading !== name) (e.target as HTMLElement).style.background = "hsla(155,55%,48%,0.08)"; }}
                   >
-                    ↓ PDF
+                    {pdfLoading === name ? (
+                      <span style={{ display: "inline-flex", alignItems: "center", gap: 4 }}>
+                        <span style={{ display: "inline-block", width: 8, height: 8, border: "2px solid #22c55e", borderTopColor: "transparent", borderRadius: "50%", animation: "spin 0.8s linear infinite" }} /> AI...
+                      </span>
+                    ) : "↓ PDF"}
                   </button>
                 </div>
               </div>
@@ -518,22 +525,29 @@ export default function Index() {
         </div>
         {(aiAnalysis?.interventions?.length > 0 || selected.interventions?.length > 0) && (
           <button
-            onClick={() => generateAiEnhancedFullReport({ ...selected, aiAnalysis, districtContext: aiAnalysis?.district_context, fiveYearProjection: aiAnalysis?.five_year_projection })}
-            disabled={aiLoading}
+            onClick={async () => { setPdfLoading("full"); try { await generateAiEnhancedFullReport({ ...selected, aiAnalysis, districtContext: aiAnalysis?.district_context, fiveYearProjection: aiAnalysis?.five_year_projection }); } finally { setPdfLoading(null); } }}
+            disabled={aiLoading || pdfLoading === "full"}
             style={{
               width: "100%", padding: "12px 16px", borderRadius: 12,
               border: "1px solid hsla(25,95%,55%,0.3)",
-              background: "linear-gradient(135deg, hsla(25,95%,55%,0.1), hsla(35,90%,65%,0.06))",
+              background: pdfLoading === "full"
+                ? "linear-gradient(135deg, hsla(25,95%,55%,0.2), hsla(35,90%,65%,0.12))"
+                : "linear-gradient(135deg, hsla(25,95%,55%,0.1), hsla(35,90%,65%,0.06))",
               color: "hsl(25,95%,60%)", fontSize: 12, fontWeight: 700,
-              cursor: aiLoading ? "not-allowed" : "pointer",
+              cursor: aiLoading || pdfLoading === "full" ? "not-allowed" : "pointer",
               letterSpacing: "0.04em",
               display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
               marginTop: 8, transition: "all 0.2s",
-              opacity: aiLoading ? 0.5 : 1,
+              opacity: aiLoading || pdfLoading === "full" ? 0.7 : 1,
               boxShadow: "0 4px 16px hsla(25,95%,55%,0.1)",
             }}
           >
-            📄 Download Full Report
+            {pdfLoading === "full" ? (
+              <>
+                <span style={{ display: "inline-block", width: 14, height: 14, border: "2px solid hsl(25,95%,60%)", borderTopColor: "transparent", borderRadius: "50%", animation: "spin 0.8s linear infinite" }} />
+                🤖 AI Generating Report...
+              </>
+            ) : "📄 Download Full Report"}
           </button>
         )}
       </div>
