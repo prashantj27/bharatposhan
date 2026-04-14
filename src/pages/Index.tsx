@@ -31,7 +31,9 @@ const RAW_DISTRICTS = [
 
 const DISTRICTS = RAW_DISTRICTS.map(d => {
   const { drivers, interventions } = computeDistrictDrivers(d);
-  return { ...d, drivers, interventions };
+  const nk = `${d.state}|${d.name}`;
+  const nd = nfhsLookup[nk];
+  return { ...d, drivers, interventions, female_literacy: nd?.female_literacy ?? null as number | null, sanitation: nd?.sanitation ?? null as number | null };
 });
 
 const riskColor = (r: number) => {
