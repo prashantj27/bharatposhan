@@ -323,7 +323,7 @@ export default function Index() {
       borderLeft: isMobile ? "none" : "1px solid hsl(220,15%,14%)",
       overflowY: "auto", padding: isMobile ? "14px" : "18px 16px",
       display: "flex", flexDirection: "column", gap: 16,
-      ...(isMobile ? { maxHeight: "calc(100vh - 100px)" } : {}),
+      ...(isMobile ? { maxHeight: "calc(100vh - 100px)" } : { minHeight: 0 }),
     }}>
       {/* District header */}
       <div style={{
