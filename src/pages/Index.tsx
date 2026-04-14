@@ -205,7 +205,7 @@ export default function Index() {
   );
 
   const renderLeftSidebar = () => (
-    <div style={{ width: isMobile ? "100%" : isTablet ? 180 : 220, borderRight: isMobile ? "none" : "1px solid rgba(255,255,255,0.06)", padding: isMobile ? "12px" : "16px 12px", display: "flex", flexDirection: "column", gap: 16, overflowY: "auto", ...(isMobile ? { maxHeight: "calc(100vh - 100px)" } : {}) }}>
+    <div style={{ width: isMobile ? "100%" : isTablet ? 180 : 220, flexShrink: 0, borderRight: isMobile ? "none" : "1px solid rgba(255,255,255,0.06)", padding: isMobile ? "12px" : "16px 12px", display: "flex", flexDirection: "column", gap: 16, overflowY: "auto", ...(isMobile ? { maxHeight: "calc(100vh - 100px)" } : {}) }}>
       <div>
         <div style={{ fontSize: 9, color: "#6b7fa3", letterSpacing: "0.2em", marginBottom: 8 }}>NATIONAL KPIs</div>
         <div style={{ display: isMobile ? "grid" : "flex", gridTemplateColumns: isMobile ? "1fr 1fr 1fr" : undefined, flexDirection: isMobile ? undefined : "column", gap: 6 }}>
@@ -245,7 +245,7 @@ export default function Index() {
   );
 
   const renderRightPanel = () => (
-    <div style={{ width: isMobile ? "100%" : isTablet ? 280 : 320, borderLeft: isMobile ? "none" : "1px solid rgba(255,255,255,0.06)", overflowY: "auto", padding: isMobile ? "12px" : "16px 14px", display: "flex", flexDirection: "column", gap: 14, ...(isMobile ? { maxHeight: "calc(100vh - 100px)" } : {}) }}>
+    <div style={{ width: isMobile ? "100%" : isTablet ? 280 : 320, flexShrink: 0, borderLeft: isMobile ? "none" : "1px solid rgba(255,255,255,0.06)", overflowY: "auto", padding: isMobile ? "12px" : "16px 14px", display: "flex", flexDirection: "column", gap: 14, ...(isMobile ? { maxHeight: "calc(100vh - 100px)" } : {}) }}>
       {/* District header card */}
       <div style={{ background: riskBg(selected.risk), border: `1px solid ${riskColor(selected.risk)}30`, borderRadius: 10, padding: isMobile ? "12px" : "14px 16px" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
@@ -442,7 +442,7 @@ export default function Index() {
   );
 
   const renderMapArea = () => (
-    <div style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden", minHeight: isMobile ? "50vh" : undefined }}>
+    <div style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", overflow: "hidden", minHeight: isMobile ? "50vh" : undefined }}>
       <div style={{ flex: 1, position: "relative", overflow: "hidden", background: "#070d1a" }}>
         <div style={{ position: "absolute", inset: 0, backgroundImage: "linear-gradient(rgba(255,255,255,0.012) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.012) 1px,transparent 1px)", backgroundSize: "40px 40px", pointerEvents: "none" }} />
         <IndiaMap
