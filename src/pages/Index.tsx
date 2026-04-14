@@ -330,7 +330,7 @@ export default function Index() {
         background: `linear-gradient(135deg, ${riskBg(selected.risk)}, transparent)`,
         border: `1px solid ${riskColor(selected.risk)}20`,
         borderRadius: 14, padding: isMobile ? "16px 14px 14px" : "24px 20px 18px",
-        position: "relative", overflow: "hidden",
+        position: "relative", overflow: "visible",
       }}>
         <div style={{ position: "absolute", top: 0, right: 0, width: 120, height: 120, background: `radial-gradient(circle at top right, ${riskColor(selected.risk)}10, transparent 70%)`, pointerEvents: "none" }} />
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", position: "relative", gap: 12 }}>
