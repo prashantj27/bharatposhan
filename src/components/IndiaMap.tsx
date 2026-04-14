@@ -30,7 +30,7 @@ const STATE_RISK_MAP: Record<string, number> = {
   "West Bengal": 0.29, "Ladakh": 0.24,
 };
 
-const districtData = nfhsData as Record<string, { district: string; state: string; stunting: number; wasting: number; underweight: number; risk: number; anemia_children: number; anemia_women: number; breastfeeding: number; immunization: number }>;
+const districtData = nfhsData as Record<string, { district: string; state: string; stunting: number; wasting: number; underweight: number; risk: number; anemia_children: number; anemia_women: number; breastfeeding: number; immunization: number; female_literacy?: number; sanitation?: number }>;
 
 const riskColor = (r: number) => {
   if (r > 0.75) return "#ef4444";
@@ -64,9 +64,15 @@ const IndiaMap = forwardRef<IndiaMapHandle, IndiaMapProps>(function IndiaMap({ a
   const [showResetButton, setShowResetButton] = useState(false);
   const zoomToStateRef = useRef<(stateName: string) => void>(() => {});
 
-  const getLayerRisk = useCallback((risk: number) => {
-    if (activeLayer === "literacy") return 1 - risk * 0.9;
-    if (activeLayer === "sanitation") return 1 - risk * 0.85;
+  const getLayerRisk = useCallback((risk: number, dd?: typeof districtData[string]) => {
+    if (activeLayer === "literacy" && dd?.female_literacy != null) {
+      // Invert: higher literacy = lower risk (green), lower literacy = higher risk (red)
+      return 1 - dd.female_literacy / 100;
+    }
+    if (activeLayer === "sanitation" && dd?.sanitation != null) {
+      // Invert: higher sanitation = lower risk (green), lower sanitation = higher risk (red)
+      return 1 - dd.sanitation / 100;
+    }
     return risk;
   }, [activeLayer]);
 
@@ -320,7 +326,7 @@ const IndiaMap = forwardRef<IndiaMapHandle, IndiaMapProps>(function IndiaMap({ a
       const key = `${state}|${district}`;
       const dd = districtData[key];
       const risk = dd?.risk ?? STATE_RISK_MAP[state] ?? 0.4;
-      const layerRisk = getLayerRisk(risk);
+      const layerRisk = getLayerRisk(risk, dd);
       const color = riskColor(layerRisk);
       const isHovered = hoveredRef.current === key;
       const isSelected = selectedStateName && state.toLowerCase().includes((selectedStateName || "").toLowerCase().slice(0, 4));
