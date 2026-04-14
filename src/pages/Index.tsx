@@ -195,20 +195,8 @@ export default function Index() {
       position: "sticky", top: 0, zIndex: 100, gap: 8,
       flexWrap: isMobile ? "wrap" : "nowrap",
     }}>
-      <div style={{ display: "flex", alignItems: "center", gap: isMobile ? 10 : 16 }}>
-        <div style={{
-          width: isMobile ? 30 : 38, height: isMobile ? 30 : 38, borderRadius: 10,
-          background: "linear-gradient(135deg, hsl(25,95%,55%), hsl(35,90%,65%))",
-          display: "flex", alignItems: "center", justifyContent: "center",
-          fontSize: isMobile ? 15 : 19, flexShrink: 0,
-          boxShadow: "0 4px 16px hsla(25,95%,55%,0.25)",
-        }}>🌾</div>
-        <div>
-          <div style={{ fontWeight: 800, fontSize: isMobile ? 15 : 19, letterSpacing: "-0.01em", color: t.text1 }}>
-            POSHAN<span style={{ color: "hsl(25,95%,55%)" }}>AI</span>
-          </div>
-          {!isMobile && <div style={{ fontSize: 10, color: t.text3, letterSpacing: "0.12em", marginTop: -1, fontFamily: "'JetBrains Mono', monospace" }}>NUTRITION INTELLIGENCE PLATFORM · GOI</div>}
-        </div>
+      <div style={{ display: "flex", alignItems: "center" }}>
+        <img src={logoImg} alt="PoshanAtlas AI" style={{ height: isMobile ? 32 : 44, width: "auto" }} />
       </div>
       <div style={{ display: "flex", gap: isMobile ? 4 : 6, alignItems: "center", flexWrap: "wrap" }}>
         {["malnutrition", "literacy", "sanitation"].map(l => (
