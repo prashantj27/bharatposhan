@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback, useMemo, useEffect } from "react";
+import { useState, useRef, useCallback, useMemo, useEffect, Fragment } from "react";
 import {
   BarChart, Bar, LineChart, Line, AreaChart, Area, XAxis, YAxis,
   Tooltip, ResponsiveContainer, ReferenceLine, CartesianGrid,
@@ -294,38 +294,34 @@ export default function Index() {
         );
       })()}
 
-      <div style={{ flex: 1 }}>
-        <SectionLabel>Top 10 · {selected.state}</SectionLabel>
-        <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-          {stateDistricts.map((d, i) => {
-            const isSelected = selected.name === d.district && selected.state === d.state;
-            return (
-              <div key={`${d.state}|${d.district}`} onClick={() => {
-                mapRef.current?.zoomToDistrict(d.district, d.state);
-                if (isMobile) setMobilePanel("map");
-              }} className="glass-card" style={{
-                padding: "10px 12px", cursor: "pointer",
-                border: `1px solid ${isSelected ? "hsla(25,95%,55%,0.4)" : "hsla(220,15%,18%,0.5)"}`,
-                background: isSelected ? "hsla(25,95%,55%,0.08)" : "hsla(225,22%,11%,0.6)",
-                animation: "fadeIn 0.3s ease",
-                animationDelay: `${i * 30}ms`,
-                animationFillMode: "both",
-              }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                    <span style={{ fontSize: 10, color: "hsl(215,12%,38%)", fontWeight: 700, minWidth: 18, fontFamily: "'JetBrains Mono', monospace" }}>#{i + 1}</span>
-                    <div style={{ fontSize: 12, color: "hsl(210,25%,90%)", fontWeight: 600 }}>{d.district}</div>
-                  </div>
-                  <div style={{ fontSize: 12, color: riskColor(d.risk), fontWeight: 700, fontFamily: "'JetBrains Mono', monospace" }}>{(d.risk * 100).toFixed(0)}</div>
-                </div>
-                <div style={{ height: 3, borderRadius: 4, background: "hsl(220,15%,14%)", marginTop: 8, overflow: "hidden" }}>
-                  <div style={{ height: "100%", width: `${d.risk * 100}%`, background: `linear-gradient(90deg, ${riskColor(d.risk)}80, ${riskColor(d.risk)})`, borderRadius: 4, transition: "width 0.6s ease" }} />
-                </div>
-              </div>
-            );
-          })}
+      {/* AI Causal Drivers - moved from right panel */}
+      <div>
+        <SectionLabel>🧠 AI Causal Drivers</SectionLabel>
+        {selected.drivers.map(d => (
+          <div key={d.factor} style={{ marginBottom: 10 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11, marginBottom: 4 }}>
+              <span style={{ color: "hsl(210,20%,72%)", fontWeight: 500 }}>{d.factor}</span>
+              <span style={{ color: "hsl(25,95%,55%)", fontWeight: 700, fontFamily: "'JetBrains Mono', monospace" }}>{d.contribution}%</span>
+            </div>
+            <div style={{ height: 4, borderRadius: 4, background: "hsl(220,15%,14%)", overflow: "hidden" }}>
+              <div style={{ height: "100%", width: `${d.contribution}%`, background: "linear-gradient(90deg, hsla(25,95%,55%,0.5), hsl(25,95%,55%))", borderRadius: 4, transition: "width 0.8s ease" }} />
+            </div>
+          </div>
+        ))}
+        <div style={{ fontSize: 10, color: "hsl(215,12%,38%)", padding: "8px 10px", background: "hsla(25,95%,55%,0.04)", borderRadius: 8, borderLeft: "3px solid hsla(25,95%,55%,0.3)", marginTop: 2, fontFamily: "'JetBrains Mono', monospace" }}>
+          Source: NFHS-5 · Census 2011 · NITI Aayog DNP 2022
         </div>
       </div>
+
+      {/* Collapsible Top 10 */}
+      <TopDistrictsDropdown
+        stateDistricts={stateDistricts}
+        selected={selected}
+        stateName={selected.state}
+        mapRef={mapRef}
+        isMobile={isMobile}
+        setMobilePanel={setMobilePanel}
+      />
       </div>
     </div>
   );
@@ -388,24 +384,6 @@ export default function Index() {
         </div>
       </div>
 
-      {/* AI Causal Drivers */}
-      <div>
-        <SectionLabel>🧠 AI Causal Drivers</SectionLabel>
-        {selected.drivers.map(d => (
-          <div key={d.factor} style={{ marginBottom: 10 }}>
-            <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11, marginBottom: 4 }}>
-              <span style={{ color: "hsl(210,20%,72%)", fontWeight: 500 }}>{d.factor}</span>
-              <span style={{ color: "hsl(25,95%,55%)", fontWeight: 700, fontFamily: "'JetBrains Mono', monospace" }}>{d.contribution}%</span>
-            </div>
-            <div style={{ height: 4, borderRadius: 4, background: "hsl(220,15%,14%)", overflow: "hidden" }}>
-              <div style={{ height: "100%", width: `${d.contribution}%`, background: "linear-gradient(90deg, hsla(25,95%,55%,0.5), hsl(25,95%,55%))", borderRadius: 4, transition: "width 0.8s ease" }} />
-            </div>
-          </div>
-        ))}
-        <div style={{ fontSize: 10, color: "hsl(215,12%,38%)", padding: "8px 10px", background: "hsla(25,95%,55%,0.04)", borderRadius: 8, borderLeft: "3px solid hsla(25,95%,55%,0.3)", marginTop: 2, fontFamily: "'JetBrains Mono', monospace" }}>
-          Source: NFHS-5 · Census 2011 · NITI Aayog DNP 2022
-        </div>
-      </div>
 
       {/* AI Interventions */}
       <div>
