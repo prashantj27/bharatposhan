@@ -501,7 +501,7 @@ export default function Index() {
           selectedStateName={selected?.state}
         />
         {renderLayerButtons()}
-        <div style={{ position: "absolute", top: 50, left: 14, zIndex: 20, width: isMobile ? "calc(100% - 28px)" : 280 }}>
+        <div style={{ position: "absolute", top: 46, left: 14, zIndex: 20, width: isMobile ? "calc(100% - 28px)" : 280 }}>
           <DistrictSearch onSelect={handleDistrictSearch} />
         </div>
         {!isMobile && tooltip && (
