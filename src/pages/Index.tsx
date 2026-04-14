@@ -70,7 +70,7 @@ const SectionLabel = ({ children }: { children: React.ReactNode }) => (
 );
 
 const TopDistrictsDropdown = ({ stateDistricts, selected, stateName, mapRef, isMobile, setMobilePanel }: any) => {
-  const [open, setOpen] = useState(true);
+  const [open, setOpen] = useState(false);
   return (
     <div style={{ flex: 1 }}>
       <div
@@ -121,11 +121,11 @@ const TopDistrictsDropdown = ({ stateDistricts, selected, stateName, mapRef, isM
 };
 
 const KpiCard = ({ label, val, delta }: { label: string; val: string; delta: string }) => (
-  <div className="glass-card" style={{ padding: "12px 14px" }}>
-    <div style={{ fontSize: 10, color: "hsl(215,18%,50%)", fontWeight: 500, marginBottom: 2 }}>{label}</div>
-    <div style={{ fontSize: 22, fontWeight: 700, color: "hsl(210,25%,93%)", lineHeight: 1.1, letterSpacing: "-0.02em" }}>{val}</div>
-    <div style={{ fontSize: 11, color: "#22c55e", fontWeight: 500, marginTop: 2, display: "flex", alignItems: "center", gap: 3 }}>
-      <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M5 8V2M5 2L2 5M5 2L8 5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+  <div className="glass-card" style={{ padding: "8px 10px" }}>
+    <div style={{ fontSize: 9, color: "hsl(215,18%,50%)", fontWeight: 500, marginBottom: 1 }}>{label}</div>
+    <div style={{ fontSize: 16, fontWeight: 700, color: "hsl(210,25%,93%)", lineHeight: 1.1, letterSpacing: "-0.02em" }}>{val}</div>
+    <div style={{ fontSize: 9, color: "#22c55e", fontWeight: 500, marginTop: 1, display: "flex", alignItems: "center", gap: 2 }}>
+      <svg width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M5 8V2M5 2L2 5M5 2L8 5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
       {delta}
     </div>
   </div>
@@ -348,17 +348,27 @@ export default function Index() {
       {/* AI Causal Drivers - moved from right panel */}
       <div>
         <SectionLabel>🧠 AI Causal Drivers</SectionLabel>
-        {selected.drivers.map(d => (
-          <div key={d.factor} style={{ marginBottom: 10 }}>
-            <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11, marginBottom: 4 }}>
-              <span style={{ color: "hsl(210,20%,72%)", fontWeight: 500 }}>{d.factor}</span>
-              <span style={{ color: "hsl(25,95%,55%)", fontWeight: 700, fontFamily: "'JetBrains Mono', monospace" }}>{d.contribution}%</span>
+        {selected.drivers.map(d => {
+          const districtVal = d.factor === "Female Literacy" && selected.female_literacy != null
+            ? `${selected.female_literacy}%`
+            : d.factor === "WASH (Sanitation)" && selected.sanitation != null
+            ? `${selected.sanitation}%`
+            : null;
+          return (
+            <div key={d.factor} style={{ marginBottom: 10 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11, marginBottom: 4 }}>
+                <span style={{ color: "hsl(210,20%,72%)", fontWeight: 500 }}>
+                  {d.factor}
+                  {districtVal && <span style={{ color: "hsl(215,18%,45%)", fontSize: 9, marginLeft: 6, fontFamily: "'JetBrains Mono', monospace" }}>({districtVal})</span>}
+                </span>
+                <span style={{ color: "hsl(25,95%,55%)", fontWeight: 700, fontFamily: "'JetBrains Mono', monospace" }}>{d.contribution}%</span>
+              </div>
+              <div style={{ height: 4, borderRadius: 4, background: "hsl(220,15%,14%)", overflow: "hidden" }}>
+                <div style={{ height: "100%", width: `${d.contribution}%`, background: "linear-gradient(90deg, hsla(25,95%,55%,0.5), hsl(25,95%,55%))", borderRadius: 4, transition: "width 0.8s ease" }} />
+              </div>
             </div>
-            <div style={{ height: 4, borderRadius: 4, background: "hsl(220,15%,14%)", overflow: "hidden" }}>
-              <div style={{ height: "100%", width: `${d.contribution}%`, background: "linear-gradient(90deg, hsla(25,95%,55%,0.5), hsl(25,95%,55%))", borderRadius: 4, transition: "width 0.8s ease" }} />
-            </div>
-          </div>
-        ))}
+          );
+        })}
         <div style={{ fontSize: 10, color: "hsl(215,12%,38%)", padding: "8px 10px", background: "hsla(25,95%,55%,0.04)", borderRadius: 8, borderLeft: "3px solid hsla(25,95%,55%,0.3)", marginTop: 2, fontFamily: "'JetBrains Mono', monospace" }}>
           Source: NFHS-5 · Census 2011 · NITI Aayog DNP 2022
         </div>
