@@ -364,7 +364,7 @@ const IndiaMap = forwardRef<IndiaMapHandle, IndiaMapProps>(function IndiaMap({ a
         <button
           onClick={() => fitToIndia()}
           style={{
-            position: "absolute", top: 14, left: 14, zIndex: 10,
+            position: "absolute", top: 120, right: 14, zIndex: 10,
             background: "hsla(225,22%,10%,0.92)", border: "1px solid hsla(220,15%,22%,0.6)",
             borderRadius: 9, padding: "7px 14px", cursor: "pointer",
             color: "hsl(210,25%,80%)", fontSize: 11, fontFamily: "'JetBrains Mono', monospace",
@@ -377,7 +377,7 @@ const IndiaMap = forwardRef<IndiaMapHandle, IndiaMapProps>(function IndiaMap({ a
           onMouseLeave={(e) => { e.currentTarget.style.borderColor = "hsla(220,15%,22%,0.6)"; e.currentTarget.style.color = "hsl(210,25%,80%)"; }}
         >
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M3 12h18M3 12l6-6M3 12l6 6"/></svg>
-          RESET
+          RESET MAP
         </button>
       )}
 
