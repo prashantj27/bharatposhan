@@ -10,6 +10,8 @@ import { generateInterventionPdf, generateFullDistrictReport } from "@/lib/gener
 import { supabase } from "@/integrations/supabase/client";
 import nfhsData from "@/data/nfhsDistrictData.json";
 
+const nfhsLookup = nfhsData as Record<string, { female_literacy?: number; sanitation?: number; [k: string]: any }>;
+
 const RAW_DISTRICTS = [
   { id: 1, name: "Pashchim Singhbhum", state: "Jharkhand", risk: 0.52, stunting: 60.6, wasting: 30.5, underweight: 62.4, anemia_children: 73.3, anemia_women: 72.6, breastfeeding: 73.7, immunization: 87.0, trend: [{ year: "NFHS-3", score: 0.58 }, { year: "NFHS-4", score: 0.55 }, { year: "NFHS-5", score: 0.52 }] },
   { id: 2, name: "Dahod", state: "Gujarat", risk: 0.46, stunting: 55.3, wasting: 27.8, underweight: 53.0, anemia_children: 87.2, anemia_women: 75.1, breastfeeding: 47.6, immunization: 66.2, trend: [{ year: "NFHS-3", score: 0.54 }, { year: "NFHS-4", score: 0.50 }, { year: "NFHS-5", score: 0.46 }] },
@@ -29,7 +31,9 @@ const RAW_DISTRICTS = [
 
 const DISTRICTS = RAW_DISTRICTS.map(d => {
   const { drivers, interventions } = computeDistrictDrivers(d);
-  return { ...d, drivers, interventions };
+  const nk = `${d.state}|${d.name}`;
+  const nd = nfhsLookup[nk];
+  return { ...d, drivers, interventions, female_literacy: nd?.female_literacy ?? null as number | null, sanitation: nd?.sanitation ?? null as number | null };
 });
 
 const riskColor = (r: number) => {
@@ -164,6 +168,7 @@ export default function Index() {
       stunting: data.stunting, wasting: data.wasting, underweight: data.underweight,
       anemia_children: data.anemia_children ?? 0, anemia_women: data.anemia_women ?? 0,
       breastfeeding: data.breastfeeding ?? 0, immunization: data.immunization ?? 0,
+      female_literacy: data.female_literacy ?? null, sanitation: data.sanitation ?? null,
       interventions, drivers,
       trend: [
         { year: "NFHS-3", score: data.risk + 0.06 },
@@ -320,6 +325,8 @@ export default function Index() {
             { label: "Anaemia (W)", val: selected.anemia_women, color: "#fbbf24" },
             { label: "Breastfeed", val: selected.breastfeeding, color: "#22c55e" },
             { label: "Immunization", val: selected.immunization, color: "#38bdf8" },
+            ...(selected.female_literacy != null ? [{ label: "Fem. Literacy", val: selected.female_literacy, color: "#a78bfa" }] : []),
+            ...(selected.sanitation != null ? [{ label: "Sanitation", val: selected.sanitation, color: "#2dd4bf" }] : []),
           ].map(i => (
             <div key={i.label} className="glass-card" style={{ padding: "10px 12px" }}>
               <div style={{ fontSize: 9, color: "hsl(215,18%,48%)", fontWeight: 500, marginBottom: 2 }}>{i.label}</div>
