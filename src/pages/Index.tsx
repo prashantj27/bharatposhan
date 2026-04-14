@@ -78,10 +78,6 @@ const KpiCard = ({ label, val, delta }: { label: string; val: string; delta: str
 export default function Index() {
   const [selected, setSelected] = useState(DISTRICTS[0]);
   const [filterState, setFilterState] = useState("All");
-  const [theme, setTheme] = useState<"dark" | "light">(() => {
-    const saved = localStorage.getItem("poshan-theme");
-    return (saved === "light" ? "light" : "dark");
-  });
   const [filterRisk, setFilterRisk] = useState("All");
   const [activeLayer, setActiveLayer] = useState("malnutrition");
   const [hoveredState, setHoveredState] = useState<{ name: string; risk: number } | null>(null);
@@ -93,35 +89,26 @@ export default function Index() {
   const { isMobile, isTablet, w } = useScreenSize();
   const [mobilePanel, setMobilePanel] = useState<"map" | "districts" | "details">("map");
   const [mobileDetailOpen, setMobileDetailOpen] = useState(false);
-  const isDark = theme === "dark";
 
-  // Apply theme to document
+  // Force dark mode
   useEffect(() => {
-    document.documentElement.classList.toggle("dark", isDark);
-    document.documentElement.classList.toggle("light", !isDark);
-    localStorage.setItem("poshan-theme", theme);
-  }, [theme, isDark]);
+    document.documentElement.classList.add("dark");
+    document.documentElement.classList.remove("light");
+  }, []);
 
-  const toggleTheme = () => setTheme(t => t === "dark" ? "light" : "dark");
-
-  // Theme-aware colors
+  // Static dark theme colors
   const t = {
-    bg: isDark ? "hsl(225,20%,6%)" : "hsl(220,20%,97%)",
-    panelBg: isDark ? "hsla(225,24%,10%,0.95)" : "hsla(220,20%,100%,0.95)",
-    panelBorder: isDark ? "hsl(220,15%,14%)" : "hsl(220,15%,88%)",
-    headerBg: isDark ? "linear-gradient(180deg, hsla(225,24%,10%,0.98), hsla(225,22%,8%,0.96))" : "linear-gradient(180deg, hsla(220,20%,100%,0.98), hsla(220,20%,98%,0.96))",
-    cardBg: isDark ? "hsla(225,22%,11%,0.8)" : "hsla(220,20%,96%,0.8)",
-    cardBorder: isDark ? "hsla(220,15%,18%,0.6)" : "hsla(220,15%,85%,0.6)",
-    text1: isDark ? "hsl(210,25%,96%)" : "hsl(225,20%,12%)",
-    text2: isDark ? "hsl(210,25%,90%)" : "hsl(225,18%,25%)",
-    text3: isDark ? "hsl(215,18%,50%)" : "hsl(215,15%,50%)",
-    textMuted: isDark ? "hsl(215,12%,40%)" : "hsl(215,12%,62%)",
-    surfaceEl: isDark ? "hsla(225,22%,11%,0.6)" : "hsla(220,20%,94%,0.6)",
-    trackBg: isDark ? "hsl(220,15%,14%)" : "hsl(220,15%,88%)",
-    footerBg: isDark ? "hsl(225,24%,7%)" : "hsl(220,20%,96%)",
-    btnInactive: isDark ? "hsla(225,22%,12%,0.6)" : "hsla(220,20%,92%,0.6)",
-    btnInactiveText: isDark ? "hsl(215,18%,55%)" : "hsl(215,15%,45%)",
-    btnInactiveBorder: isDark ? "hsl(220,15%,18%)" : "hsl(220,15%,85%)",
+    bg: "hsl(225,20%,6%)",
+    panelBorder: "hsl(220,15%,14%)",
+    headerBg: "linear-gradient(180deg, hsla(225,24%,10%,0.98), hsla(225,22%,8%,0.96))",
+    text1: "hsl(210,25%,96%)",
+    text2: "hsl(210,25%,90%)",
+    text3: "hsl(215,18%,50%)",
+    textMuted: "hsl(215,12%,40%)",
+    footerBg: "hsl(225,24%,7%)",
+    btnInactive: "hsla(225,22%,12%,0.6)",
+    btnInactiveText: "hsl(215,18%,55%)",
+    btnInactiveBorder: "hsl(220,15%,18%)",
   };
 
   const fetchAiAnalysis = useCallback(async (district: string, state: string, indicators: any) => {
