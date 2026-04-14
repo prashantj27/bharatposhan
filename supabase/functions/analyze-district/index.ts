@@ -16,8 +16,7 @@ serve(async (req) => {
       });
     }
 
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
+    if (!GEMINI_API_KEY) throw new Error("GEMINI_API_KEY is not configured");
 
     const ind = indicators || {};
     const prompt = `You are an expert Indian public health policy analyst specializing in district-level nutrition programs.
@@ -88,34 +87,33 @@ RULES:
 - Be specific to this district, not generic India-wide recommendations
 - Return ONLY valid JSON, no markdown or explanation`;
 
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "google/gemini-3-flash-preview",
-        messages: [
-          { role: "system", content: "You are a district-level nutrition policy expert for India. Always return valid JSON only, no markdown fences." },
-          { role: "user", content: prompt },
-        ],
-        temperature: 0.7,
-        max_tokens: 4096,
-      }),
-    });
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${GEMINI_API_KEY}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          contents: [
+            {
+              role: "user",
+              parts: [{ text: "You are a district-level nutrition policy expert for India. Always return valid JSON only.\n\n" + prompt }],
+            },
+          ],
+          generationConfig: {
+            temperature: 0.7,
+            maxOutputTokens: 4096,
+            responseMimeType: "application/json",
+          },
+        }),
+      }
+    );
 
     if (!response.ok) {
       const errText = await response.text();
-      console.error("AI Gateway error:", response.status, errText);
+      console.error("Gemini API error:", response.status, errText);
       if (response.status === 429) {
         return new Response(JSON.stringify({ error: "Rate limited. Please try again in a moment." }), {
           status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-      if (response.status === 402) {
-        return new Response(JSON.stringify({ error: "AI credits exhausted. Please add funds." }), {
-          status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
       return new Response(JSON.stringify({ error: "AI analysis failed", fallback: true }), {
@@ -124,9 +122,8 @@ RULES:
     }
 
     const aiData = await response.json();
-    let content = aiData.choices?.[0]?.message?.content || "";
+    let content = aiData.candidates?.[0]?.content?.parts?.[0]?.text || "";
 
-    // Strip markdown code fences if present
     content = content.replace(/```json\s*/g, "").replace(/```\s*/g, "").trim();
 
     let parsed;
@@ -139,13 +136,12 @@ RULES:
           parsed = JSON.parse(jsonMatch[0]);
         } catch {
           console.error("Failed to parse AI response:", content.substring(0, 500));
-          return new Response(JSON.stringify({ error: "Failed to parse AI analysis. Please try again.", fallback: true }), {
+          return new Response(JSON.stringify({ error: "Failed to parse AI analysis.", fallback: true }), {
             status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
           });
         }
       } else {
-        console.error("No JSON found in AI response:", content.substring(0, 500));
-        return new Response(JSON.stringify({ error: "Failed to parse AI analysis. Please try again.", fallback: true }), {
+        return new Response(JSON.stringify({ error: "Failed to parse AI analysis.", fallback: true }), {
           status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
