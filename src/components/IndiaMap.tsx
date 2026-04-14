@@ -136,10 +136,10 @@ const IndiaMap = forwardRef<IndiaMapHandle, IndiaMapProps>(function IndiaMap({ a
     clearLabels();
     // Center of mainland India, zoom 5 shows full country in most viewports
     const bounds = new window.google.maps.LatLngBounds(
-      { lat: 3, lng: 65 },
-      { lat: 40, lng: 100 }
+      { lat: 6.5, lng: 68 },
+      { lat: 37, lng: 97.5 }
     );
-    map.fitBounds(bounds, { top: 0, right: 0, bottom: 0, left: 0 });
+    map.fitBounds(bounds, { top: 5, right: 5, bottom: 5, left: 5 });
   }, [clearLabels]);
 
   // Zoom to state bounds and show labels
