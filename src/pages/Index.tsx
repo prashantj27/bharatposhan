@@ -69,6 +69,57 @@ const SectionLabel = ({ children }: { children: React.ReactNode }) => (
   </div>
 );
 
+const TopDistrictsDropdown = ({ stateDistricts, selected, stateName, mapRef, isMobile, setMobilePanel }: any) => {
+  const [open, setOpen] = useState(true);
+  return (
+    <div style={{ flex: 1 }}>
+      <div
+        onClick={() => setOpen(!open)}
+        style={{ display: "flex", alignItems: "center", justifyContent: "space-between", cursor: "pointer", marginBottom: open ? 10 : 0 }}
+      >
+        <SectionLabel>Top 10 · {stateName}</SectionLabel>
+        <svg
+          width="14" height="14" viewBox="0 0 14 14" fill="none"
+          style={{ transform: open ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.2s ease", flexShrink: 0, marginBottom: 10 }}
+        >
+          <path d="M3 5L7 9L11 5" stroke="hsl(215,18%,50%)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+        </svg>
+      </div>
+      {open && (
+        <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+          {stateDistricts.map((d: any, i: number) => {
+            const isSelected = selected.name === d.district && selected.state === d.state;
+            return (
+              <div key={`${d.state}|${d.district}`} onClick={() => {
+                mapRef.current?.zoomToDistrict(d.district, d.state);
+                if (isMobile) setMobilePanel("map");
+              }} className="glass-card" style={{
+                padding: "10px 12px", cursor: "pointer",
+                border: `1px solid ${isSelected ? "hsla(25,95%,55%,0.4)" : "hsla(220,15%,18%,0.5)"}`,
+                background: isSelected ? "hsla(25,95%,55%,0.08)" : "hsla(225,22%,11%,0.6)",
+                animation: "fadeIn 0.3s ease",
+                animationDelay: `${i * 30}ms`,
+                animationFillMode: "both",
+              }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                    <span style={{ fontSize: 10, color: "hsl(215,12%,38%)", fontWeight: 700, minWidth: 18, fontFamily: "'JetBrains Mono', monospace" }}>#{i + 1}</span>
+                    <div style={{ fontSize: 12, color: "hsl(210,25%,90%)", fontWeight: 600 }}>{d.district}</div>
+                  </div>
+                  <div style={{ fontSize: 12, color: riskColor(d.risk), fontWeight: 700, fontFamily: "'JetBrains Mono', monospace" }}>{(d.risk * 100).toFixed(0)}</div>
+                </div>
+                <div style={{ height: 3, borderRadius: 4, background: "hsl(220,15%,14%)", marginTop: 8, overflow: "hidden" }}>
+                  <div style={{ height: "100%", width: `${d.risk * 100}%`, background: `linear-gradient(90deg, ${riskColor(d.risk)}80, ${riskColor(d.risk)})`, borderRadius: 4, transition: "width 0.6s ease" }} />
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+};
+
 const KpiCard = ({ label, val, delta }: { label: string; val: string; delta: string }) => (
   <div className="glass-card" style={{ padding: "12px 14px" }}>
     <div style={{ fontSize: 10, color: "hsl(215,18%,50%)", fontWeight: 500, marginBottom: 2 }}>{label}</div>
