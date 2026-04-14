@@ -78,6 +78,10 @@ const KpiCard = ({ label, val, delta }: { label: string; val: string; delta: str
 export default function Index() {
   const [selected, setSelected] = useState(DISTRICTS[0]);
   const [filterState, setFilterState] = useState("All");
+  const [theme, setTheme] = useState<"dark" | "light">(() => {
+    const saved = localStorage.getItem("poshan-theme");
+    return (saved === "light" ? "light" : "dark");
+  });
   const [filterRisk, setFilterRisk] = useState("All");
   const [activeLayer, setActiveLayer] = useState("malnutrition");
   const [hoveredState, setHoveredState] = useState<{ name: string; risk: number } | null>(null);
