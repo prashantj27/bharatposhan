@@ -215,7 +215,7 @@ export default function Index() {
       borderRight: isMobile ? "none" : "1px solid hsl(220,15%,14%)",
       padding: isMobile ? "14px" : "18px 14px",
       display: "flex", flexDirection: "column", gap: 18, overflowY: "auto",
-      ...(isMobile ? { maxHeight: "calc(100vh - 100px)" } : {}),
+      ...(isMobile ? { maxHeight: "calc(100vh - 100px)" } : { minHeight: 0 }),
     }}>
       <div style={{ padding: "0 10px 6px", borderBottom: "1px solid hsl(220,15%,14%)", marginBottom: 4, display: "flex", justifyContent: "center" }}>
         <img src={logoImg} alt="PoshanAtlas AI" style={{ height: isMobile ? 54 : 70, width: "auto" }} />
