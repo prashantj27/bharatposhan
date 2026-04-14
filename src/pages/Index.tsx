@@ -217,8 +217,8 @@ export default function Index() {
       display: "flex", flexDirection: "column", gap: 18, overflowY: "auto",
       ...(isMobile ? { maxHeight: "calc(100vh - 100px)" } : {}),
     }}>
-      <div style={{ padding: "12px 10px 6px", borderBottom: "1px solid hsl(220,15%,14%)", marginBottom: 4, display: "flex", justifyContent: "center" }}>
-        <img src={logoImg} alt="PoshanAtlas AI" style={{ height: isMobile ? 60 : 78, width: "auto" }} />
+      <div style={{ padding: "0 10px 6px", borderBottom: "1px solid hsl(220,15%,14%)", marginBottom: 4, display: "flex", justifyContent: "center" }}>
+        <img src={logoImg} alt="PoshanAtlas AI" style={{ height: isMobile ? 54 : 70, width: "auto" }} />
       </div>
       <div>
         <SectionLabel>National KPIs</SectionLabel>
