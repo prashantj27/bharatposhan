@@ -582,7 +582,7 @@ export default function Index() {
   // ---- MOBILE LAYOUT ----
   if (isMobile) {
     return (
-      <div style={{ fontFamily: "'Inter', sans-serif", background: "hsl(225,20%,6%)", minHeight: "100vh", color: "hsl(210,25%,92%)", display: "flex", flexDirection: "column", overflow: "hidden" }}>
+      <div style={{ fontFamily: "'Inter', sans-serif", background: t.bg, minHeight: "100vh", color: t.text2, display: "flex", flexDirection: "column", overflow: "hidden" }}>
         {renderHeader()}
         <div style={{ flex: 1, overflow: "hidden", display: "flex", flexDirection: "column" }}>
           {mobilePanel === "map" && (
@@ -605,7 +605,7 @@ export default function Index() {
           {mobilePanel === "districts" && renderLeftSidebar()}
           {mobilePanel === "details" && renderRightPanel()}
         </div>
-        <div style={{ display: "flex", borderTop: "1px solid hsl(220,15%,14%)", background: "hsl(225,24%,7%)", zIndex: 40 }}>
+        <div style={{ display: "flex", borderTop: `1px solid ${t.panelBorder}`, background: t.footerBg, zIndex: 40 }}>
           {[
             { key: "map" as const, label: "🗺️ Map" },
             { key: "districts" as const, label: "📊 Districts" },
@@ -621,7 +621,7 @@ export default function Index() {
             }}>{t.label}</button>
           ))}
         </div>
-        <div style={{ borderTop: "1px solid hsl(220,15%,12%)", padding: "5px 12px", background: "hsl(225,24%,7%)", fontSize: 8, color: "hsl(215,12%,32%)", textAlign: "center", fontFamily: "'JetBrains Mono', monospace" }}>
+        <div style={{ borderTop: `1px solid ${t.panelBorder}`, padding: "5px 12px", background: t.footerBg, fontSize: 8, color: t.textMuted, textAlign: "center", fontFamily: "'JetBrains Mono', monospace" }}>
           Data: NFHS-5 (2019-21) · rchiips.org/nfhs
         </div>
       </div>
@@ -630,14 +630,14 @@ export default function Index() {
 
   // ---- DESKTOP / TABLET LAYOUT ----
   return (
-    <div style={{ fontFamily: "'Inter', sans-serif", background: "hsl(225,20%,6%)", minHeight: "100vh", color: "hsl(210,25%,92%)", display: "flex", flexDirection: "column", overflow: "hidden" }}>
+    <div style={{ fontFamily: "'Inter', sans-serif", background: t.bg, minHeight: "100vh", color: t.text2, display: "flex", flexDirection: "column", overflow: "hidden" }}>
       {renderHeader()}
       <div style={{ display: "flex", flex: 1, overflow: "hidden", height: "calc(100vh - 61px)" }}>
         {renderLeftSidebar()}
         {renderMapArea()}
         {renderRightPanel()}
       </div>
-      <div style={{ borderTop: "1px solid hsl(220,15%,12%)", padding: "7px 24px", background: "hsl(225,24%,7%)", fontSize: 9, color: "hsl(215,12%,35%)", display: "flex", gap: 20, flexWrap: "wrap", fontFamily: "'JetBrains Mono', monospace" }}>
+      <div style={{ borderTop: `1px solid ${t.panelBorder}`, padding: "7px 24px", background: t.footerBg, fontSize: 9, color: t.textMuted, display: "flex", gap: 20, flexWrap: "wrap", fontFamily: "'JetBrains Mono', monospace" }}>
         <span>Data: NFHS-5 (2019-21) · rchiips.org/nfhs</span>
         <span>Census 2011 · censusindia.gov.in</span>
         <span>NITI Aayog District Nutrition Profile · niti.gov.in</span>
