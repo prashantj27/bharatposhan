@@ -329,18 +329,18 @@ export default function Index() {
       <div style={{
         background: `linear-gradient(135deg, ${riskBg(selected.risk)}, transparent)`,
         border: `1px solid ${riskColor(selected.risk)}20`,
-        borderRadius: 14, padding: isMobile ? "14px" : "18px 20px",
+        borderRadius: 14, padding: isMobile ? "16px 14px 14px" : "24px 20px 18px",
         position: "relative", overflow: "hidden",
       }}>
         <div style={{ position: "absolute", top: 0, right: 0, width: 120, height: 120, background: `radial-gradient(circle at top right, ${riskColor(selected.risk)}10, transparent 70%)`, pointerEvents: "none" }} />
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", position: "relative" }}>
-          <div>
-            <div style={{ fontSize: isMobile ? 16 : 18, fontWeight: 800, color: "hsl(210,25%,96%)", letterSpacing: "-0.02em", lineHeight: 1.2, wordBreak: "break-word" }}>{selected.name}</div>
-            <div style={{ fontSize: 11, color: "hsl(215,18%,50%)", marginTop: 3, fontFamily: "'JetBrains Mono', monospace" }}>{selected.state} · District</div>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", position: "relative", gap: 12 }}>
+          <div style={{ flex: 1, minWidth: 0, paddingTop: 2 }}>
+            <div style={{ fontSize: isMobile ? 16 : 18, fontWeight: 800, color: "hsl(210,25%,96%)", letterSpacing: "-0.01em", lineHeight: 1.25, wordBreak: "break-word" }}>{selected.name}</div>
+            <div style={{ fontSize: 11, color: "hsl(215,18%,50%)", marginTop: 6, fontFamily: "'JetBrains Mono', monospace" }}>{selected.state} · District</div>
           </div>
-          <div style={{ textAlign: "right" }}>
-            <div style={{ fontSize: isMobile ? 28 : 36, fontWeight: 800, color: riskColor(selected.risk), lineHeight: 1, letterSpacing: "-0.03em" }}>{(selected.risk * 100).toFixed(0)}</div>
-            <div style={{ fontSize: 9, color: riskColor(selected.risk), letterSpacing: "0.15em", fontWeight: 700, fontFamily: "'JetBrains Mono', monospace" }}>{riskLabel(selected.risk)}</div>
+          <div style={{ textAlign: "right", flexShrink: 0, paddingTop: 2 }}>
+            <div style={{ fontSize: isMobile ? 28 : 34, fontWeight: 800, color: riskColor(selected.risk), lineHeight: 1.1, letterSpacing: "-0.01em" }}>{(selected.risk * 100).toFixed(0)}</div>
+            <div style={{ fontSize: 9, color: riskColor(selected.risk), letterSpacing: "0.15em", fontWeight: 700, fontFamily: "'JetBrains Mono', monospace", marginTop: 4 }}>{riskLabel(selected.risk)}</div>
           </div>
         </div>
         <div style={{ height: 4, borderRadius: 4, background: "hsla(220,15%,20%,0.5)", marginTop: 14 }}>
