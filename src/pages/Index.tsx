@@ -582,13 +582,13 @@ export default function Index() {
 
   // ---- DESKTOP / TABLET LAYOUT ----
   return (
-    <div style={{ fontFamily: "'Inter', sans-serif", background: t.bg, minHeight: "100vh", color: t.text2, display: "flex", flexDirection: "column", overflow: "hidden" }}>
-      <div style={{ display: "flex", flex: 1, overflow: "hidden", height: "100vh" }}>
+    <div style={{ fontFamily: "'Inter', sans-serif", background: t.bg, height: "100vh", color: t.text2, display: "flex", flexDirection: "column", overflow: "hidden" }}>
+      <div style={{ display: "flex", flex: 1, overflow: "hidden" }}>
         {renderLeftSidebar()}
         {renderMapArea()}
         {renderRightPanel()}
       </div>
-      <div style={{ borderTop: `1px solid ${t.panelBorder}`, padding: "7px 24px", background: t.footerBg, fontSize: 9, color: t.textMuted, display: "flex", gap: 20, flexWrap: "wrap", fontFamily: "'JetBrains Mono', monospace" }}>
+      <div style={{ borderTop: `1px solid ${t.panelBorder}`, padding: "7px 24px", background: t.footerBg, fontSize: 9, color: t.textMuted, display: "flex", gap: 20, flexWrap: "wrap", fontFamily: "'JetBrains Mono', monospace", flexShrink: 0 }}>
         <span>Data: NFHS-5 (2019-21) · rchiips.org/nfhs</span>
         <span>Census 2011 · censusindia.gov.in</span>
         <span>NITI Aayog District Nutrition Profile · niti.gov.in</span>
