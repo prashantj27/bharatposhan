@@ -30,9 +30,7 @@ export default function DistrictSearch({ onSelect }: DistrictSearchProps) {
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
-      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
-        setOpen(false);
-      }
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) setOpen(false);
     };
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
@@ -40,8 +38,18 @@ export default function DistrictSearch({ onSelect }: DistrictSearchProps) {
 
   return (
     <div ref={containerRef} style={{ position: "relative" }}>
-      <div style={{ display: "flex", alignItems: "center", background: "#0d1628", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 6, padding: "0 10px", gap: 6 }}>
-        <span style={{ fontSize: 13, opacity: 0.5 }}>🔍</span>
+      <div style={{
+        display: "flex", alignItems: "center",
+        background: "hsla(225,22%,10%,0.9)",
+        border: "1px solid hsla(220,15%,20%,0.6)",
+        borderRadius: 10, padding: "0 12px", gap: 8,
+        backdropFilter: "blur(16px)",
+        boxShadow: "0 4px 16px hsla(0,0%,0%,0.3)",
+        transition: "border-color 0.2s",
+      }}>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="hsl(215,18%,45%)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" />
+        </svg>
         <input
           ref={inputRef}
           value={query}
@@ -50,42 +58,40 @@ export default function DistrictSearch({ onSelect }: DistrictSearchProps) {
           placeholder="Search 594 districts…"
           style={{
             background: "transparent", border: "none", outline: "none",
-            color: "#e0e8f0", fontSize: 11, padding: "7px 0", width: "100%",
-            fontFamily: "'DM Mono', monospace",
+            color: "hsl(210,25%,92%)", fontSize: 12, padding: "9px 0", width: "100%",
+            fontFamily: "'Inter', sans-serif", fontWeight: 400,
           }}
         />
         {query && (
           <span
             onClick={() => { setQuery(""); setOpen(false); }}
-            style={{ cursor: "pointer", fontSize: 11, color: "#6b7fa3" }}
+            style={{ cursor: "pointer", fontSize: 12, color: "hsl(215,18%,45%)", fontWeight: 500, padding: "2px 4px", borderRadius: 4, transition: "all 0.15s" }}
           >✕</span>
         )}
       </div>
       {open && results.length > 0 && (
         <div style={{
-          position: "absolute", top: "100%", left: 0, right: 0, zIndex: 50,
-          background: "#0d1628", border: "1px solid rgba(255,255,255,0.1)",
-          borderRadius: 6, marginTop: 4, maxHeight: 240, overflowY: "auto",
-          boxShadow: "0 8px 24px rgba(0,0,0,0.5)",
+          position: "absolute", top: "calc(100% + 6px)", left: 0, right: 0, zIndex: 50,
+          background: "hsla(225,22%,9%,0.98)", border: "1px solid hsla(220,15%,20%,0.6)",
+          borderRadius: 12, maxHeight: 260, overflowY: "auto",
+          boxShadow: "0 12px 40px hsla(0,0%,0%,0.5)",
+          backdropFilter: "blur(20px)",
         }}>
-          {results.map(r => (
+          {results.map((r, i) => (
             <div
               key={r.key}
-              onClick={() => {
-                onSelect(r.district, r.state);
-                setQuery(r.label);
-                setOpen(false);
-              }}
+              onClick={() => { onSelect(r.district, r.state); setQuery(r.label); setOpen(false); }}
               style={{
-                padding: "8px 12px", cursor: "pointer", fontSize: 11,
-                borderBottom: "1px solid rgba(255,255,255,0.04)",
-                transition: "background 0.1s",
+                padding: "10px 14px", cursor: "pointer", fontSize: 12,
+                borderBottom: i < results.length - 1 ? "1px solid hsla(220,15%,16%,0.5)" : "none",
+                transition: "background 0.15s",
+                display: "flex", justifyContent: "space-between", alignItems: "center",
               }}
-              onMouseEnter={e => (e.currentTarget.style.background = "rgba(255,107,53,0.1)")}
+              onMouseEnter={e => (e.currentTarget.style.background = "hsla(25,95%,55%,0.06)")}
               onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
             >
-              <span style={{ color: "#e0e8f0" }}>{r.district}</span>
-              <span style={{ color: "#6b7fa3", marginLeft: 6 }}>{r.state}</span>
+              <span style={{ color: "hsl(210,25%,92%)", fontWeight: 500 }}>{r.district}</span>
+              <span style={{ color: "hsl(215,18%,45%)", fontSize: 10, fontFamily: "'JetBrains Mono', monospace" }}>{r.state}</span>
             </div>
           ))}
         </div>

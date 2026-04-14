@@ -33,10 +33,10 @@ const STATE_RISK_MAP: Record<string, number> = {
 const districtData = nfhsData as Record<string, { district: string; state: string; stunting: number; wasting: number; underweight: number; risk: number; anemia_children: number; anemia_women: number; breastfeeding: number; immunization: number }>;
 
 const riskColor = (r: number) => {
-  if (r > 0.75) return "#ef233c";
-  if (r > 0.5) return "#f77f00";
-  if (r > 0.3) return "#fcbf49";
-  return "#52b788";
+  if (r > 0.75) return "#ef4444";
+  if (r > 0.5) return "#f97316";
+  if (r > 0.3) return "#eab308";
+  return "#22c55e";
 };
 
 declare global {
@@ -353,45 +353,46 @@ const IndiaMap = forwardRef<IndiaMapHandle, IndiaMapProps>(function IndiaMap({ a
       )}
       <div ref={mapContainerRef} style={{ width: "100%", height: "100%" }} />
 
-      {/* Reset Map button - always visible when not loading */}
+      {/* Reset Map button */}
       {!loading && (
         <button
-          onClick={() => {
-            fitToIndia();
-          }}
+          onClick={() => fitToIndia()}
           style={{
             position: "absolute", top: 14, left: 14, zIndex: 10,
-            background: "rgba(7,13,26,0.92)", border: "1px solid rgba(255,255,255,0.12)",
-            borderRadius: 6, padding: "6px 12px", cursor: "pointer",
-            color: "#c8d6e5", fontSize: 10, fontFamily: "'DM Mono', monospace",
-            letterSpacing: "0.1em", backdropFilter: "blur(12px)",
-            display: "flex", alignItems: "center", gap: 6,
+            background: "hsla(225,22%,10%,0.92)", border: "1px solid hsla(220,15%,22%,0.6)",
+            borderRadius: 9, padding: "7px 14px", cursor: "pointer",
+            color: "hsl(210,25%,80%)", fontSize: 11, fontFamily: "'JetBrains Mono', monospace",
+            fontWeight: 600, letterSpacing: "0.06em", backdropFilter: "blur(16px)",
+            display: "flex", alignItems: "center", gap: 7,
             transition: "all 0.2s ease",
+            boxShadow: "0 4px 16px hsla(0,0%,0%,0.3)",
           }}
-          onMouseEnter={(e) => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.3)"; e.currentTarget.style.color = "#ffffff"; }}
-          onMouseLeave={(e) => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.12)"; e.currentTarget.style.color = "#c8d6e5"; }}
+          onMouseEnter={(e) => { e.currentTarget.style.borderColor = "hsla(25,95%,55%,0.4)"; e.currentTarget.style.color = "hsl(25,95%,60%)"; }}
+          onMouseLeave={(e) => { e.currentTarget.style.borderColor = "hsla(220,15%,22%,0.6)"; e.currentTarget.style.color = "hsl(210,25%,80%)"; }}
         >
-          <span style={{ fontSize: 12 }}>←</span> RESET MAP
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M3 12h18M3 12l6-6M3 12l6 6"/></svg>
+          RESET
         </button>
       )}
 
       {/* Legend */}
       <div style={{
         position: "absolute", bottom: 14, left: 14,
-        background: "rgba(7,13,26,0.92)", border: "1px solid rgba(255,255,255,0.08)",
-        borderRadius: 8, padding: "10px 14px", backdropFilter: "blur(12px)", zIndex: 5,
+        background: "hsla(225,22%,10%,0.92)", border: "1px solid hsla(220,15%,20%,0.5)",
+        borderRadius: 12, padding: "12px 16px", backdropFilter: "blur(16px)", zIndex: 5,
+        boxShadow: "0 4px 20px hsla(0,0%,0%,0.3)",
       }}>
-        <div style={{ fontSize: 9, color: "#6b7fa3", marginBottom: 6, letterSpacing: "0.15em" }}>
-          {activeLayer.toUpperCase()} RISK · DISTRICT LEVEL
+        <div style={{ fontSize: 10, color: "hsl(215,18%,48%)", marginBottom: 8, letterSpacing: "0.12em", fontWeight: 600, fontFamily: "'JetBrains Mono', monospace" }}>
+          {activeLayer.toUpperCase()} RISK · DISTRICT
         </div>
-        {[["CRITICAL", "#ef233c", "> 75"], ["HIGH", "#f77f00", "50–75"], ["MODERATE", "#fcbf49", "30–50"], ["LOW", "#52b788", "< 30"]].map(([l, c, r]) => (
-          <div key={l} style={{ display: "flex", gap: 7, alignItems: "center", marginBottom: 4 }}>
-            <div style={{ width: 10, height: 10, borderRadius: 2, background: c as string, boxShadow: `0 0 5px ${c}60` }} />
-            <span style={{ fontSize: 9, color: "#8899b4" }}>{l}</span>
-            <span style={{ fontSize: 8, color: "#4a5f7a" }}>{r}</span>
+        {[["CRITICAL", "#ef4444", "> 75"], ["HIGH", "#f97316", "50–75"], ["MODERATE", "#eab308", "30–50"], ["LOW", "#22c55e", "< 30"]].map(([l, c, r]) => (
+          <div key={l} style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 5 }}>
+            <div style={{ width: 10, height: 10, borderRadius: 3, background: c as string, boxShadow: `0 0 8px ${c}50` }} />
+            <span style={{ fontSize: 10, color: "hsl(210,20%,72%)", fontWeight: 500 }}>{l}</span>
+            <span style={{ fontSize: 9, color: "hsl(215,12%,40%)", fontFamily: "'JetBrains Mono', monospace" }}>{r}</span>
           </div>
         ))}
-        <div style={{ fontSize: 8, color: "#4a5f7a", marginTop: 4, borderTop: "1px solid rgba(255,255,255,0.06)", paddingTop: 4 }}>
+        <div style={{ fontSize: 9, color: "hsl(215,12%,38%)", marginTop: 6, borderTop: "1px solid hsla(220,15%,18%,0.5)", paddingTop: 6, fontFamily: "'JetBrains Mono', monospace" }}>
           Source: NFHS-5 (2019-21) · 594 Districts
         </div>
       </div>

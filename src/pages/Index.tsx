@@ -10,8 +10,6 @@ import { generateInterventionPdf, generateFullDistrictReport } from "@/lib/gener
 import { supabase } from "@/integrations/supabase/client";
 import nfhsData from "@/data/nfhsDistrictData.json";
 
-// Source: NFHS-5 (2019-21) district-level fact sheets, rchiips.org
-// Risk = 0.4×stunting/100 + 0.3×wasting/100 + 0.3×underweight/100
 const RAW_DISTRICTS = [
   { id: 1, name: "Pashchim Singhbhum", state: "Jharkhand", risk: 0.52, stunting: 60.6, wasting: 30.5, underweight: 62.4, anemia_children: 73.3, anemia_women: 72.6, breastfeeding: 73.7, immunization: 87.0, trend: [{ year: "NFHS-3", score: 0.58 }, { year: "NFHS-4", score: 0.55 }, { year: "NFHS-5", score: 0.52 }] },
   { id: 2, name: "Dahod", state: "Gujarat", risk: 0.46, stunting: 55.3, wasting: 27.8, underweight: 53.0, anemia_children: 87.2, anemia_women: 75.1, breastfeeding: 47.6, immunization: 66.2, trend: [{ year: "NFHS-3", score: 0.54 }, { year: "NFHS-4", score: 0.50 }, { year: "NFHS-5", score: 0.46 }] },
@@ -35,13 +33,13 @@ const DISTRICTS = RAW_DISTRICTS.map(d => {
 });
 
 const riskColor = (r: number) => {
-  if (r > 0.75) return "#ef233c";
-  if (r > 0.5) return "#f77f00";
-  if (r > 0.3) return "#fcbf49";
-  return "#52b788";
+  if (r > 0.75) return "#ef4444";
+  if (r > 0.5) return "#f97316";
+  if (r > 0.3) return "#eab308";
+  return "#22c55e";
 };
 const riskLabel = (r: number) => r > 0.75 ? "CRITICAL" : r > 0.5 ? "HIGH" : r > 0.3 ? "MODERATE" : "LOW";
-const riskBg = (r: number) => r > 0.75 ? "rgba(239,35,60,0.15)" : r > 0.5 ? "rgba(247,127,0,0.15)" : r > 0.3 ? "rgba(252,191,73,0.15)" : "rgba(82,183,136,0.15)";
+const riskBg = (r: number) => r > 0.75 ? "rgba(239,68,68,0.08)" : r > 0.5 ? "rgba(249,115,22,0.08)" : r > 0.3 ? "rgba(234,179,8,0.08)" : "rgba(34,197,94,0.08)";
 
 const NATIONAL_TRENDS = [
   { year: "2005-06", stunting: 48.0, wasting: 19.8, underweight: 42.5 },
@@ -59,6 +57,24 @@ function useScreenSize() {
   return { isMobile: size.w < 768, isTablet: size.w >= 768 && size.w < 1024, w: size.w };
 }
 
+// -- Styled sub-components --
+const SectionLabel = ({ children }: { children: React.ReactNode }) => (
+  <div style={{ fontSize: 10, color: "hsl(215,18%,50%)", letterSpacing: "0.18em", fontWeight: 600, marginBottom: 10, textTransform: "uppercase", fontFamily: "'JetBrains Mono', monospace" }}>
+    {children}
+  </div>
+);
+
+const KpiCard = ({ label, val, delta }: { label: string; val: string; delta: string }) => (
+  <div className="glass-card" style={{ padding: "12px 14px" }}>
+    <div style={{ fontSize: 10, color: "hsl(215,18%,50%)", fontWeight: 500, marginBottom: 2 }}>{label}</div>
+    <div style={{ fontSize: 22, fontWeight: 700, color: "hsl(210,25%,93%)", lineHeight: 1.1, letterSpacing: "-0.02em" }}>{val}</div>
+    <div style={{ fontSize: 11, color: "#22c55e", fontWeight: 500, marginTop: 2, display: "flex", alignItems: "center", gap: 3 }}>
+      <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M5 8V2M5 2L2 5M5 2L8 5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+      {delta}
+    </div>
+  </div>
+);
+
 export default function Index() {
   const [selected, setSelected] = useState(DISTRICTS[0]);
   const [filterState, setFilterState] = useState("All");
@@ -71,30 +87,20 @@ export default function Index() {
   const [aiLoading, setAiLoading] = useState(false);
   const [aiError, setAiError] = useState<string | null>(null);
   const { isMobile, isTablet, w } = useScreenSize();
-  // Mobile: which panel is showing
   const [mobilePanel, setMobilePanel] = useState<"map" | "districts" | "details">("map");
-  // Mobile: expandable detail sheet
   const [mobileDetailOpen, setMobileDetailOpen] = useState(false);
 
   const fetchAiAnalysis = useCallback(async (district: string, state: string, indicators: any) => {
-    setAiLoading(true);
-    setAiError(null);
-    setAiAnalysis(null);
+    setAiLoading(true); setAiError(null); setAiAnalysis(null);
     try {
-      const { data, error } = await supabase.functions.invoke("analyze-district", {
-        body: { district, state, indicators },
-      });
+      const { data, error } = await supabase.functions.invoke("analyze-district", { body: { district, state, indicators } });
       if (error) throw new Error(error.message || "AI analysis failed");
       if (data?.error) throw new Error(data.error);
-      if (data?.analysis) {
-        setAiAnalysis(data.analysis);
-      }
+      if (data?.analysis) setAiAnalysis(data.analysis);
     } catch (e: any) {
       console.error("AI analysis error:", e);
       setAiError(e.message || "Failed to generate AI analysis");
-    } finally {
-      setAiLoading(false);
-    }
+    } finally { setAiLoading(false); }
   }, []);
 
   const handleDistrictSearch = useCallback((district: string, state: string) => {
@@ -102,14 +108,11 @@ export default function Index() {
     if (isMobile) setMobilePanel("map");
   }, [isMobile]);
 
-  const states = [...new Set(DISTRICTS.map(d => d.state))].sort();
-
   const allNfhsDistricts = nfhsData as Record<string, { district: string; state: string; stunting: number; wasting: number; underweight: number; risk: number; anemia_children: number; anemia_women: number; breastfeeding: number; immunization: number }>;
 
   const stateDistricts = useMemo(() => {
-    const currentState = selected.state;
     return Object.values(allNfhsDistricts)
-      .filter(d => d.state === currentState)
+      .filter(d => d.state === selected.state)
       .sort((a, b) => b.risk - a.risk)
       .slice(0, 10);
   }, [selected.state]);
@@ -131,72 +134,76 @@ export default function Index() {
 
   const handleDistrictClick = useCallback((district: string, state: string, data: any) => {
     const { drivers, interventions } = computeDistrictDrivers({
-      stunting: data.stunting,
-      wasting: data.wasting,
-      underweight: data.underweight,
-      anemia_children: data.anemia_children ?? 67,
-      anemia_women: data.anemia_women ?? 57,
-      breastfeeding: data.breastfeeding ?? 64,
-      immunization: data.immunization ?? 76,
-      risk: data.risk,
+      stunting: data.stunting, wasting: data.wasting, underweight: data.underweight,
+      anemia_children: data.anemia_children ?? 67, anemia_women: data.anemia_women ?? 57,
+      breastfeeding: data.breastfeeding ?? 64, immunization: data.immunization ?? 76, risk: data.risk,
     });
-    const districtObj = {
-      id: 999,
-      name: district,
-      state: state,
-      risk: data.risk,
-      stunting: data.stunting,
-      wasting: data.wasting,
-      underweight: data.underweight,
-      anemia_children: data.anemia_children ?? 0,
-      anemia_women: data.anemia_women ?? 0,
-      breastfeeding: data.breastfeeding ?? 0,
-      immunization: data.immunization ?? 0,
-      interventions,
-      drivers,
+    setSelected({
+      id: 999, name: district, state, risk: data.risk,
+      stunting: data.stunting, wasting: data.wasting, underweight: data.underweight,
+      anemia_children: data.anemia_children ?? 0, anemia_women: data.anemia_women ?? 0,
+      breastfeeding: data.breastfeeding ?? 0, immunization: data.immunization ?? 0,
+      interventions, drivers,
       trend: [
         { year: "NFHS-3", score: data.risk + 0.06 },
         { year: "NFHS-4", score: data.risk + 0.03 },
         { year: "NFHS-5", score: data.risk },
       ],
-    };
-    setSelected(districtObj);
+    });
     if (isMobile) setMobileDetailOpen(true);
     fetchAiAnalysis(district, state, {
-      stunting: data.stunting,
-      wasting: data.wasting,
-      underweight: data.underweight,
-      anemia_children: data.anemia_children,
-      anemia_women: data.anemia_women,
-      breastfeeding: data.breastfeeding,
-      immunization: data.immunization,
-      risk: data.risk,
+      stunting: data.stunting, wasting: data.wasting, underweight: data.underweight,
+      anemia_children: data.anemia_children, anemia_women: data.anemia_women,
+      breastfeeding: data.breastfeeding, immunization: data.immunization, risk: data.risk,
     });
   }, [fetchAiAnalysis, isMobile]);
 
-  // --- Shared sub-components ---
-
+  // ---- HEADER ----
   const renderHeader = () => (
-    <header className="poshan-header" style={{ padding: isMobile ? "8px 12px" : "12px 24px", borderBottom: "1px solid rgba(255,255,255,0.07)", display: "flex", alignItems: "center", justifyContent: "space-between", background: "rgba(7,13,26,0.96)", backdropFilter: "blur(12px)", position: "sticky", top: 0, zIndex: 100, gap: 8, flexWrap: isMobile ? "wrap" : "nowrap" }}>
-      <div style={{ display: "flex", alignItems: "center", gap: isMobile ? 8 : 16 }}>
-        <div style={{ width: isMobile ? 28 : 36, height: isMobile ? 28 : 36, borderRadius: 8, background: "linear-gradient(135deg,#ff6b35,#f7c59f)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: isMobile ? 14 : 18, flexShrink: 0 }}>🌾</div>
+    <header style={{
+      padding: isMobile ? "10px 14px" : "12px 24px",
+      borderBottom: "1px solid hsl(220,15%,14%)",
+      display: "flex", alignItems: "center", justifyContent: "space-between",
+      background: "linear-gradient(180deg, hsla(225,24%,10%,0.98), hsla(225,22%,8%,0.96))",
+      backdropFilter: "blur(20px)",
+      position: "sticky", top: 0, zIndex: 100, gap: 8,
+      flexWrap: isMobile ? "wrap" : "nowrap",
+    }}>
+      <div style={{ display: "flex", alignItems: "center", gap: isMobile ? 10 : 16 }}>
+        <div style={{
+          width: isMobile ? 30 : 38, height: isMobile ? 30 : 38, borderRadius: 10,
+          background: "linear-gradient(135deg, hsl(25,95%,55%), hsl(35,90%,65%))",
+          display: "flex", alignItems: "center", justifyContent: "center",
+          fontSize: isMobile ? 15 : 19, flexShrink: 0,
+          boxShadow: "0 4px 16px hsla(25,95%,55%,0.25)",
+        }}>🌾</div>
         <div>
-          <div style={{ fontFamily: "'Syne',sans-serif", fontWeight: 800, fontSize: isMobile ? 14 : 18, letterSpacing: "0.05em", color: "#fff" }}>POSHAN<span style={{ color: "#ff6b35" }}>AI</span></div>
-          {!isMobile && <div style={{ fontSize: 9, color: "#6b7fa3", letterSpacing: "0.18em", marginTop: -2 }}>NUTRITION INTELLIGENCE PLATFORM · GOI</div>}
+          <div style={{ fontWeight: 800, fontSize: isMobile ? 15 : 19, letterSpacing: "-0.01em", color: "hsl(210,25%,96%)" }}>
+            POSHAN<span style={{ color: "hsl(25,95%,55%)" }}>AI</span>
+          </div>
+          {!isMobile && <div style={{ fontSize: 10, color: "hsl(215,18%,45%)", letterSpacing: "0.12em", marginTop: -1, fontFamily: "'JetBrains Mono', monospace" }}>NUTRITION INTELLIGENCE PLATFORM · GOI</div>}
         </div>
       </div>
-      <div style={{ display: "flex", gap: isMobile ? 4 : 8, alignItems: "center", flexWrap: "wrap" }}>
+      <div style={{ display: "flex", gap: isMobile ? 4 : 6, alignItems: "center", flexWrap: "wrap" }}>
         {["malnutrition", "literacy", "sanitation", "scheme"].map(l => (
-          <button key={l} onClick={() => setActiveLayer(l)} style={{ padding: isMobile ? "3px 8px" : "4px 12px", borderRadius: 4, border: `1px solid ${activeLayer === l ? "#ff6b35" : "rgba(255,255,255,0.1)"}`, background: activeLayer === l ? "rgba(255,107,53,0.15)" : "transparent", color: activeLayer === l ? "#ff6b35" : "#6b7fa3", fontSize: isMobile ? 8 : 10, letterSpacing: "0.1em", cursor: "pointer", textTransform: "uppercase", transition: "all 0.2s" }}>
+          <button key={l} onClick={() => setActiveLayer(l)} style={{
+            padding: isMobile ? "5px 10px" : "6px 16px", borderRadius: 8,
+            border: `1px solid ${activeLayer === l ? "hsl(25,95%,55%)" : "hsl(220,15%,18%)"}`,
+            background: activeLayer === l ? "hsla(25,95%,55%,0.12)" : "hsla(225,22%,12%,0.6)",
+            color: activeLayer === l ? "hsl(25,95%,60%)" : "hsl(215,18%,55%)",
+            fontSize: isMobile ? 9 : 11, fontWeight: 600, letterSpacing: "0.06em",
+            cursor: "pointer", textTransform: "uppercase", transition: "all 0.2s ease",
+            backdropFilter: "blur(8px)",
+          }}>
             {isMobile ? l.slice(0, 3).toUpperCase() : l}
           </button>
         ))}
         {!isMobile && (
           <>
-            <div style={{ width: 1, height: 24, background: "rgba(255,255,255,0.1)", margin: "0 8px" }} />
-            <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
-              <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#52b788", animation: "pulse 2s infinite" }} />
-              <span style={{ fontSize: 10, color: "#52b788", letterSpacing: "0.1em" }}>LIVE · NFHS-5</span>
+            <div style={{ width: 1, height: 28, background: "hsl(220,15%,16%)", margin: "0 10px" }} />
+            <div style={{ display: "flex", gap: 7, alignItems: "center", padding: "5px 12px", borderRadius: 8, background: "hsla(155,55%,48%,0.08)", border: "1px solid hsla(155,55%,48%,0.15)" }}>
+              <div style={{ width: 7, height: 7, borderRadius: "50%", background: "#22c55e", boxShadow: "0 0 8px #22c55e80", animation: "pulse 2s infinite" }} />
+              <span style={{ fontSize: 10, color: "#22c55e", letterSpacing: "0.08em", fontWeight: 600, fontFamily: "'JetBrains Mono', monospace" }}>LIVE · NFHS-5</span>
             </div>
           </>
         )}
@@ -204,81 +211,110 @@ export default function Index() {
     </header>
   );
 
+  // ---- LEFT SIDEBAR ----
   const renderLeftSidebar = () => (
-    <div style={{ width: isMobile ? "100%" : isTablet ? 180 : 220, flexShrink: 0, background: "#070d1a", zIndex: 10, position: "relative", borderRight: isMobile ? "none" : "1px solid rgba(255,255,255,0.06)", padding: isMobile ? "12px" : "16px 12px", display: "flex", flexDirection: "column", gap: 16, overflowY: "auto", ...(isMobile ? { maxHeight: "calc(100vh - 100px)" } : {}) }}>
+    <div className="glass-panel" style={{
+      width: isMobile ? "100%" : isTablet ? 190 : 240, flexShrink: 0,
+      zIndex: 10, position: "relative",
+      borderRight: isMobile ? "none" : "1px solid hsl(220,15%,14%)",
+      padding: isMobile ? "14px" : "18px 14px",
+      display: "flex", flexDirection: "column", gap: 18, overflowY: "auto",
+      ...(isMobile ? { maxHeight: "calc(100vh - 100px)" } : {}),
+    }}>
       <div>
-        <div style={{ fontSize: 9, color: "#6b7fa3", letterSpacing: "0.2em", marginBottom: 8 }}>NATIONAL KPIs</div>
-        <div style={{ display: isMobile ? "grid" : "flex", gridTemplateColumns: isMobile ? "1fr 1fr 1fr" : undefined, flexDirection: isMobile ? undefined : "column", gap: 6 }}>
-          {[{ label: "Avg Stunting", val: "35.5%", delta: "▼ 2.9%" }, { label: "Avg Wasting", val: "19.3%", delta: "▼ 1.7%" }, { label: "Avg Underweight", val: "32.1%", delta: "▼ 3.7%" }].map(k => (
-            <div key={k.label} style={{ padding: "8px 10px", background: "#0d1628", borderRadius: 6, border: "1px solid rgba(255,255,255,0.05)" }}>
-              <div style={{ fontSize: 9, color: "#6b7fa3" }}>{k.label}</div>
-              <div style={{ fontSize: isMobile ? 16 : 18, fontWeight: 500, color: "#fff", lineHeight: 1.2 }}>{k.val}</div>
-              <div style={{ fontSize: 10, color: "#52b788" }}>{k.delta}</div>
-            </div>
-          ))}
+        <SectionLabel>National KPIs</SectionLabel>
+        <div style={{ display: isMobile ? "grid" : "flex", gridTemplateColumns: isMobile ? "1fr 1fr 1fr" : undefined, flexDirection: isMobile ? undefined : "column", gap: 8 }}>
+          <KpiCard label="Avg Stunting" val="35.5%" delta="2.9%" />
+          <KpiCard label="Avg Wasting" val="19.3%" delta="1.7%" />
+          <KpiCard label="Avg Underweight" val="32.1%" delta="3.7%" />
         </div>
       </div>
       <div style={{ flex: 1 }}>
-        <div style={{ fontSize: 9, color: "#6b7fa3", letterSpacing: "0.2em", marginBottom: 8 }}>TOP 10 · {selected.state.toUpperCase()}</div>
-        {stateDistricts.map((d, i) => {
-          const isSelected = selected.name === d.district && selected.state === d.state;
-          return (
-            <div key={`${d.state}|${d.district}`} onClick={() => {
-              mapRef.current?.zoomToDistrict(d.district, d.state);
-              if (isMobile) setMobilePanel("map");
-            }} style={{ padding: "8px 10px", borderRadius: 6, marginBottom: 4, cursor: "pointer", border: `1px solid ${isSelected ? "rgba(255,107,53,0.4)" : "rgba(255,255,255,0.04)"}`, background: isSelected ? "rgba(255,107,53,0.1)" : "#0d1628", transition: "all 0.15s" }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                  <span style={{ fontSize: 9, color: "#4a5f7a", fontWeight: 600, minWidth: 14 }}>#{i + 1}</span>
-                  <div style={{ fontSize: 11, color: "#e0e8f0", fontWeight: 500 }}>{d.district}</div>
+        <SectionLabel>Top 10 · {selected.state}</SectionLabel>
+        <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+          {stateDistricts.map((d, i) => {
+            const isSelected = selected.name === d.district && selected.state === d.state;
+            return (
+              <div key={`${d.state}|${d.district}`} onClick={() => {
+                mapRef.current?.zoomToDistrict(d.district, d.state);
+                if (isMobile) setMobilePanel("map");
+              }} className="glass-card" style={{
+                padding: "10px 12px", cursor: "pointer",
+                border: `1px solid ${isSelected ? "hsla(25,95%,55%,0.4)" : "hsla(220,15%,18%,0.5)"}`,
+                background: isSelected ? "hsla(25,95%,55%,0.08)" : "hsla(225,22%,11%,0.6)",
+                animation: "fadeIn 0.3s ease",
+                animationDelay: `${i * 30}ms`,
+                animationFillMode: "both",
+              }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                    <span style={{ fontSize: 10, color: "hsl(215,12%,38%)", fontWeight: 700, minWidth: 18, fontFamily: "'JetBrains Mono', monospace" }}>#{i + 1}</span>
+                    <div style={{ fontSize: 12, color: "hsl(210,25%,90%)", fontWeight: 600 }}>{d.district}</div>
+                  </div>
+                  <div style={{ fontSize: 12, color: riskColor(d.risk), fontWeight: 700, fontFamily: "'JetBrains Mono', monospace" }}>{(d.risk * 100).toFixed(0)}</div>
                 </div>
-                <div style={{ fontSize: 10, color: riskColor(d.risk), fontWeight: 500 }}>{(d.risk * 100).toFixed(0)}</div>
+                <div style={{ height: 3, borderRadius: 4, background: "hsl(220,15%,14%)", marginTop: 8, overflow: "hidden" }}>
+                  <div style={{ height: "100%", width: `${d.risk * 100}%`, background: `linear-gradient(90deg, ${riskColor(d.risk)}80, ${riskColor(d.risk)})`, borderRadius: 4, transition: "width 0.6s ease" }} />
+                </div>
               </div>
-              <div style={{ height: 2, borderRadius: 1, background: "#1a2340", marginTop: 6 }}>
-                <div style={{ height: "100%", width: `${d.risk * 100}%`, background: riskColor(d.risk), borderRadius: 1, transition: "width 0.5s" }} />
-              </div>
-            </div>
-          );
-        })}
+            );
+          })}
+        </div>
       </div>
     </div>
   );
 
+  // ---- RIGHT PANEL ----
   const renderRightPanel = () => (
-    <div style={{ width: isMobile ? "100%" : isTablet ? 280 : 320, flexShrink: 0, background: "#070d1a", zIndex: 10, position: "relative", borderLeft: isMobile ? "none" : "1px solid rgba(255,255,255,0.06)", overflowY: "auto", padding: isMobile ? "12px" : "16px 14px", display: "flex", flexDirection: "column", gap: 14, ...(isMobile ? { maxHeight: "calc(100vh - 100px)" } : {}) }}>
-      {/* District header card */}
-      <div style={{ background: riskBg(selected.risk), border: `1px solid ${riskColor(selected.risk)}30`, borderRadius: 10, padding: isMobile ? "12px" : "14px 16px" }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+    <div className="glass-panel" style={{
+      width: isMobile ? "100%" : isTablet ? 290 : 340, flexShrink: 0,
+      zIndex: 10, position: "relative",
+      borderLeft: isMobile ? "none" : "1px solid hsl(220,15%,14%)",
+      overflowY: "auto", padding: isMobile ? "14px" : "18px 16px",
+      display: "flex", flexDirection: "column", gap: 16,
+      ...(isMobile ? { maxHeight: "calc(100vh - 100px)" } : {}),
+    }}>
+      {/* District header */}
+      <div style={{
+        background: `linear-gradient(135deg, ${riskBg(selected.risk)}, transparent)`,
+        border: `1px solid ${riskColor(selected.risk)}20`,
+        borderRadius: 14, padding: isMobile ? "14px" : "18px 20px",
+        position: "relative", overflow: "hidden",
+      }}>
+        <div style={{ position: "absolute", top: 0, right: 0, width: 120, height: 120, background: `radial-gradient(circle at top right, ${riskColor(selected.risk)}10, transparent 70%)`, pointerEvents: "none" }} />
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", position: "relative" }}>
           <div>
-            <div style={{ fontFamily: "'Syne',sans-serif", fontSize: isMobile ? 16 : 20, fontWeight: 700, color: "#fff" }}>{selected.name}</div>
-            <div style={{ fontSize: 10, color: "#6b7fa3", marginTop: 2 }}>{selected.state} · District</div>
+            <div style={{ fontSize: isMobile ? 18 : 22, fontWeight: 800, color: "hsl(210,25%,96%)", letterSpacing: "-0.02em" }}>{selected.name}</div>
+            <div style={{ fontSize: 11, color: "hsl(215,18%,50%)", marginTop: 3, fontFamily: "'JetBrains Mono', monospace" }}>{selected.state} · District</div>
           </div>
           <div style={{ textAlign: "right" }}>
-            <div style={{ fontSize: isMobile ? 22 : 28, fontWeight: 700, color: riskColor(selected.risk), lineHeight: 1 }}>{(selected.risk * 100).toFixed(0)}</div>
-            <div style={{ fontSize: 8, color: riskColor(selected.risk), letterSpacing: "0.15em" }}>{riskLabel(selected.risk)} RISK</div>
+            <div style={{ fontSize: isMobile ? 28 : 36, fontWeight: 800, color: riskColor(selected.risk), lineHeight: 1, letterSpacing: "-0.03em" }}>{(selected.risk * 100).toFixed(0)}</div>
+            <div style={{ fontSize: 9, color: riskColor(selected.risk), letterSpacing: "0.15em", fontWeight: 700, fontFamily: "'JetBrains Mono', monospace" }}>{riskLabel(selected.risk)}</div>
           </div>
         </div>
-        <div style={{ height: 4, borderRadius: 2, background: "rgba(255,255,255,0.08)", marginTop: 12 }}>
-          <div style={{ height: "100%", width: `${selected.risk * 100}%`, background: `linear-gradient(90deg,${riskColor(selected.risk)}80,${riskColor(selected.risk)})`, borderRadius: 2, transition: "width 0.6s ease" }} />
+        <div style={{ height: 4, borderRadius: 4, background: "hsla(220,15%,20%,0.5)", marginTop: 14 }}>
+          <div style={{ height: "100%", width: `${selected.risk * 100}%`, background: `linear-gradient(90deg, ${riskColor(selected.risk)}60, ${riskColor(selected.risk)})`, borderRadius: 4, transition: "width 0.6s ease", boxShadow: `0 0 12px ${riskColor(selected.risk)}30` }} />
         </div>
       </div>
 
       {/* Nutrition Indicators */}
       <div>
-        <div style={{ fontSize: 9, color: "#6b7fa3", letterSpacing: "0.2em", marginBottom: 8 }}>NUTRITION INDICATORS · NFHS-5</div>
-        <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr 1fr 1fr" : "1fr 1fr", gap: 6 }}>
+        <SectionLabel>Nutrition Indicators · NFHS-5</SectionLabel>
+        <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr 1fr 1fr" : "1fr 1fr", gap: 8 }}>
           {[
-            { label: "Stunting", val: selected.stunting, unit: "%", color: "#ef233c" },
-            { label: "Wasting", val: selected.wasting, unit: "%", color: "#f77f00" },
-            { label: "Underweight", val: selected.underweight, unit: "%", color: "#fcbf49" },
-            { label: "Anaemia (C)", val: selected.anemia_children, unit: "%", color: "#e76f51" },
-            { label: "Anaemia (W)", val: selected.anemia_women, unit: "%", color: "#e9c46a" },
-            { label: "Breastfeed", val: selected.breastfeeding, unit: "%", color: "#52b788" },
-            { label: "Immunization", val: selected.immunization, unit: "%", color: "#48cae4" },
+            { label: "Stunting", val: selected.stunting, color: "#ef4444" },
+            { label: "Wasting", val: selected.wasting, color: "#f97316" },
+            { label: "Underweight", val: selected.underweight, color: "#eab308" },
+            { label: "Anaemia (C)", val: selected.anemia_children, color: "#f87171" },
+            { label: "Anaemia (W)", val: selected.anemia_women, color: "#fbbf24" },
+            { label: "Breastfeed", val: selected.breastfeeding, color: "#22c55e" },
+            { label: "Immunization", val: selected.immunization, color: "#38bdf8" },
           ].map(i => (
-            <div key={i.label} style={{ background: "#0d1628", borderRadius: 6, padding: "8px 10px", border: "1px solid rgba(255,255,255,0.05)" }}>
-              <div style={{ fontSize: 8, color: "#6b7fa3" }}>{i.label}</div>
-              <div style={{ fontSize: isMobile ? 14 : 16, fontWeight: 500, color: i.color }}>{i.val}<span style={{ fontSize: 10 }}>{i.unit}</span></div>
+            <div key={i.label} className="glass-card" style={{ padding: "10px 12px" }}>
+              <div style={{ fontSize: 9, color: "hsl(215,18%,48%)", fontWeight: 500, marginBottom: 2 }}>{i.label}</div>
+              <div style={{ fontSize: 18, fontWeight: 700, color: i.color, letterSpacing: "-0.02em", fontFamily: "'JetBrains Mono', monospace" }}>
+                {i.val}<span style={{ fontSize: 11, fontWeight: 500 }}>%</span>
+              </div>
             </div>
           ))}
         </div>
@@ -286,19 +322,19 @@ export default function Index() {
 
       {/* AI Causal Drivers */}
       <div>
-        <div style={{ fontSize: 9, color: "#6b7fa3", letterSpacing: "0.2em", marginBottom: 8 }}>🧠 AI CAUSAL DRIVERS</div>
+        <SectionLabel>🧠 AI Causal Drivers</SectionLabel>
         {selected.drivers.map(d => (
-          <div key={d.factor} style={{ marginBottom: 8 }}>
-            <div style={{ display: "flex", justifyContent: "space-between", fontSize: 10, marginBottom: 3 }}>
-              <span style={{ color: "#a0b4cc" }}>{d.factor}</span>
-              <span style={{ color: "#ff6b35", fontWeight: 500 }}>{d.contribution}%</span>
+          <div key={d.factor} style={{ marginBottom: 10 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11, marginBottom: 4 }}>
+              <span style={{ color: "hsl(210,20%,72%)", fontWeight: 500 }}>{d.factor}</span>
+              <span style={{ color: "hsl(25,95%,55%)", fontWeight: 700, fontFamily: "'JetBrains Mono', monospace" }}>{d.contribution}%</span>
             </div>
-            <div style={{ height: 3, borderRadius: 2, background: "#1a2340" }}>
-              <div style={{ height: "100%", width: `${d.contribution}%`, background: "linear-gradient(90deg,#ff6b3580,#ff6b35)", borderRadius: 2, transition: "width 0.8s ease" }} />
+            <div style={{ height: 4, borderRadius: 4, background: "hsl(220,15%,14%)", overflow: "hidden" }}>
+              <div style={{ height: "100%", width: `${d.contribution}%`, background: "linear-gradient(90deg, hsla(25,95%,55%,0.5), hsl(25,95%,55%))", borderRadius: 4, transition: "width 0.8s ease" }} />
             </div>
           </div>
         ))}
-        <div style={{ fontSize: 9, color: "#4a5f7a", marginTop: 4, padding: "6px 8px", background: "rgba(255,107,53,0.05)", borderRadius: 4, borderLeft: "2px solid #ff6b3540" }}>
+        <div style={{ fontSize: 10, color: "hsl(215,12%,38%)", padding: "8px 10px", background: "hsla(25,95%,55%,0.04)", borderRadius: 8, borderLeft: "3px solid hsla(25,95%,55%,0.3)", marginTop: 2, fontFamily: "'JetBrains Mono', monospace" }}>
           Source: NFHS-5 · Census 2011 · NITI Aayog DNP 2022
         </div>
       </div>
@@ -311,21 +347,22 @@ export default function Index() {
         const padding = Math.max((maxScore - minScore) * 0.3, 0.02);
         const yMin = Math.max(0, Math.floor((minScore - padding) * 100) / 100);
         const yMax = Math.min(1, Math.ceil((maxScore + padding) * 100) / 100);
-        const baseline = selected.risk;
         return (
           <div>
-            <div style={{ fontSize: 9, color: "#6b7fa3", letterSpacing: "0.2em", marginBottom: 8 }}>RISK TREND · YoY VARIATION</div>
-            <ResponsiveContainer width="100%" height={isMobile ? 110 : 130}>
-              <LineChart data={selected.trend} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
-                <XAxis dataKey="year" tick={{ fill: "#6b7fa3", fontSize: 9 }} axisLine={{ stroke: "rgba(255,255,255,0.1)" }} tickLine={false} />
-                <YAxis domain={[yMin, yMax]} tick={{ fill: "#6b7fa3", fontSize: 9 }} axisLine={false} tickLine={false} tickFormatter={(v: number) => `${(v * 100).toFixed(0)}%`} width={40} />
-                <ReferenceLine y={baseline} stroke="#ff6b3566" strokeDasharray="5 3" label={{ value: `${(baseline * 100).toFixed(0)}%`, position: "right", fill: "#ff6b35", fontSize: 8 }} />
-                <Tooltip contentStyle={{ background: "#0d1628", border: `1px solid ${riskColor(selected.risk)}55`, borderRadius: 6, fontSize: 10 }} formatter={(v: number) => [(v * 100).toFixed(1) + "%", "Risk Score"]} labelStyle={{ color: "#a0b4cc" }} />
-                <Line type="monotone" dataKey="score" stroke={riskColor(selected.risk)} strokeWidth={2.5} dot={{ r: 5, fill: riskColor(selected.risk), stroke: "#070d1a", strokeWidth: 2 }} activeDot={{ r: 7, stroke: "#fff", strokeWidth: 2 }} />
-              </LineChart>
-            </ResponsiveContainer>
-            <div style={{ fontSize: 8, color: "#4a5f7a", marginTop: 4, textAlign: "center" }}>
+            <SectionLabel>Risk Trend · YoY Variation</SectionLabel>
+            <div className="glass-card" style={{ padding: "12px 8px 4px 0", overflow: "hidden" }}>
+              <ResponsiveContainer width="100%" height={isMobile ? 110 : 130}>
+                <LineChart data={selected.trend} margin={{ top: 10, right: 14, left: -6, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="hsla(220,15%,20%,0.5)" />
+                  <XAxis dataKey="year" tick={{ fill: "hsl(215,18%,50%)", fontSize: 10, fontFamily: "'JetBrains Mono', monospace" }} axisLine={{ stroke: "hsl(220,15%,16%)" }} tickLine={false} />
+                  <YAxis domain={[yMin, yMax]} tick={{ fill: "hsl(215,18%,50%)", fontSize: 10, fontFamily: "'JetBrains Mono', monospace" }} axisLine={false} tickLine={false} tickFormatter={(v: number) => `${(v * 100).toFixed(0)}%`} width={40} />
+                  <ReferenceLine y={selected.risk} stroke={`${riskColor(selected.risk)}44`} strokeDasharray="5 3" />
+                  <Tooltip contentStyle={{ background: "hsl(225,22%,9%)", border: `1px solid ${riskColor(selected.risk)}40`, borderRadius: 10, fontSize: 11, fontFamily: "'JetBrains Mono', monospace" }} formatter={(v: number) => [(v * 100).toFixed(1) + "%", "Risk"]} labelStyle={{ color: "hsl(215,18%,60%)" }} />
+                  <Line type="monotone" dataKey="score" stroke={riskColor(selected.risk)} strokeWidth={2.5} dot={{ r: 5, fill: riskColor(selected.risk), stroke: "hsl(225,22%,8%)", strokeWidth: 2 }} activeDot={{ r: 7, stroke: "#fff", strokeWidth: 2 }} />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+            <div style={{ fontSize: 10, color: "hsl(215,12%,40%)", marginTop: 6, textAlign: "center", fontFamily: "'JetBrains Mono', monospace" }}>
               Change: {((scores[0] - scores[scores.length - 1]) * 100).toFixed(1)}% improvement
             </div>
           </div>
@@ -334,84 +371,89 @@ export default function Index() {
 
       {/* AI Interventions */}
       <div>
-        <div style={{ fontSize: 9, color: "#6b7fa3", letterSpacing: "0.2em", marginBottom: 8, display: "flex", alignItems: "center", gap: 6 }}>
-          💡 AI-POWERED INTERVENTIONS
-          {aiLoading && <span style={{ color: "#ff6b35", fontSize: 8, animation: "pulse 1s infinite" }}>● ANALYZING...</span>}
-        </div>
+        <SectionLabel>
+          💡 AI-Powered Interventions
+          {aiLoading && <span style={{ color: "hsl(25,95%,55%)", fontSize: 9, animation: "pulse 1s infinite", marginLeft: 8 }}>● ANALYZING...</span>}
+        </SectionLabel>
         {aiLoading && (
-          <div style={{ padding: "16px 10px", textAlign: "center", color: "#6b7fa3", fontSize: 10 }}>
-            <div style={{ marginBottom: 8 }}>🔬 AI is researching {selected.name}, {selected.state}...</div>
-            <div style={{ height: 2, background: "#1a2340", borderRadius: 2, marginTop: 10, overflow: "hidden" }}>
-              <div style={{ height: "100%", width: "60%", background: "linear-gradient(90deg, #ff6b35, #f7c59f)", borderRadius: 2, animation: "scan 2s linear infinite" }} />
+          <div className="glass-card" style={{ padding: "18px 14px", textAlign: "center" }}>
+            <div style={{ fontSize: 11, color: "hsl(215,18%,55%)", marginBottom: 10 }}>🔬 AI is researching {selected.name}, {selected.state}...</div>
+            <div style={{ height: 3, background: "hsl(220,15%,14%)", borderRadius: 4, overflow: "hidden" }}>
+              <div style={{ height: "100%", width: "60%", background: "linear-gradient(90deg, hsl(25,95%,55%), hsl(35,90%,65%))", borderRadius: 4, animation: "scan 2s linear infinite" }} />
             </div>
           </div>
         )}
         {aiError && (
-          <div style={{ padding: "10px", borderRadius: 6, background: "rgba(239,35,60,0.1)", border: "1px solid rgba(239,35,60,0.2)", fontSize: 10, color: "#ef233c", marginBottom: 8 }}>
+          <div style={{ padding: "12px 14px", borderRadius: 10, background: "hsla(0,72%,55%,0.06)", border: "1px solid hsla(0,72%,55%,0.15)", fontSize: 11, color: "#ef4444" }}>
             {aiError}
-            <div style={{ fontSize: 8, color: "#6b7fa3", marginTop: 4 }}>Showing fallback recommendations below</div>
+            <div style={{ fontSize: 9, color: "hsl(215,12%,40%)", marginTop: 4 }}>Showing fallback recommendations</div>
           </div>
         )}
         {aiAnalysis?.district_context && (
-          <div style={{ padding: "8px 10px", borderRadius: 6, marginBottom: 8, background: "rgba(255,107,53,0.05)", border: "1px solid rgba(255,107,53,0.1)", fontSize: 9, color: "#a0b4cc" }}>
-            <div style={{ color: "#ff6b35", fontWeight: 600, marginBottom: 4, fontSize: 8, letterSpacing: "0.15em" }}>DISTRICT CONTEXT</div>
-            <div style={{ marginBottom: 3 }}>{aiAnalysis.district_context.geography}</div>
-            <div style={{ marginBottom: 3 }}>{aiAnalysis.district_context.population_profile}</div>
+          <div className="glass-card" style={{ padding: "12px 14px", borderLeft: "3px solid hsla(25,95%,55%,0.3)" }}>
+            <div style={{ color: "hsl(25,95%,60%)", fontWeight: 700, marginBottom: 5, fontSize: 9, letterSpacing: "0.15em", fontFamily: "'JetBrains Mono', monospace" }}>DISTRICT CONTEXT</div>
+            <div style={{ fontSize: 10, color: "hsl(210,20%,72%)", marginBottom: 3 }}>{aiAnalysis.district_context.geography}</div>
+            <div style={{ fontSize: 10, color: "hsl(210,20%,72%)", marginBottom: 3 }}>{aiAnalysis.district_context.population_profile}</div>
             {aiAnalysis.district_context.key_challenges?.slice(0, 2).map((c: string, i: number) => (
-              <div key={i} style={{ color: "#6b7fa3", fontSize: 8 }}>⚠ {c}</div>
+              <div key={i} style={{ color: "hsl(215,12%,45%)", fontSize: 9 }}>⚠ {c}</div>
             ))}
           </div>
         )}
-        {(aiAnalysis?.interventions || selected.interventions).map((inv: any, i: number) => {
-          const isAi = typeof inv === "object" && inv.name;
-          const name = isAi ? inv.name : inv;
-          const desc = isAi ? inv.description : null;
-          const priority = isAi ? inv.priority : null;
-          const impact = isAi ? inv.expected_impact : null;
-          const priorityColor = priority === "critical" ? "#ef233c" : priority === "high" ? "#f77f00" : "#52b788";
-          return (
-            <div key={i} style={{ padding: "8px 10px", borderRadius: 6, marginBottom: 5, background: "#0d1628", border: `1px solid ${isAi ? "rgba(255,107,53,0.12)" : "rgba(255,255,255,0.05)"}`, fontSize: 10, color: "#a0b4cc" }}>
-              <div style={{ display: "flex", gap: 8, alignItems: "flex-start" }}>
-                <span style={{ color: isAi ? "#ff6b35" : "#52b788", flexShrink: 0, marginTop: 1 }}>{isAi ? "🤖" : "→"}</span>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 4, flexWrap: "wrap" }}>
-                    <span style={{ fontWeight: 500, color: "#e0e8f0", fontSize: isMobile ? 9 : 10 }}>{name}</span>
-                    {priority && <span style={{ fontSize: 7, color: priorityColor, padding: "1px 5px", borderRadius: 3, border: `1px solid ${priorityColor}40`, textTransform: "uppercase", letterSpacing: "0.1em", flexShrink: 0 }}>{priority}</span>}
+        <div style={{ display: "flex", flexDirection: "column", gap: 6, marginTop: 4 }}>
+          {(aiAnalysis?.interventions || selected.interventions).map((inv: any, i: number) => {
+            const isAi = typeof inv === "object" && inv.name;
+            const name = isAi ? inv.name : inv;
+            const desc = isAi ? inv.description : null;
+            const priority = isAi ? inv.priority : null;
+            const impact = isAi ? inv.expected_impact : null;
+            const priorityColor = priority === "critical" ? "#ef4444" : priority === "high" ? "#f97316" : "#22c55e";
+            return (
+              <div key={i} className="glass-card" style={{ padding: "10px 12px", borderLeft: `3px solid ${isAi ? "hsla(25,95%,55%,0.3)" : "hsla(155,55%,48%,0.3)"}` }}>
+                <div style={{ display: "flex", gap: 8, alignItems: "flex-start" }}>
+                  <span style={{ color: isAi ? "hsl(25,95%,55%)" : "#22c55e", flexShrink: 0, marginTop: 1, fontSize: 12 }}>{isAi ? "🤖" : "→"}</span>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 4, flexWrap: "wrap" }}>
+                      <span style={{ fontWeight: 600, color: "hsl(210,25%,90%)", fontSize: 11 }}>{name}</span>
+                      {priority && <span style={{ fontSize: 8, color: priorityColor, padding: "2px 7px", borderRadius: 6, border: `1px solid ${priorityColor}30`, background: `${priorityColor}10`, textTransform: "uppercase", letterSpacing: "0.1em", fontWeight: 700 }}>{priority}</span>}
+                    </div>
+                    {desc && <div style={{ fontSize: 10, color: "hsl(215,18%,50%)", marginTop: 4 }}>{desc}</div>}
+                    {impact && <div style={{ fontSize: 9, color: "#22c55e", marginTop: 4, fontWeight: 500 }}>📈 {impact}</div>}
                   </div>
-                  {desc && <div style={{ fontSize: 9, color: "#6b7fa3", marginTop: 3 }}>{desc}</div>}
-                  {impact && <div style={{ fontSize: 8, color: "#52b788", marginTop: 3 }}>📈 {impact}</div>}
+                  <button
+                    onClick={(e) => { e.stopPropagation(); generateInterventionPdf(name, { ...selected, aiAnalysis: isAi ? inv : null, districtContext: aiAnalysis?.district_context, fiveYearProjection: aiAnalysis?.five_year_projection }); }}
+                    style={{
+                      flexShrink: 0, padding: "5px 10px", borderRadius: 7,
+                      border: "1px solid hsla(155,55%,48%,0.25)",
+                      background: "hsla(155,55%,48%,0.08)",
+                      color: "#22c55e", fontSize: 9, cursor: "pointer",
+                      fontWeight: 700, transition: "all 0.2s",
+                      fontFamily: "'JetBrains Mono', monospace",
+                    }}
+                    onMouseEnter={e => { (e.target as HTMLElement).style.background = "hsla(155,55%,48%,0.18)"; }}
+                    onMouseLeave={e => { (e.target as HTMLElement).style.background = "hsla(155,55%,48%,0.08)"; }}
+                  >
+                    ↓ PDF
+                  </button>
                 </div>
-                <button
-                  onClick={(e) => { e.stopPropagation(); generateInterventionPdf(name, { ...selected, aiAnalysis: isAi ? inv : null, districtContext: aiAnalysis?.district_context, fiveYearProjection: aiAnalysis?.five_year_projection }); }}
-                  style={{ flexShrink: 0, padding: "3px 8px", borderRadius: 4, border: "1px solid rgba(82,183,136,0.3)", background: "rgba(82,183,136,0.1)", color: "#52b788", fontSize: 8, cursor: "pointer", letterSpacing: "0.1em", fontWeight: 600, transition: "all 0.2s", marginTop: 1 }}
-                  onMouseEnter={e => { (e.target as HTMLElement).style.background = "rgba(82,183,136,0.25)"; }}
-                  onMouseLeave={e => { (e.target as HTMLElement).style.background = "rgba(82,183,136,0.1)"; }}
-                >
-                  ↓ PDF
-                </button>
               </div>
-            </div>
-          );
-        })}
+            );
+          })}
+        </div>
         {(aiAnalysis?.interventions?.length > 0 || selected.interventions?.length > 0) && (
           <button
-            onClick={() => generateFullDistrictReport({
-              ...selected,
-              aiAnalysis: aiAnalysis,
-              districtContext: aiAnalysis?.district_context,
-              fiveYearProjection: aiAnalysis?.five_year_projection,
-            })}
+            onClick={() => generateFullDistrictReport({ ...selected, aiAnalysis, districtContext: aiAnalysis?.district_context, fiveYearProjection: aiAnalysis?.five_year_projection })}
             disabled={aiLoading}
             style={{
-              width: "100%", padding: "10px 14px", borderRadius: 8,
-              border: "1px solid rgba(255,107,53,0.4)",
-              background: "linear-gradient(135deg, rgba(255,107,53,0.15), rgba(247,197,159,0.1))",
-              color: "#ff6b35", fontSize: 11, fontWeight: 700,
+              width: "100%", padding: "12px 16px", borderRadius: 12,
+              border: "1px solid hsla(25,95%,55%,0.3)",
+              background: "linear-gradient(135deg, hsla(25,95%,55%,0.1), hsla(35,90%,65%,0.06))",
+              color: "hsl(25,95%,60%)", fontSize: 12, fontWeight: 700,
               cursor: aiLoading ? "not-allowed" : "pointer",
-              letterSpacing: "0.08em",
+              letterSpacing: "0.04em",
               display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
-              marginTop: 4, transition: "all 0.2s",
-              opacity: aiLoading ? 0.5 : 1, fontFamily: "'Syne',sans-serif",
+              marginTop: 8, transition: "all 0.2s",
+              opacity: aiLoading ? 0.5 : 1,
+              boxShadow: "0 4px 16px hsla(25,95%,55%,0.1)",
             }}
           >
             📄 Download Full Report
@@ -421,30 +463,32 @@ export default function Index() {
 
       {/* National Trends */}
       <div>
-        <div style={{ fontSize: 9, color: "#6b7fa3", letterSpacing: "0.2em", marginBottom: 8 }}>NATIONAL NFHS TRENDS</div>
-        <ResponsiveContainer width="100%" height={100}>
-          <BarChart data={NATIONAL_TRENDS} barGap={2}>
-            <XAxis dataKey="year" tick={{ fill: "#6b7fa3", fontSize: 9 }} axisLine={false} tickLine={false} />
-            <YAxis hide domain={[0, 55]} />
-            <Tooltip contentStyle={{ background: "#0d1628", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 6, fontSize: 10 }} />
-            <Bar dataKey="stunting" fill="#ef233c80" radius={[2, 2, 0, 0]} />
-            <Bar dataKey="wasting" fill="#f77f0080" radius={[2, 2, 0, 0]} />
-            <Bar dataKey="underweight" fill="#fcbf4980" radius={[2, 2, 0, 0]} />
-          </BarChart>
-        </ResponsiveContainer>
-        <div style={{ display: "flex", gap: 10, justifyContent: "center", fontSize: 8, color: "#6b7fa3" }}>
-          <span style={{ color: "#ef233c" }}>● Stunting</span>
-          <span style={{ color: "#f77f00" }}>● Wasting</span>
-          <span style={{ color: "#fcbf49" }}>● Underweight</span>
+        <SectionLabel>National NFHS Trends</SectionLabel>
+        <div className="glass-card" style={{ padding: "12px 8px 4px 0", overflow: "hidden" }}>
+          <ResponsiveContainer width="100%" height={100}>
+            <BarChart data={NATIONAL_TRENDS} barGap={2}>
+              <XAxis dataKey="year" tick={{ fill: "hsl(215,18%,50%)", fontSize: 10, fontFamily: "'JetBrains Mono', monospace" }} axisLine={false} tickLine={false} />
+              <YAxis hide domain={[0, 55]} />
+              <Tooltip contentStyle={{ background: "hsl(225,22%,9%)", border: "1px solid hsl(220,15%,18%)", borderRadius: 10, fontSize: 11, fontFamily: "'JetBrains Mono', monospace" }} />
+              <Bar dataKey="stunting" fill="#ef444480" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="wasting" fill="#f9731680" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="underweight" fill="#eab30880" radius={[4, 4, 0, 0]} />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+        <div style={{ display: "flex", gap: 14, justifyContent: "center", fontSize: 10, color: "hsl(215,18%,50%)", marginTop: 8, fontFamily: "'JetBrains Mono', monospace" }}>
+          <span><span style={{ color: "#ef4444" }}>●</span> Stunting</span>
+          <span><span style={{ color: "#f97316" }}>●</span> Wasting</span>
+          <span><span style={{ color: "#eab308" }}>●</span> Underweight</span>
         </div>
       </div>
     </div>
   );
 
+  // ---- MAP AREA ----
   const renderMapArea = () => (
     <div style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", overflow: "hidden", minHeight: isMobile ? "50vh" : undefined }}>
-      <div style={{ flex: 1, position: "relative", overflow: "hidden", background: "#070d1a" }}>
-        <div style={{ position: "absolute", inset: 0, backgroundImage: "linear-gradient(rgba(255,255,255,0.012) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.012) 1px,transparent 1px)", backgroundSize: "40px 40px", pointerEvents: "none" }} />
+      <div style={{ flex: 1, position: "relative", overflow: "hidden", background: "hsl(225,25%,5%)" }}>
         <IndiaMap
           ref={mapRef}
           activeLayer={activeLayer}
@@ -454,33 +498,32 @@ export default function Index() {
           hoveredStateName={hoveredState?.name}
           selectedStateName={selected?.state}
         />
-        <div style={{ position: "absolute", top: 50, left: 14, zIndex: 20, width: isMobile ? "calc(100% - 28px)" : 260 }}>
+        <div style={{ position: "absolute", top: 50, left: 14, zIndex: 20, width: isMobile ? "calc(100% - 28px)" : 280 }}>
           <DistrictSearch onSelect={handleDistrictSearch} />
         </div>
         {!isMobile && tooltip && (
           <div style={{
             position: "absolute",
             left: tooltip.x + 16, top: tooltip.y + 16,
-            background: "rgba(5,10,22,0.96)",
-            border: `1px solid ${riskColor(tooltip.risk)}55`,
-            borderRadius: 9, padding: "10px 14px",
+            background: "hsla(225,24%,8%,0.96)",
+            border: `1px solid ${riskColor(tooltip.risk)}40`,
+            borderRadius: 12, padding: "12px 16px",
             pointerEvents: "none", zIndex: 50,
-            backdropFilter: "blur(14px)",
-            boxShadow: `0 8px 32px ${riskColor(tooltip.risk)}25`,
-            minWidth: 155, maxWidth: 220,
+            backdropFilter: "blur(20px)",
+            boxShadow: `0 8px 32px ${riskColor(tooltip.risk)}20, 0 0 0 1px hsla(220,15%,20%,0.3)`,
+            minWidth: 170, maxWidth: 240,
           }}>
-            <div style={{ fontSize: 12, color: "#fff", fontWeight: 600, marginBottom: 6, fontFamily: "'Syne',sans-serif" }}>{tooltip.name}</div>
-            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 3 }}>
-              <span style={{ fontSize: 9, color: "#6b7fa3", letterSpacing: "0.08em" }}>RISK SCORE</span>
-              <span style={{ fontSize: 10, color: riskColor(tooltip.risk), fontWeight: 700 }}>{(tooltip.risk * 100).toFixed(0)}</span>
+            <div style={{ fontSize: 13, color: "hsl(210,25%,96%)", fontWeight: 700, marginBottom: 8 }}>{tooltip.name}</div>
+            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
+              <span style={{ fontSize: 10, color: "hsl(215,18%,50%)", letterSpacing: "0.08em", fontFamily: "'JetBrains Mono', monospace" }}>RISK SCORE</span>
+              <span style={{ fontSize: 12, color: riskColor(tooltip.risk), fontWeight: 800, fontFamily: "'JetBrains Mono', monospace" }}>{(tooltip.risk * 100).toFixed(0)}</span>
             </div>
-            <div style={{ height: 3, borderRadius: 99, background: "rgba(255,255,255,0.07)" }}>
-              <div style={{ height: "100%", width: `${tooltip.risk * 100}%`, background: `linear-gradient(90deg,${riskColor(tooltip.risk)}55,${riskColor(tooltip.risk)})`, borderRadius: 99 }} />
+            <div style={{ height: 4, borderRadius: 99, background: "hsla(220,15%,20%,0.5)" }}>
+              <div style={{ height: "100%", width: `${tooltip.risk * 100}%`, background: `linear-gradient(90deg, ${riskColor(tooltip.risk)}40, ${riskColor(tooltip.risk)})`, borderRadius: 99 }} />
             </div>
-            <div style={{ fontSize: 8, color: "#3a5070", marginTop: 5, letterSpacing: "0.06em" }}>Click to view NFHS data</div>
+            <div style={{ fontSize: 9, color: "hsl(215,12%,38%)", marginTop: 6, fontFamily: "'JetBrains Mono', monospace" }}>Click to view NFHS data</div>
           </div>
         )}
-        <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 2, background: "linear-gradient(90deg,transparent,rgba(255,107,53,0.25),transparent)", animation: "scan 5s linear infinite", pointerEvents: "none" }} />
       </div>
     </div>
   );
@@ -488,26 +531,22 @@ export default function Index() {
   // ---- MOBILE LAYOUT ----
   if (isMobile) {
     return (
-      <div style={{ fontFamily: "'DM Mono','Courier New',monospace", background: "#070d1a", minHeight: "100vh", color: "#e0e8f0", display: "flex", flexDirection: "column", overflow: "hidden" }}>
-        <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet" />
+      <div style={{ fontFamily: "'Inter', sans-serif", background: "hsl(225,20%,6%)", minHeight: "100vh", color: "hsl(210,25%,92%)", display: "flex", flexDirection: "column", overflow: "hidden" }}>
         {renderHeader()}
-        
-        {/* Mobile bottom tab bar */}
         <div style={{ flex: 1, overflow: "hidden", display: "flex", flexDirection: "column" }}>
           {mobilePanel === "map" && (
             <div style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
               {renderMapArea()}
-              {/* Floating district info card */}
               <div
                 onClick={() => setMobilePanel("details")}
-                style={{ position: "absolute", bottom: 56, left: 12, right: 12, zIndex: 30, background: riskBg(selected.risk), border: `1px solid ${riskColor(selected.risk)}30`, borderRadius: 10, padding: "10px 14px", cursor: "pointer" }}
+                style={{ position: "absolute", bottom: 56, left: 12, right: 12, zIndex: 30, background: `linear-gradient(135deg, ${riskBg(selected.risk)}, hsla(225,22%,10%,0.95))`, border: `1px solid ${riskColor(selected.risk)}25`, borderRadius: 14, padding: "12px 16px", cursor: "pointer", backdropFilter: "blur(16px)" }}
               >
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                   <div>
-                    <div style={{ fontFamily: "'Syne',sans-serif", fontSize: 14, fontWeight: 700, color: "#fff" }}>{selected.name}</div>
-                    <div style={{ fontSize: 9, color: "#6b7fa3" }}>{selected.state} · Tap for details</div>
+                    <div style={{ fontSize: 15, fontWeight: 700, color: "hsl(210,25%,96%)" }}>{selected.name}</div>
+                    <div style={{ fontSize: 10, color: "hsl(215,18%,50%)" }}>{selected.state} · Tap for details</div>
                   </div>
-                  <div style={{ fontSize: 22, fontWeight: 700, color: riskColor(selected.risk) }}>{(selected.risk * 100).toFixed(0)}</div>
+                  <div style={{ fontSize: 26, fontWeight: 800, color: riskColor(selected.risk), fontFamily: "'JetBrains Mono', monospace" }}>{(selected.risk * 100).toFixed(0)}</div>
                 </div>
               </div>
             </div>
@@ -515,70 +554,44 @@ export default function Index() {
           {mobilePanel === "districts" && renderLeftSidebar()}
           {mobilePanel === "details" && renderRightPanel()}
         </div>
-
-        {/* Mobile Tab Bar */}
-        <div style={{ display: "flex", borderTop: "1px solid rgba(255,255,255,0.08)", background: "#070d1a", zIndex: 40 }}>
+        <div style={{ display: "flex", borderTop: "1px solid hsl(220,15%,14%)", background: "hsl(225,24%,7%)", zIndex: 40 }}>
           {[
             { key: "map" as const, label: "🗺️ Map" },
             { key: "districts" as const, label: "📊 Districts" },
             { key: "details" as const, label: "📋 Details" },
           ].map(t => (
-            <button
-              key={t.key}
-              onClick={() => setMobilePanel(t.key)}
-              style={{
-                flex: 1, padding: "10px 0", border: "none", cursor: "pointer",
-                background: mobilePanel === t.key ? "rgba(255,107,53,0.1)" : "transparent",
-                color: mobilePanel === t.key ? "#ff6b35" : "#6b7fa3",
-                fontSize: 11, fontWeight: mobilePanel === t.key ? 600 : 400,
-                borderTop: mobilePanel === t.key ? "2px solid #ff6b35" : "2px solid transparent",
-                fontFamily: "'DM Mono', monospace",
-              }}
-            >
-              {t.label}
-            </button>
+            <button key={t.key} onClick={() => setMobilePanel(t.key)} style={{
+              flex: 1, padding: "11px 0", border: "none", cursor: "pointer",
+              background: mobilePanel === t.key ? "hsla(25,95%,55%,0.08)" : "transparent",
+              color: mobilePanel === t.key ? "hsl(25,95%,60%)" : "hsl(215,18%,45%)",
+              fontSize: 11, fontWeight: mobilePanel === t.key ? 700 : 400,
+              borderTop: mobilePanel === t.key ? "2px solid hsl(25,95%,55%)" : "2px solid transparent",
+              fontFamily: "'Inter', sans-serif",
+            }}>{t.label}</button>
           ))}
         </div>
-
-        <div style={{ borderTop: "1px solid rgba(255,255,255,0.04)", padding: "4px 12px", background: "#070d1a", fontSize: 7, color: "#3a5070", textAlign: "center" }}>
+        <div style={{ borderTop: "1px solid hsl(220,15%,12%)", padding: "5px 12px", background: "hsl(225,24%,7%)", fontSize: 8, color: "hsl(215,12%,32%)", textAlign: "center", fontFamily: "'JetBrains Mono', monospace" }}>
           Data: NFHS-5 (2019-21) · rchiips.org/nfhs
         </div>
-
-        <style>{`
-          @keyframes scan { 0%{top:0} 100%{top:100%} }
-          @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
-          * { box-sizing:border-box; scrollbar-width:thin; scrollbar-color:#1a2340 transparent; }
-          ::-webkit-scrollbar{width:4px} ::-webkit-scrollbar-track{background:transparent} ::-webkit-scrollbar-thumb{background:#1a2340;border-radius:2px}
-        `}</style>
       </div>
     );
   }
 
   // ---- DESKTOP / TABLET LAYOUT ----
   return (
-    <div style={{ fontFamily: "'DM Mono','Courier New',monospace", background: "#070d1a", minHeight: "100vh", color: "#e0e8f0", display: "flex", flexDirection: "column", overflow: "hidden" }}>
-      <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet" />
+    <div style={{ fontFamily: "'Inter', sans-serif", background: "hsl(225,20%,6%)", minHeight: "100vh", color: "hsl(210,25%,92%)", display: "flex", flexDirection: "column", overflow: "hidden" }}>
       {renderHeader()}
-
       <div style={{ display: "flex", flex: 1, overflow: "hidden", height: "calc(100vh - 61px)" }}>
         {renderLeftSidebar()}
         {renderMapArea()}
         {renderRightPanel()}
       </div>
-
-      <div style={{ borderTop: "1px solid rgba(255,255,255,0.04)", padding: "6px 20px", background: "#070d1a", fontSize: 8, color: "#3a5070", display: "flex", gap: 16, flexWrap: "wrap" }}>
+      <div style={{ borderTop: "1px solid hsl(220,15%,12%)", padding: "7px 24px", background: "hsl(225,24%,7%)", fontSize: 9, color: "hsl(215,12%,35%)", display: "flex", gap: 20, flexWrap: "wrap", fontFamily: "'JetBrains Mono', monospace" }}>
         <span>Data: NFHS-5 (2019-21) · rchiips.org/nfhs</span>
         <span>Census 2011 · censusindia.gov.in</span>
         <span>NITI Aayog District Nutrition Profile · niti.gov.in</span>
-        <span>Risk = 0.4×Stunting + 0.3×Wasting + 0.3×Underweight (normalized)</span>
+        <span>Risk = 0.4×Stunting + 0.3×Wasting + 0.3×Underweight</span>
       </div>
-
-      <style>{`
-        @keyframes scan { 0%{top:0} 100%{top:100%} }
-        @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
-        * { box-sizing:border-box; scrollbar-width:thin; scrollbar-color:#1a2340 transparent; }
-        ::-webkit-scrollbar{width:4px} ::-webkit-scrollbar-track{background:transparent} ::-webkit-scrollbar-thumb{background:#1a2340;border-radius:2px}
-      `}</style>
     </div>
   );
 }
