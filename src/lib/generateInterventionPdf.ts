@@ -1,5 +1,7 @@
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "@/hooks/use-toast";
 
 interface DistrictData {
   name: string;
@@ -1677,4 +1679,82 @@ export function generateFullDistrictReport(district: DistrictData) {
   }
 
   doc.save(`${district.name.replace(/\s+/g, "_")}_Full_District_Report.pdf`);
+}
+
+// ========= AI-ENHANCED PDF GENERATION =========
+
+export async function generateAiEnhancedInterventionPdf(intervention: string, district: DistrictData) {
+  toast({ title: "🤖 Generating AI-Enhanced Report...", description: `Analyzing ${intervention} for ${district.name}` });
+
+  try {
+    const { data, error } = await supabase.functions.invoke("generate-report", {
+      body: {
+        district: district.name,
+        state: district.state,
+        indicators: {
+          stunting: district.stunting, wasting: district.wasting, underweight: district.underweight,
+          anemia_children: district.anemia_children, anemia_women: district.anemia_women,
+          breastfeeding: district.breastfeeding, immunization: district.immunization, risk: district.risk,
+        },
+        interventions: [intervention],
+        drivers: district.drivers,
+        reportType: "single",
+      },
+    });
+
+    if (data?.report && !data?.fallback) {
+      // Merge AI report data into district data for enhanced PDF
+      const enrichedDistrict = {
+        ...district,
+        aiReportData: data.report,
+      };
+      generateInterventionPdf(intervention, enrichedDistrict);
+      toast({ title: "✅ AI-Enhanced Report Ready", description: "PDF downloaded with Gemini-powered insights" });
+    } else {
+      // Fallback to standard generation
+      generateInterventionPdf(intervention, district);
+      toast({ title: "📄 Report Downloaded", description: "Generated with built-in templates" });
+    }
+  } catch (e) {
+    console.error("AI report generation failed:", e);
+    generateInterventionPdf(intervention, district);
+    toast({ title: "📄 Report Downloaded", description: "AI enhancement unavailable, using templates" });
+  }
+}
+
+export async function generateAiEnhancedFullReport(district: DistrictData) {
+  toast({ title: "🤖 Generating AI-Enhanced Full Report...", description: `Comprehensive analysis for ${district.name}` });
+
+  try {
+    const { data, error } = await supabase.functions.invoke("generate-report", {
+      body: {
+        district: district.name,
+        state: district.state,
+        indicators: {
+          stunting: district.stunting, wasting: district.wasting, underweight: district.underweight,
+          anemia_children: district.anemia_children, anemia_women: district.anemia_women,
+          breastfeeding: district.breastfeeding, immunization: district.immunization, risk: district.risk,
+        },
+        interventions: district.interventions,
+        drivers: district.drivers,
+        reportType: "full",
+      },
+    });
+
+    if (data?.report && !data?.fallback) {
+      const enrichedDistrict = {
+        ...district,
+        aiFullReportData: data.report,
+      };
+      generateFullDistrictReport(enrichedDistrict);
+      toast({ title: "✅ AI-Enhanced Full Report Ready", description: "PDF downloaded with Gemini-powered analysis" });
+    } else {
+      generateFullDistrictReport(district);
+      toast({ title: "📄 Full Report Downloaded", description: "Generated with built-in templates" });
+    }
+  } catch (e) {
+    console.error("AI full report generation failed:", e);
+    generateFullDistrictReport(district);
+    toast({ title: "📄 Full Report Downloaded", description: "AI enhancement unavailable, using templates" });
+  }
 }

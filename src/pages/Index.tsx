@@ -6,7 +6,7 @@ import {
 import IndiaMap, { type IndiaMapHandle } from "@/components/IndiaMap";
 import DistrictSearch from "@/components/DistrictSearch";
 import { computeDistrictDrivers } from "@/lib/districtDrivers";
-import { generateInterventionPdf, generateFullDistrictReport } from "@/lib/generateInterventionPdf";
+import { generateInterventionPdf, generateFullDistrictReport, generateAiEnhancedInterventionPdf, generateAiEnhancedFullReport } from "@/lib/generateInterventionPdf";
 import { supabase } from "@/integrations/supabase/client";
 import nfhsData from "@/data/nfhsDistrictData.json";
 import logoImg from "@/assets/logo.png";
@@ -487,7 +487,7 @@ export default function Index() {
                     {impact && <div style={{ fontSize: 9, color: "#22c55e", marginTop: 4, fontWeight: 500 }}>📈 {impact}</div>}
                   </div>
                   <button
-                    onClick={(e) => { e.stopPropagation(); generateInterventionPdf(name, { ...selected, aiAnalysis: isAi ? inv : null, districtContext: aiAnalysis?.district_context, fiveYearProjection: aiAnalysis?.five_year_projection }); }}
+                    onClick={(e) => { e.stopPropagation(); generateAiEnhancedInterventionPdf(name, { ...selected, aiAnalysis: isAi ? inv : null, districtContext: aiAnalysis?.district_context, fiveYearProjection: aiAnalysis?.five_year_projection }); }}
                     style={{
                       flexShrink: 0, padding: "5px 10px", borderRadius: 7,
                       border: "1px solid hsla(155,55%,48%,0.25)",
@@ -508,7 +508,7 @@ export default function Index() {
         </div>
         {(aiAnalysis?.interventions?.length > 0 || selected.interventions?.length > 0) && (
           <button
-            onClick={() => generateFullDistrictReport({ ...selected, aiAnalysis, districtContext: aiAnalysis?.district_context, fiveYearProjection: aiAnalysis?.five_year_projection })}
+            onClick={() => generateAiEnhancedFullReport({ ...selected, aiAnalysis, districtContext: aiAnalysis?.district_context, fiveYearProjection: aiAnalysis?.five_year_projection })}
             disabled={aiLoading}
             style={{
               width: "100%", padding: "12px 16px", borderRadius: 12,
