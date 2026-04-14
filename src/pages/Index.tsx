@@ -196,23 +196,24 @@ export default function Index() {
       position: "sticky", top: 0, zIndex: 100, gap: 8,
       flexWrap: isMobile ? "wrap" : "nowrap",
     }}>
-      <div style={{ display: "flex", alignItems: "center" }}>
+      <div style={{ display: "flex", alignItems: "center", flex: 1 }}>
         <img src={logoImg} alt="PoshanAtlas AI" style={{ height: isMobile ? 45 : 62, width: "auto" }} />
       </div>
-      <div style={{ display: "flex", gap: isMobile ? 4 : 6, alignItems: "center", flexWrap: "wrap" }}>
+      <div style={{ display: "flex", gap: isMobile ? 4 : 6, alignItems: "center", justifyContent: "center", flex: 1 }}>
         {["malnutrition", "literacy", "sanitation"].map(l => (
           <button key={l} onClick={() => setActiveLayer(l)} style={{
-            padding: isMobile ? "5px 10px" : "6px 16px", borderRadius: 8,
+            padding: isMobile ? "4px 9px" : "5px 14px", borderRadius: 7,
             border: `1px solid ${activeLayer === l ? "hsl(25,95%,55%)" : t.btnInactiveBorder}`,
             background: activeLayer === l ? "hsla(25,95%,55%,0.12)" : t.btnInactive,
             color: activeLayer === l ? "hsl(25,95%,60%)" : t.btnInactiveText,
-            fontSize: isMobile ? 9 : 11, fontWeight: 600, letterSpacing: "0.06em",
+            fontSize: isMobile ? 8 : 10, fontWeight: 600, letterSpacing: "0.06em",
             cursor: "pointer", textTransform: "uppercase", transition: "all 0.2s ease",
           }}>
             {isMobile ? l.slice(0, 3).toUpperCase() : l}
           </button>
         ))}
       </div>
+      <div style={{ flex: 1 }} />
     </header>
   );
 
