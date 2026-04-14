@@ -261,8 +261,6 @@ export default function Index() {
       </div>
     </header>
   );
-    </header>
-  );
 
   // ---- LEFT SIDEBAR ----
   const renderLeftSidebar = () => (
