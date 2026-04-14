@@ -454,7 +454,7 @@ export default function Index() {
           hoveredStateName={hoveredState?.name}
           selectedStateName={selected?.state}
         />
-        <div style={{ position: "absolute", top: 14, left: 14, zIndex: 20, width: isMobile ? "calc(100% - 28px)" : 260 }}>
+        <div style={{ position: "absolute", top: 50, left: 14, zIndex: 20, width: isMobile ? "calc(100% - 28px)" : 260 }}>
           <DistrictSearch onSelect={handleDistrictSearch} />
         </div>
         {!isMobile && tooltip && (
