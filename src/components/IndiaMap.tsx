@@ -200,7 +200,7 @@ const IndiaMap = forwardRef<IndiaMapHandle, IndiaMapProps>(function IndiaMap({ a
 
       const map = new window.google.maps.Map(mapContainerRef.current, {
         center: { lat: 22, lng: 82 },
-        zoom: 4, minZoom: 4, maxZoom: 10,
+        zoom: 4, minZoom: 3, maxZoom: 10,
         mapTypeId: "roadmap", disableDefaultUI: true, zoomControl: true,
         zoomControlOptions: { position: window.google.maps.ControlPosition.RIGHT_TOP },
         styles: [
@@ -211,7 +211,7 @@ const IndiaMap = forwardRef<IndiaMapHandle, IndiaMapProps>(function IndiaMap({ a
           { featureType: "poi", stylers: [{ visibility: "off" }] },
           { featureType: "transit", stylers: [{ visibility: "off" }] },
           { featureType: "administrative.country", elementType: "geometry.stroke", stylers: [{ color: "#2a3f5f" }, { weight: 1.5 }] },
-          { featureType: "administrative.province", elementType: "geometry.stroke", stylers: [{ color: "#3a5a8a" }, { weight: 2 }, { visibility: "on" }] },
+          { featureType: "administrative.province", elementType: "geometry.stroke", stylers: [{ color: "#e0e6ed" }, { weight: 2.5 }, { visibility: "on" }] },
           { featureType: "administrative.province", elementType: "labels", stylers: [{ visibility: "off" }] },
           { featureType: "landscape", elementType: "geometry", stylers: [{ color: "#0d1628" }] },
         ],
