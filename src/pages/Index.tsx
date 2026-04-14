@@ -531,7 +531,7 @@ export default function Index() {
   if (isMobile) {
     return (
       <div style={{ fontFamily: "'Inter', sans-serif", background: t.bg, minHeight: "100vh", color: t.text2, display: "flex", flexDirection: "column", overflow: "hidden" }}>
-        {renderHeader()}
+        
         <div style={{ flex: 1, overflow: "hidden", display: "flex", flexDirection: "column" }}>
           {mobilePanel === "map" && (
             <div style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
@@ -579,8 +579,7 @@ export default function Index() {
   // ---- DESKTOP / TABLET LAYOUT ----
   return (
     <div style={{ fontFamily: "'Inter', sans-serif", background: t.bg, minHeight: "100vh", color: t.text2, display: "flex", flexDirection: "column", overflow: "hidden" }}>
-      {renderHeader()}
-      <div style={{ display: "flex", flex: 1, overflow: "hidden", height: "calc(100vh - 61px)" }}>
+      <div style={{ display: "flex", flex: 1, overflow: "hidden", height: "100vh" }}>
         {renderLeftSidebar()}
         {renderMapArea()}
         {renderRightPanel()}
