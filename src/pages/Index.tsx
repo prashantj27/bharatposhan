@@ -78,6 +78,10 @@ const KpiCard = ({ label, val, delta }: { label: string; val: string; delta: str
 export default function Index() {
   const [selected, setSelected] = useState(DISTRICTS[0]);
   const [filterState, setFilterState] = useState("All");
+  const [theme, setTheme] = useState<"dark" | "light">(() => {
+    const saved = localStorage.getItem("poshan-theme");
+    return (saved === "light" ? "light" : "dark");
+  });
   const [filterRisk, setFilterRisk] = useState("All");
   const [activeLayer, setActiveLayer] = useState("malnutrition");
   const [hoveredState, setHoveredState] = useState<{ name: string; risk: number } | null>(null);
@@ -89,6 +93,36 @@ export default function Index() {
   const { isMobile, isTablet, w } = useScreenSize();
   const [mobilePanel, setMobilePanel] = useState<"map" | "districts" | "details">("map");
   const [mobileDetailOpen, setMobileDetailOpen] = useState(false);
+  const isDark = theme === "dark";
+
+  // Apply theme to document
+  useEffect(() => {
+    document.documentElement.classList.toggle("dark", isDark);
+    document.documentElement.classList.toggle("light", !isDark);
+    localStorage.setItem("poshan-theme", theme);
+  }, [theme, isDark]);
+
+  const toggleTheme = () => setTheme(t => t === "dark" ? "light" : "dark");
+
+  // Theme-aware colors
+  const t = {
+    bg: isDark ? "hsl(225,20%,6%)" : "hsl(220,20%,97%)",
+    panelBg: isDark ? "hsla(225,24%,10%,0.95)" : "hsla(220,20%,100%,0.95)",
+    panelBorder: isDark ? "hsl(220,15%,14%)" : "hsl(220,15%,88%)",
+    headerBg: isDark ? "linear-gradient(180deg, hsla(225,24%,10%,0.98), hsla(225,22%,8%,0.96))" : "linear-gradient(180deg, hsla(220,20%,100%,0.98), hsla(220,20%,98%,0.96))",
+    cardBg: isDark ? "hsla(225,22%,11%,0.8)" : "hsla(220,20%,96%,0.8)",
+    cardBorder: isDark ? "hsla(220,15%,18%,0.6)" : "hsla(220,15%,85%,0.6)",
+    text1: isDark ? "hsl(210,25%,96%)" : "hsl(225,20%,12%)",
+    text2: isDark ? "hsl(210,25%,90%)" : "hsl(225,18%,25%)",
+    text3: isDark ? "hsl(215,18%,50%)" : "hsl(215,15%,50%)",
+    textMuted: isDark ? "hsl(215,12%,40%)" : "hsl(215,12%,62%)",
+    surfaceEl: isDark ? "hsla(225,22%,11%,0.6)" : "hsla(220,20%,94%,0.6)",
+    trackBg: isDark ? "hsl(220,15%,14%)" : "hsl(220,15%,88%)",
+    footerBg: isDark ? "hsl(225,24%,7%)" : "hsl(220,20%,96%)",
+    btnInactive: isDark ? "hsla(225,22%,12%,0.6)" : "hsla(220,20%,92%,0.6)",
+    btnInactiveText: isDark ? "hsl(215,18%,55%)" : "hsl(215,15%,45%)",
+    btnInactiveBorder: isDark ? "hsl(220,15%,18%)" : "hsl(220,15%,85%)",
+  };
 
   const fetchAiAnalysis = useCallback(async (district: string, state: string, indicators: any) => {
     setAiLoading(true); setAiError(null); setAiAnalysis(null);
@@ -162,9 +196,9 @@ export default function Index() {
   const renderHeader = () => (
     <header style={{
       padding: isMobile ? "10px 14px" : "12px 24px",
-      borderBottom: "1px solid hsl(220,15%,14%)",
+      borderBottom: `1px solid ${t.panelBorder}`,
       display: "flex", alignItems: "center", justifyContent: "space-between",
-      background: "linear-gradient(180deg, hsla(225,24%,10%,0.98), hsla(225,22%,8%,0.96))",
+      background: t.headerBg,
       backdropFilter: "blur(20px)",
       position: "sticky", top: 0, zIndex: 100, gap: 8,
       flexWrap: isMobile ? "wrap" : "nowrap",
@@ -178,35 +212,52 @@ export default function Index() {
           boxShadow: "0 4px 16px hsla(25,95%,55%,0.25)",
         }}>🌾</div>
         <div>
-          <div style={{ fontWeight: 800, fontSize: isMobile ? 15 : 19, letterSpacing: "-0.01em", color: "hsl(210,25%,96%)" }}>
+          <div style={{ fontWeight: 800, fontSize: isMobile ? 15 : 19, letterSpacing: "-0.01em", color: t.text1 }}>
             POSHAN<span style={{ color: "hsl(25,95%,55%)" }}>AI</span>
           </div>
-          {!isMobile && <div style={{ fontSize: 10, color: "hsl(215,18%,45%)", letterSpacing: "0.12em", marginTop: -1, fontFamily: "'JetBrains Mono', monospace" }}>NUTRITION INTELLIGENCE PLATFORM · GOI</div>}
+          {!isMobile && <div style={{ fontSize: 10, color: t.text3, letterSpacing: "0.12em", marginTop: -1, fontFamily: "'JetBrains Mono', monospace" }}>NUTRITION INTELLIGENCE PLATFORM · GOI</div>}
         </div>
       </div>
       <div style={{ display: "flex", gap: isMobile ? 4 : 6, alignItems: "center", flexWrap: "wrap" }}>
-        {["malnutrition", "literacy", "sanitation", "scheme"].map(l => (
+        {["malnutrition", "literacy", "sanitation"].map(l => (
           <button key={l} onClick={() => setActiveLayer(l)} style={{
             padding: isMobile ? "5px 10px" : "6px 16px", borderRadius: 8,
-            border: `1px solid ${activeLayer === l ? "hsl(25,95%,55%)" : "hsl(220,15%,18%)"}`,
-            background: activeLayer === l ? "hsla(25,95%,55%,0.12)" : "hsla(225,22%,12%,0.6)",
-            color: activeLayer === l ? "hsl(25,95%,60%)" : "hsl(215,18%,55%)",
+            border: `1px solid ${activeLayer === l ? "hsl(25,95%,55%)" : t.btnInactiveBorder}`,
+            background: activeLayer === l ? "hsla(25,95%,55%,0.12)" : t.btnInactive,
+            color: activeLayer === l ? "hsl(25,95%,60%)" : t.btnInactiveText,
             fontSize: isMobile ? 9 : 11, fontWeight: 600, letterSpacing: "0.06em",
             cursor: "pointer", textTransform: "uppercase", transition: "all 0.2s ease",
-            backdropFilter: "blur(8px)",
           }}>
             {isMobile ? l.slice(0, 3).toUpperCase() : l}
           </button>
         ))}
         {!isMobile && (
           <>
-            <div style={{ width: 1, height: 28, background: "hsl(220,15%,16%)", margin: "0 10px" }} />
+            <div style={{ width: 1, height: 28, background: t.panelBorder, margin: "0 8px" }} />
             <div style={{ display: "flex", gap: 7, alignItems: "center", padding: "5px 12px", borderRadius: 8, background: "hsla(155,55%,48%,0.08)", border: "1px solid hsla(155,55%,48%,0.15)" }}>
               <div style={{ width: 7, height: 7, borderRadius: "50%", background: "#22c55e", boxShadow: "0 0 8px #22c55e80", animation: "pulse 2s infinite" }} />
               <span style={{ fontSize: 10, color: "#22c55e", letterSpacing: "0.08em", fontWeight: 600, fontFamily: "'JetBrains Mono', monospace" }}>LIVE · NFHS-5</span>
             </div>
           </>
         )}
+        <div style={{ width: 1, height: 28, background: t.panelBorder, margin: "0 4px" }} />
+        {/* Theme toggle */}
+        <button
+          onClick={toggleTheme}
+          style={{
+            padding: "6px 10px", borderRadius: 8,
+            border: `1px solid ${t.btnInactiveBorder}`,
+            background: t.btnInactive,
+            color: t.btnInactiveText,
+            fontSize: 14, cursor: "pointer",
+            transition: "all 0.2s ease",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            width: 36, height: 36,
+          }}
+          title={isDark ? "Switch to Light Mode" : "Switch to Dark Mode"}
+        >
+          {isDark ? "☀️" : "🌙"}
+        </button>
       </div>
     </header>
   );
@@ -531,7 +582,7 @@ export default function Index() {
   // ---- MOBILE LAYOUT ----
   if (isMobile) {
     return (
-      <div style={{ fontFamily: "'Inter', sans-serif", background: "hsl(225,20%,6%)", minHeight: "100vh", color: "hsl(210,25%,92%)", display: "flex", flexDirection: "column", overflow: "hidden" }}>
+      <div style={{ fontFamily: "'Inter', sans-serif", background: t.bg, minHeight: "100vh", color: t.text2, display: "flex", flexDirection: "column", overflow: "hidden" }}>
         {renderHeader()}
         <div style={{ flex: 1, overflow: "hidden", display: "flex", flexDirection: "column" }}>
           {mobilePanel === "map" && (
@@ -554,7 +605,7 @@ export default function Index() {
           {mobilePanel === "districts" && renderLeftSidebar()}
           {mobilePanel === "details" && renderRightPanel()}
         </div>
-        <div style={{ display: "flex", borderTop: "1px solid hsl(220,15%,14%)", background: "hsl(225,24%,7%)", zIndex: 40 }}>
+        <div style={{ display: "flex", borderTop: `1px solid ${t.panelBorder}`, background: t.footerBg, zIndex: 40 }}>
           {[
             { key: "map" as const, label: "🗺️ Map" },
             { key: "districts" as const, label: "📊 Districts" },
@@ -570,7 +621,7 @@ export default function Index() {
             }}>{t.label}</button>
           ))}
         </div>
-        <div style={{ borderTop: "1px solid hsl(220,15%,12%)", padding: "5px 12px", background: "hsl(225,24%,7%)", fontSize: 8, color: "hsl(215,12%,32%)", textAlign: "center", fontFamily: "'JetBrains Mono', monospace" }}>
+        <div style={{ borderTop: `1px solid ${t.panelBorder}`, padding: "5px 12px", background: t.footerBg, fontSize: 8, color: t.textMuted, textAlign: "center", fontFamily: "'JetBrains Mono', monospace" }}>
           Data: NFHS-5 (2019-21) · rchiips.org/nfhs
         </div>
       </div>
@@ -579,14 +630,14 @@ export default function Index() {
 
   // ---- DESKTOP / TABLET LAYOUT ----
   return (
-    <div style={{ fontFamily: "'Inter', sans-serif", background: "hsl(225,20%,6%)", minHeight: "100vh", color: "hsl(210,25%,92%)", display: "flex", flexDirection: "column", overflow: "hidden" }}>
+    <div style={{ fontFamily: "'Inter', sans-serif", background: t.bg, minHeight: "100vh", color: t.text2, display: "flex", flexDirection: "column", overflow: "hidden" }}>
       {renderHeader()}
       <div style={{ display: "flex", flex: 1, overflow: "hidden", height: "calc(100vh - 61px)" }}>
         {renderLeftSidebar()}
         {renderMapArea()}
         {renderRightPanel()}
       </div>
-      <div style={{ borderTop: "1px solid hsl(220,15%,12%)", padding: "7px 24px", background: "hsl(225,24%,7%)", fontSize: 9, color: "hsl(215,12%,35%)", display: "flex", gap: 20, flexWrap: "wrap", fontFamily: "'JetBrains Mono', monospace" }}>
+      <div style={{ borderTop: `1px solid ${t.panelBorder}`, padding: "7px 24px", background: t.footerBg, fontSize: 9, color: t.textMuted, display: "flex", gap: 20, flexWrap: "wrap", fontFamily: "'JetBrains Mono', monospace" }}>
         <span>Data: NFHS-5 (2019-21) · rchiips.org/nfhs</span>
         <span>Census 2011 · censusindia.gov.in</span>
         <span>NITI Aayog District Nutrition Profile · niti.gov.in</span>
