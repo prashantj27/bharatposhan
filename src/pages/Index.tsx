@@ -9,6 +9,7 @@ import { computeDistrictDrivers } from "@/lib/districtDrivers";
 import { generateInterventionPdf, generateFullDistrictReport } from "@/lib/generateInterventionPdf";
 import { supabase } from "@/integrations/supabase/client";
 import nfhsData from "@/data/nfhsDistrictData.json";
+import logoImg from "@/assets/logo.png";
 
 const nfhsLookup = nfhsData as Record<string, { female_literacy?: number; sanitation?: number; [k: string]: any }>;
 
