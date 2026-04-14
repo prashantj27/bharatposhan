@@ -142,6 +142,7 @@ export default function Index() {
   const [aiAnalysis, setAiAnalysis] = useState<any>(null);
   const [aiLoading, setAiLoading] = useState(false);
   const [aiError, setAiError] = useState<string | null>(null);
+  const [pdfLoading, setPdfLoading] = useState<string | null>(null); // tracks which PDF is generating (intervention name or "full");
   const { isMobile, isTablet, w } = useScreenSize();
   const [mobilePanel, setMobilePanel] = useState<"map" | "districts" | "details">("map");
   const [mobileDetailOpen, setMobileDetailOpen] = useState(false);
