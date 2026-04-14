@@ -197,7 +197,7 @@ export default function Index() {
       flexWrap: isMobile ? "wrap" : "nowrap",
     }}>
       <div style={{ display: "flex", alignItems: "center" }}>
-        <img src={logoImg} alt="PoshanAtlas AI" style={{ height: isMobile ? 64 : 88, width: "auto" }} />
+        <img src={logoImg} alt="PoshanAtlas AI" style={{ height: isMobile ? 45 : 62, width: "auto" }} />
       </div>
       <div style={{ display: "flex", gap: isMobile ? 4 : 6, alignItems: "center", flexWrap: "wrap" }}>
         {["malnutrition", "literacy", "sanitation"].map(l => (
