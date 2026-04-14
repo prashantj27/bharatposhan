@@ -196,9 +196,9 @@ export default function Index() {
   const renderHeader = () => (
     <header style={{
       padding: isMobile ? "10px 14px" : "12px 24px",
-      borderBottom: "1px solid hsl(220,15%,14%)",
+      borderBottom: `1px solid ${t.panelBorder}`,
       display: "flex", alignItems: "center", justifyContent: "space-between",
-      background: "linear-gradient(180deg, hsla(225,24%,10%,0.98), hsla(225,22%,8%,0.96))",
+      background: t.headerBg,
       backdropFilter: "blur(20px)",
       position: "sticky", top: 0, zIndex: 100, gap: 8,
       flexWrap: isMobile ? "wrap" : "nowrap",
@@ -212,36 +212,55 @@ export default function Index() {
           boxShadow: "0 4px 16px hsla(25,95%,55%,0.25)",
         }}>🌾</div>
         <div>
-          <div style={{ fontWeight: 800, fontSize: isMobile ? 15 : 19, letterSpacing: "-0.01em", color: "hsl(210,25%,96%)" }}>
+          <div style={{ fontWeight: 800, fontSize: isMobile ? 15 : 19, letterSpacing: "-0.01em", color: t.text1 }}>
             POSHAN<span style={{ color: "hsl(25,95%,55%)" }}>AI</span>
           </div>
-          {!isMobile && <div style={{ fontSize: 10, color: "hsl(215,18%,45%)", letterSpacing: "0.12em", marginTop: -1, fontFamily: "'JetBrains Mono', monospace" }}>NUTRITION INTELLIGENCE PLATFORM · GOI</div>}
+          {!isMobile && <div style={{ fontSize: 10, color: t.text3, letterSpacing: "0.12em", marginTop: -1, fontFamily: "'JetBrains Mono', monospace" }}>NUTRITION INTELLIGENCE PLATFORM · GOI</div>}
         </div>
       </div>
       <div style={{ display: "flex", gap: isMobile ? 4 : 6, alignItems: "center", flexWrap: "wrap" }}>
-        {["malnutrition", "literacy", "sanitation", "scheme"].map(l => (
+        {["malnutrition", "literacy", "sanitation"].map(l => (
           <button key={l} onClick={() => setActiveLayer(l)} style={{
             padding: isMobile ? "5px 10px" : "6px 16px", borderRadius: 8,
-            border: `1px solid ${activeLayer === l ? "hsl(25,95%,55%)" : "hsl(220,15%,18%)"}`,
-            background: activeLayer === l ? "hsla(25,95%,55%,0.12)" : "hsla(225,22%,12%,0.6)",
-            color: activeLayer === l ? "hsl(25,95%,60%)" : "hsl(215,18%,55%)",
+            border: `1px solid ${activeLayer === l ? "hsl(25,95%,55%)" : t.btnInactiveBorder}`,
+            background: activeLayer === l ? "hsla(25,95%,55%,0.12)" : t.btnInactive,
+            color: activeLayer === l ? "hsl(25,95%,60%)" : t.btnInactiveText,
             fontSize: isMobile ? 9 : 11, fontWeight: 600, letterSpacing: "0.06em",
             cursor: "pointer", textTransform: "uppercase", transition: "all 0.2s ease",
-            backdropFilter: "blur(8px)",
           }}>
             {isMobile ? l.slice(0, 3).toUpperCase() : l}
           </button>
         ))}
         {!isMobile && (
           <>
-            <div style={{ width: 1, height: 28, background: "hsl(220,15%,16%)", margin: "0 10px" }} />
+            <div style={{ width: 1, height: 28, background: t.panelBorder, margin: "0 8px" }} />
             <div style={{ display: "flex", gap: 7, alignItems: "center", padding: "5px 12px", borderRadius: 8, background: "hsla(155,55%,48%,0.08)", border: "1px solid hsla(155,55%,48%,0.15)" }}>
               <div style={{ width: 7, height: 7, borderRadius: "50%", background: "#22c55e", boxShadow: "0 0 8px #22c55e80", animation: "pulse 2s infinite" }} />
               <span style={{ fontSize: 10, color: "#22c55e", letterSpacing: "0.08em", fontWeight: 600, fontFamily: "'JetBrains Mono', monospace" }}>LIVE · NFHS-5</span>
             </div>
           </>
         )}
+        <div style={{ width: 1, height: 28, background: t.panelBorder, margin: "0 4px" }} />
+        {/* Theme toggle */}
+        <button
+          onClick={toggleTheme}
+          style={{
+            padding: "6px 10px", borderRadius: 8,
+            border: `1px solid ${t.btnInactiveBorder}`,
+            background: t.btnInactive,
+            color: t.btnInactiveText,
+            fontSize: 14, cursor: "pointer",
+            transition: "all 0.2s ease",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            width: 36, height: 36,
+          }}
+          title={isDark ? "Switch to Light Mode" : "Switch to Dark Mode"}
+        >
+          {isDark ? "☀️" : "🌙"}
+        </button>
       </div>
+    </header>
+  );
     </header>
   );
 
