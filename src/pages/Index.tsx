@@ -409,36 +409,6 @@ export default function Index() {
         </div>
       </div>
 
-      {/* Risk Trend */}
-      {(() => {
-        const scores = selected.trend.map((t: any) => t.score);
-        const minScore = Math.min(...scores);
-        const maxScore = Math.max(...scores);
-        const padding = Math.max((maxScore - minScore) * 0.3, 0.02);
-        const yMin = Math.max(0, Math.floor((minScore - padding) * 100) / 100);
-        const yMax = Math.min(1, Math.ceil((maxScore + padding) * 100) / 100);
-        return (
-          <div>
-            <SectionLabel>Risk Trend · YoY Variation</SectionLabel>
-            <div className="glass-card" style={{ padding: "12px 8px 4px 0", overflow: "hidden" }}>
-              <ResponsiveContainer width="100%" height={isMobile ? 110 : 130}>
-                <LineChart data={selected.trend} margin={{ top: 10, right: 14, left: -6, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="hsla(220,15%,20%,0.5)" />
-                  <XAxis dataKey="year" tick={{ fill: "hsl(215,18%,50%)", fontSize: 10, fontFamily: "'JetBrains Mono', monospace" }} axisLine={{ stroke: "hsl(220,15%,16%)" }} tickLine={false} />
-                  <YAxis domain={[yMin, yMax]} tick={{ fill: "hsl(215,18%,50%)", fontSize: 10, fontFamily: "'JetBrains Mono', monospace" }} axisLine={false} tickLine={false} tickFormatter={(v: number) => `${(v * 100).toFixed(0)}%`} width={40} />
-                  <ReferenceLine y={selected.risk} stroke={`${riskColor(selected.risk)}44`} strokeDasharray="5 3" />
-                  <Tooltip contentStyle={{ background: "hsl(225,22%,9%)", border: `1px solid ${riskColor(selected.risk)}40`, borderRadius: 10, fontSize: 11, fontFamily: "'JetBrains Mono', monospace" }} formatter={(v: number) => [(v * 100).toFixed(1) + "%", "Risk"]} labelStyle={{ color: "hsl(215,18%,60%)" }} />
-                  <Line type="monotone" dataKey="score" stroke={riskColor(selected.risk)} strokeWidth={2.5} dot={{ r: 5, fill: riskColor(selected.risk), stroke: "hsl(225,22%,8%)", strokeWidth: 2 }} activeDot={{ r: 7, stroke: "#fff", strokeWidth: 2 }} />
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
-            <div style={{ fontSize: 10, color: "hsl(215,12%,40%)", marginTop: 6, textAlign: "center", fontFamily: "'JetBrains Mono', monospace" }}>
-              Change: {((scores[0] - scores[scores.length - 1]) * 100).toFixed(1)}% improvement
-            </div>
-          </div>
-        );
-      })()}
-
       {/* AI Interventions */}
       <div>
         <SectionLabel>
@@ -531,27 +501,7 @@ export default function Index() {
         )}
       </div>
 
-      {/* National Trends */}
-      <div>
-        <SectionLabel>National NFHS Trends</SectionLabel>
-        <div className="glass-card" style={{ padding: "12px 8px 4px 0", overflow: "hidden" }}>
-          <ResponsiveContainer width="100%" height={100}>
-            <BarChart data={NATIONAL_TRENDS} barGap={2}>
-              <XAxis dataKey="year" tick={{ fill: "hsl(215,18%,50%)", fontSize: 10, fontFamily: "'JetBrains Mono', monospace" }} axisLine={false} tickLine={false} />
-              <YAxis hide domain={[0, 55]} />
-              <Tooltip contentStyle={{ background: "hsl(225,22%,9%)", border: "1px solid hsl(220,15%,18%)", borderRadius: 10, fontSize: 11, fontFamily: "'JetBrains Mono', monospace" }} />
-              <Bar dataKey="stunting" fill="#ef444480" radius={[4, 4, 0, 0]} />
-              <Bar dataKey="wasting" fill="#f9731680" radius={[4, 4, 0, 0]} />
-              <Bar dataKey="underweight" fill="#eab30880" radius={[4, 4, 0, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
-        <div style={{ display: "flex", gap: 14, justifyContent: "center", fontSize: 10, color: "hsl(215,18%,50%)", marginTop: 8, fontFamily: "'JetBrains Mono', monospace" }}>
-          <span><span style={{ color: "#ef4444" }}>●</span> Stunting</span>
-          <span><span style={{ color: "#f97316" }}>●</span> Wasting</span>
-          <span><span style={{ color: "#eab308" }}>●</span> Underweight</span>
-        </div>
-      </div>
+    </div>
     </div>
   );
 
