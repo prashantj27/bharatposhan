@@ -8,6 +8,21 @@ const corsHeaders = {
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
+  const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY");
+  
+  // List models endpoint for debugging
+  const url = new URL(req.url);
+  if (url.searchParams.get("list_models") === "true") {
+    const resp = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${GEMINI_API_KEY}`);
+    const data = await resp.json();
+    const models = (data.models || [])
+      .filter((m: any) => m.supportedGenerationMethods?.includes("generateContent"))
+      .map((m: any) => m.name);
+    return new Response(JSON.stringify({ models }), {
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+
   try {
     const { district, state, indicators } = await req.json();
     if (!district || !state) {
@@ -16,7 +31,6 @@ serve(async (req) => {
       });
     }
 
-    const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY");
     if (!GEMINI_API_KEY) throw new Error("GEMINI_API_KEY is not configured");
 
     const ind = indicators || {};
@@ -125,7 +139,6 @@ RULES:
     const aiData = await response.json();
     let content = aiData.candidates?.[0]?.content?.parts?.[0]?.text || "";
 
-    // Strip markdown code fences if present
     content = content.replace(/```json\s*/g, "").replace(/```\s*/g, "").trim();
 
     let parsed;
@@ -138,13 +151,12 @@ RULES:
           parsed = JSON.parse(jsonMatch[0]);
         } catch {
           console.error("Failed to parse AI response:", content.substring(0, 500));
-          return new Response(JSON.stringify({ error: "Failed to parse AI analysis. Please try again.", fallback: true }), {
+          return new Response(JSON.stringify({ error: "Failed to parse AI analysis.", fallback: true }), {
             status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
           });
         }
       } else {
-        console.error("No JSON found in AI response:", content.substring(0, 500));
-        return new Response(JSON.stringify({ error: "Failed to parse AI analysis. Please try again.", fallback: true }), {
+        return new Response(JSON.stringify({ error: "Failed to parse AI analysis.", fallback: true }), {
           status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
