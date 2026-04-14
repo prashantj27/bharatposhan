@@ -185,37 +185,26 @@ export default function Index() {
     });
   }, [fetchAiAnalysis, isMobile]);
 
-  // ---- HEADER ----
-  const renderHeader = () => (
-    <header style={{
-      padding: isMobile ? "10px 14px" : "12px 24px",
-      borderBottom: "1px solid hsla(220,20%,30%,0.2)",
-      display: "flex", alignItems: "center", justifyContent: "space-between",
-      background: "hsla(220,20%,8%,0.45)",
-      backdropFilter: "blur(40px)", WebkitBackdropFilter: "blur(40px)",
-      position: "sticky", top: 0, zIndex: 100, gap: 8,
-      boxShadow: "0 4px 30px hsla(0,0%,0%,0.3)",
-      flexWrap: isMobile ? "wrap" : "nowrap",
+  // ---- LAYER BUTTONS (map overlay) ----
+  const renderLayerButtons = () => (
+    <div style={{
+      position: "absolute", top: 10, right: 14, zIndex: 20,
+      display: "flex", gap: 5,
     }}>
-      <div style={{ display: "flex", alignItems: "center", flex: 1 }}>
-        <img src={logoImg} alt="PoshanAtlas AI" style={{ height: isMobile ? 45 : 62, width: "auto" }} />
-      </div>
-      <div style={{ display: "flex", gap: isMobile ? 4 : 6, alignItems: "center", justifyContent: "center", flex: 1 }}>
-        {["malnutrition", "literacy", "sanitation"].map(l => (
-          <button key={l} onClick={() => setActiveLayer(l)} style={{
-            padding: isMobile ? "4px 9px" : "5px 14px", borderRadius: 7,
-            border: `1px solid ${activeLayer === l ? "hsl(25,95%,55%)" : t.btnInactiveBorder}`,
-            background: activeLayer === l ? "hsla(25,95%,55%,0.12)" : t.btnInactive,
-            color: activeLayer === l ? "hsl(25,95%,60%)" : t.btnInactiveText,
-            fontSize: isMobile ? 8 : 10, fontWeight: 600, letterSpacing: "0.06em",
-            cursor: "pointer", textTransform: "uppercase", transition: "all 0.2s ease",
-          }}>
-            {isMobile ? l.slice(0, 3).toUpperCase() : l}
-          </button>
-        ))}
-      </div>
-      <div style={{ flex: 1 }} />
-    </header>
+      {["malnutrition", "literacy", "sanitation"].map(l => (
+        <button key={l} onClick={() => setActiveLayer(l)} style={{
+          padding: isMobile ? "4px 9px" : "5px 14px", borderRadius: 7,
+          border: `1px solid ${activeLayer === l ? "hsl(25,95%,55%)" : "hsla(220,15%,40%,0.4)"}`,
+          background: activeLayer === l ? "hsla(25,95%,55%,0.18)" : "hsla(225,24%,8%,0.75)",
+          color: activeLayer === l ? "hsl(25,95%,60%)" : "hsl(215,18%,60%)",
+          fontSize: isMobile ? 8 : 10, fontWeight: 600, letterSpacing: "0.06em",
+          cursor: "pointer", textTransform: "uppercase", transition: "all 0.2s ease",
+          backdropFilter: "blur(12px)",
+        }}>
+          {isMobile ? l.slice(0, 3).toUpperCase() : l}
+        </button>
+      ))}
+    </div>
   );
 
   // ---- LEFT SIDEBAR ----
