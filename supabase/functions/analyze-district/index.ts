@@ -8,21 +8,6 @@ const corsHeaders = {
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
-  const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY");
-  
-  // List models endpoint for debugging
-  const url = new URL(req.url);
-  if (url.searchParams.get("list_models") === "true") {
-    const resp = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${GEMINI_API_KEY}`);
-    const data = await resp.json();
-    const models = (data.models || [])
-      .filter((m: any) => m.supportedGenerationMethods?.includes("generateContent"))
-      .map((m: any) => m.name);
-    return new Response(JSON.stringify({ models }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
-  }
-
   try {
     const { district, state, indicators } = await req.json();
     if (!district || !state) {
