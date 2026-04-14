@@ -209,17 +209,27 @@ export default function Index() {
 
   // ---- LEFT SIDEBAR ----
   const renderLeftSidebar = () => (
-    <div className="glass-panel" style={{
+    <div style={{
       width: isMobile ? "100%" : isTablet ? 190 : 240, flexShrink: 0,
       zIndex: 10, position: "relative",
       borderRight: isMobile ? "none" : "1px solid hsl(220,15%,14%)",
-      padding: isMobile ? "14px" : "18px 14px",
-      display: "flex", flexDirection: "column", gap: 18, overflowY: "auto",
+      display: "flex", flexDirection: "column",
       ...(isMobile ? { maxHeight: "calc(100vh - 100px)" } : { minHeight: 0 }),
     }}>
-      <div style={{ padding: "0 10px 6px", borderBottom: "1px solid hsl(220,15%,14%)", marginBottom: 4, display: "flex", justifyContent: "center" }}>
+      {/* Fixed logo header */}
+      <div style={{
+        padding: "10px 10px 8px", borderBottom: "1px solid hsl(220,15%,14%)",
+        display: "flex", justifyContent: "center", flexShrink: 0,
+        background: "hsl(225,22%,4%)",
+      }}>
         <img src={logoImg} alt="PoshanAtlas AI" style={{ height: isMobile ? 54 : 70, width: "auto" }} />
       </div>
+      {/* Scrollable content */}
+      <div className="glass-panel" style={{
+        flex: 1, minHeight: 0, overflowY: "auto",
+        padding: isMobile ? "14px" : "18px 14px",
+        display: "flex", flexDirection: "column", gap: 18,
+      }}>
       <div>
         <SectionLabel>National KPIs</SectionLabel>
         <div style={{ display: isMobile ? "grid" : "flex", gridTemplateColumns: isMobile ? "1fr 1fr 1fr" : undefined, flexDirection: isMobile ? undefined : "column", gap: 8 }}>
@@ -311,6 +321,7 @@ export default function Index() {
             );
           })}
         </div>
+      </div>
       </div>
     </div>
   );
