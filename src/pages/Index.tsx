@@ -443,20 +443,7 @@ export default function Index() {
 
   const renderMapArea = () => (
     <div style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden", minHeight: isMobile ? "50vh" : undefined }}>
-      <div style={{ padding: "8px 12px", fontSize: 10, color: "#6b7fa3", borderBottom: "1px solid rgba(255,255,255,0.05)", display: "flex", gap: 8, alignItems: "center", justifyContent: "space-between", flexWrap: "wrap" }}>
-        <div style={{ display: "flex", gap: 8, alignItems: "center", minWidth: 0 }}>
-          <span>India</span><span style={{ color: "#ff6b35" }}>›</span>
-          <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{selected.state}</span><span style={{ color: "#ff6b35" }}>›</span>
-          <span style={{ color: "#fff", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{selected.name}</span>
-        </div>
-        {hoveredState && !isMobile && (
-          <div style={{ display: "flex", gap: 8, alignItems: "center", padding: "3px 10px", borderRadius: 4, background: riskBg(hoveredState.risk), border: `1px solid ${riskColor(hoveredState.risk)}40` }}>
-            <span style={{ fontSize: 10, color: "#a0b4cc" }}>{hoveredState.name}</span>
-            <span style={{ fontSize: 10, color: riskColor(hoveredState.risk), fontWeight: 600 }}>{riskLabel(hoveredState.risk)} · {(hoveredState.risk * 100).toFixed(0)}</span>
-          </div>
-        )}
-      </div>
-      <div style={{ flex: 1, position: "relative", overflow: "hidden", background: "radial-gradient(ellipse at 50% 40%, #0d1628 0%, #070d1a 100%)" }}>
+      <div style={{ flex: 1, position: "relative", overflow: "hidden", background: "#070d1a" }}>
         <div style={{ position: "absolute", inset: 0, backgroundImage: "linear-gradient(rgba(255,255,255,0.012) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.012) 1px,transparent 1px)", backgroundSize: "40px 40px", pointerEvents: "none" }} />
         <IndiaMap
           ref={mapRef}

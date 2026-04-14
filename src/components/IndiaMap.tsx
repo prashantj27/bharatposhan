@@ -135,8 +135,11 @@ const IndiaMap = forwardRef<IndiaMapHandle, IndiaMapProps>(function IndiaMap({ a
     if (!map || !window.google) return;
     clearLabels();
     // Center of mainland India, zoom 5 shows full country in most viewports
-    map.setCenter({ lat: 22, lng: 82 });
-    map.setZoom(5);
+    const bounds = new window.google.maps.LatLngBounds(
+      { lat: 6, lng: 68 },
+      { lat: 37, lng: 97 }
+    );
+    map.fitBounds(bounds, { top: 0, right: 0, bottom: 0, left: 0 });
   }, [clearLabels]);
 
   // Zoom to state bounds and show labels
@@ -212,7 +215,7 @@ const IndiaMap = forwardRef<IndiaMapHandle, IndiaMapProps>(function IndiaMap({ a
           { featureType: "administrative.province", elementType: "labels", stylers: [{ visibility: "off" }] },
           { featureType: "landscape", elementType: "geometry", stylers: [{ color: "#0d1628" }] },
         ],
-        restriction: { latLngBounds: { north: 38, south: 6, west: 67, east: 98 }, strictBounds: false },
+        restriction: { latLngBounds: { north: 37, south: 6, west: 68, east: 98 }, strictBounds: true },
       });
       mapRef.current = map;
 
