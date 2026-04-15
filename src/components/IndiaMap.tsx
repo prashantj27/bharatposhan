@@ -13,21 +13,23 @@ interface IndiaMapProps {
 
 // State-level average risk scores computed from NFHS-5 (2019-21) district data
 const STATE_RISK_MAP: Record<string, number> = {
-  "Andaman and Nicobar": 0.19, "Andaman and Nicobar Islands": 0.19,
-  "Andhra Pradesh": 0.28, "Arunachal Pradesh": 0.19, "Assam": 0.30,
-  "Bihar": 0.36, "Chandigarh": 0.19, "Chhattisgarh": 0.29,
-  "Dadra and Nagar Haveli": 0.36, "Dadra and Nagar Haveli and Daman and Diu": 0.32,
-  "Daman and Diu": 0.28, "Delhi": 0.19, "NCT of Delhi": 0.19,
-  "Goa": 0.23, "Gujarat": 0.35, "Haryana": 0.20,
-  "Himachal Pradesh": 0.25, "Jammu and Kashmir": 0.24, "Jammu & Kashmir": 0.24,
-  "Jharkhand": 0.35, "Karnataka": 0.29, "Kerala": 0.20,
-  "Lakshadweep": 0.26, "Madhya Pradesh": 0.30, "Maharashtra": 0.33,
+  "Andaman & Nicobar Islands": 0.23, "Andaman and Nicobar": 0.23, "Andaman and Nicobar Islands": 0.23,
+  "Andhra Pradesh": 0.26, "Arunachal Pradesh": 0.19, "Assam": 0.3,
+  "Bihar": 0.37, "Chandigarh": 0.19, "Chhattisgarh": 0.3,
+  "Dadra and Nagar Haveli": 0.3, "Dadra and Nagar Haveli & Daman and Diu": 0.3,
+  "Dadra and Nagar Haveli and Daman and Diu": 0.3, "Daman and Diu": 0.3,
+  "Delhi": 0.23, "NCT of Delhi": 0.23, "Goa": 0.23,
+  "Gujarat": 0.35, "Haryana": 0.2, "Himachal Pradesh": 0.25,
+  "Jammu & Kashmir": 0.23, "Jammu and Kashmir": 0.23,
+  "Jharkhand": 0.35, "Karnataka": 0.29, "Kerala": 0.2,
+  "Ladakh": 0.23, "Lakshadweep": 0.26, "Madhya Pradesh": 0.29,
+  "Maharashtra": 0.33, "Maharastra": 0.33,
   "Manipur": 0.17, "Meghalaya": 0.29, "Mizoram": 0.19,
   "Nagaland": 0.27, "Odisha": 0.27, "Orissa": 0.27,
-  "Puducherry": 0.21, "Punjab": 0.18, "Rajasthan": 0.27,
-  "Sikkim": 0.17, "Tamil Nadu": 0.21, "Telangana": 0.28,
-  "Tripura": 0.26, "Uttar Pradesh": 0.31, "Uttarakhand": 0.20, "Uttaranchal": 0.20,
-  "West Bengal": 0.29, "Ladakh": 0.24,
+  "Puducherry": 0.21, "Punjab": 0.19, "Rajasthan": 0.27,
+  "Sikkim": 0.17, "Tamil Nadu": 0.21, "Telangana": 0.3,
+  "Tripura": 0.27, "Uttar Pradesh": 0.31, "Uttarakhand": 0.2, "Uttaranchal": 0.2,
+  "West Bengal": 0.3,
 };
 
 const districtData = nfhsData as Record<string, { district: string; state: string; stunting: number; wasting: number; underweight: number; risk: number; anemia_children: number; anemia_women: number; breastfeeding: number; immunization: number; female_literacy?: number; sanitation?: number }>;
