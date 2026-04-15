@@ -35,9 +35,9 @@ const STATE_RISK_MAP: Record<string, number> = {
 const districtData = nfhsData as Record<string, { district: string; state: string; stunting: number; wasting: number; underweight: number; risk: number; anemia_children: number; anemia_women: number; breastfeeding: number; immunization: number; female_literacy?: number; sanitation?: number }>;
 
 const riskColor = (r: number) => {
-  if (r > 0.75) return "#ef4444";
-  if (r > 0.5) return "#f97316";
-  if (r > 0.3) return "#eab308";
+  if (r > 0.6) return "#ef4444";
+  if (r > 0.4) return "#f97316";
+  if (r > 0.2) return "#eab308";
   return "#22c55e";
 };
 
@@ -393,7 +393,7 @@ const IndiaMap = forwardRef<IndiaMapHandle, IndiaMapProps>(function IndiaMap({ a
         <div style={{ fontSize: 10, color: "hsl(215,18%,48%)", marginBottom: 8, letterSpacing: "0.12em", fontWeight: 600, fontFamily: "'JetBrains Mono', monospace" }}>
           {activeLayer.toUpperCase()} RISK · DISTRICT
         </div>
-        {[["CRITICAL", "#ef4444", "> 75"], ["HIGH", "#f97316", "50–75"], ["MODERATE", "#eab308", "30–50"], ["LOW", "#22c55e", "< 30"]].map(([l, c, r]) => (
+        {[["CRITICAL", "#ef4444", "> 60"], ["HIGH", "#f97316", "40–60"], ["MODERATE", "#eab308", "20–40"], ["LOW", "#22c55e", "< 20"]].map(([l, c, r]) => (
           <div key={l} style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 5 }}>
             <div style={{ width: 10, height: 10, borderRadius: 3, background: c as string, boxShadow: `0 0 8px ${c}50` }} />
             <span style={{ fontSize: 10, color: "hsl(210,20%,72%)", fontWeight: 500 }}>{l}</span>
