@@ -38,13 +38,13 @@ const DISTRICTS = RAW_DISTRICTS.map(d => {
 });
 
 const riskColor = (r: number) => {
-  if (r > 0.75) return "#ef4444";
-  if (r > 0.5) return "#f97316";
-  if (r > 0.3) return "#eab308";
+  if (r > 0.6) return "#ef4444";
+  if (r > 0.4) return "#f97316";
+  if (r > 0.2) return "#eab308";
   return "#22c55e";
 };
-const riskLabel = (r: number) => r > 0.75 ? "CRITICAL" : r > 0.5 ? "HIGH" : r > 0.3 ? "MODERATE" : "LOW";
-const riskBg = (r: number) => r > 0.75 ? "rgba(239,68,68,0.08)" : r > 0.5 ? "rgba(249,115,22,0.08)" : r > 0.3 ? "rgba(234,179,8,0.08)" : "rgba(34,197,94,0.08)";
+const riskLabel = (r: number) => r > 0.6 ? "CRITICAL" : r > 0.4 ? "HIGH" : r > 0.2 ? "MODERATE" : "LOW";
+const riskBg = (r: number) => r > 0.6 ? "rgba(239,68,68,0.08)" : r > 0.4 ? "rgba(249,115,22,0.08)" : r > 0.2 ? "rgba(234,179,8,0.08)" : "rgba(34,197,94,0.08)";
 
 const NATIONAL_TRENDS = [
   { year: "2005-06", stunting: 48.0, wasting: 19.8, underweight: 42.5 },
