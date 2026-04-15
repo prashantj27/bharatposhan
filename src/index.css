@@ -158,3 +158,13 @@
 .district-label {
   text-shadow: 0 1px 4px rgba(0,0,0,0.8);
 }
+
+/* Mobile touch & viewport fixes */
+@supports (height: 100dvh) {
+  .mobile-vh { height: 100dvh !important; }
+}
+@media (max-width: 767px) {
+  * { -webkit-tap-highlight-color: transparent; }
+  input, button, select, textarea { font-size: 16px; } /* prevent iOS zoom */
+  body { overscroll-behavior: none; }
+}
