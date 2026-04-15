@@ -266,7 +266,7 @@ export default function Index() {
       zIndex: 10, position: "relative",
       borderRight: isMobile ? "none" : "1px solid hsl(220,15%,14%)",
       display: "flex", flexDirection: "column",
-      ...(isMobile ? { maxHeight: "calc(100vh - 100px)" } : { minHeight: 0 }),
+      ...(isMobile ? { height: "100%" } : { minHeight: 0 }),
     }}>
       {/* Fixed logo header */}
       <div style={{
@@ -394,9 +394,9 @@ export default function Index() {
       width: isMobile ? "100%" : isTablet ? 290 : 340, flexShrink: 0,
       zIndex: 10, position: "relative",
       borderLeft: isMobile ? "none" : "1px solid hsl(220,15%,14%)",
-      overflowY: "auto", padding: isMobile ? "14px" : "18px 16px",
+      overflowY: isMobile ? "visible" : "auto", padding: isMobile ? "14px" : "18px 16px",
       display: "flex", flexDirection: "column", gap: 16,
-      ...(isMobile ? { maxHeight: "calc(100vh - 100px)" } : { minHeight: 0 }),
+      ...(isMobile ? {} : { minHeight: 0 }),
     }}>
       {/* District header */}
       <div style={{
