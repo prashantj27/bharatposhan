@@ -38,13 +38,13 @@ const DISTRICTS = RAW_DISTRICTS.map(d => {
 });
 
 const riskColor = (r: number) => {
-  if (r > 0.75) return "#ef4444";
-  if (r > 0.5) return "#f97316";
-  if (r > 0.3) return "#eab308";
+  if (r > 0.6) return "#ef4444";
+  if (r > 0.4) return "#f97316";
+  if (r > 0.2) return "#eab308";
   return "#22c55e";
 };
-const riskLabel = (r: number) => r > 0.75 ? "CRITICAL" : r > 0.5 ? "HIGH" : r > 0.3 ? "MODERATE" : "LOW";
-const riskBg = (r: number) => r > 0.75 ? "rgba(239,68,68,0.08)" : r > 0.5 ? "rgba(249,115,22,0.08)" : r > 0.3 ? "rgba(234,179,8,0.08)" : "rgba(34,197,94,0.08)";
+const riskLabel = (r: number) => r > 0.6 ? "CRITICAL" : r > 0.4 ? "HIGH" : r > 0.2 ? "MODERATE" : "LOW";
+const riskBg = (r: number) => r > 0.6 ? "rgba(239,68,68,0.08)" : r > 0.4 ? "rgba(249,115,22,0.08)" : r > 0.2 ? "rgba(234,179,8,0.08)" : "rgba(34,197,94,0.08)";
 
 const NATIONAL_TRENDS = [
   { year: "2005-06", stunting: 48.0, wasting: 19.8, underweight: 42.5 },
@@ -266,7 +266,7 @@ export default function Index() {
       zIndex: 10, position: "relative",
       borderRight: isMobile ? "none" : "1px solid hsl(220,15%,14%)",
       display: "flex", flexDirection: "column",
-      ...(isMobile ? { maxHeight: "calc(100vh - 100px)" } : { minHeight: 0 }),
+      ...(isMobile ? { height: "100%" } : { minHeight: 0 }),
     }}>
       {/* Fixed logo header */}
       <div style={{
@@ -394,9 +394,9 @@ export default function Index() {
       width: isMobile ? "100%" : isTablet ? 290 : 340, flexShrink: 0,
       zIndex: 10, position: "relative",
       borderLeft: isMobile ? "none" : "1px solid hsl(220,15%,14%)",
-      overflowY: "auto", padding: isMobile ? "14px" : "18px 16px",
+      overflowY: isMobile ? "visible" : "auto", padding: isMobile ? "14px" : "18px 16px",
       display: "flex", flexDirection: "column", gap: 16,
-      ...(isMobile ? { maxHeight: "calc(100vh - 100px)" } : { minHeight: 0 }),
+      ...(isMobile ? {} : { minHeight: 0 }),
     }}>
       {/* District header */}
       <div style={{
@@ -602,47 +602,66 @@ export default function Index() {
   // ---- MOBILE LAYOUT ----
   if (isMobile) {
     return (
-      <div style={{ fontFamily: "'Inter', sans-serif", background: t.bg, minHeight: "100vh", color: t.text2, display: "flex", flexDirection: "column", overflow: "hidden" }}>
+      <div style={{ fontFamily: "'Inter', sans-serif", background: t.bg, height: "100dvh", color: t.text2, display: "flex", flexDirection: "column", overflow: "hidden", position: "relative" }}>
         
-        <div style={{ flex: 1, overflow: "hidden", display: "flex", flexDirection: "column" }}>
-          {mobilePanel === "map" && (
-            <div style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
-              {renderMapArea()}
-              <div
-                onClick={() => setMobilePanel("details")}
-                style={{ position: "absolute", bottom: 56, left: 12, right: 12, zIndex: 30, background: `linear-gradient(135deg, ${riskBg(selected.risk)}, hsla(225,22%,10%,0.95))`, border: `1px solid ${riskColor(selected.risk)}25`, borderRadius: 14, padding: "12px 16px", cursor: "pointer", backdropFilter: "blur(16px)" }}
-              >
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                  <div>
-                    <div style={{ fontSize: 15, fontWeight: 700, color: "hsl(210,25%,96%)" }}>{selected.name}</div>
-                    <div style={{ fontSize: 10, color: "hsl(215,18%,50%)" }}>{selected.state} · Tap for details</div>
-                  </div>
-                  <div style={{ fontSize: 26, fontWeight: 800, color: riskColor(selected.risk), fontFamily: "'JetBrains Mono', monospace" }}>{(selected.risk * 100).toFixed(0)}</div>
-                </div>
-              </div>
+        {/* Map always visible behind everything on mobile */}
+        <div style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden", position: "relative" }}>
+          {mobilePanel === "map" && renderMapArea()}
+          {mobilePanel === "districts" && (
+            <div style={{ flex: 1, overflowY: "auto", WebkitOverflowScrolling: "touch" }}>
+              {renderLeftSidebar()}
             </div>
           )}
-          {mobilePanel === "districts" && renderLeftSidebar()}
-          {mobilePanel === "details" && renderRightPanel()}
+          {mobilePanel === "details" && (
+            <div style={{ flex: 1, overflowY: "auto", WebkitOverflowScrolling: "touch" }}>
+              {renderRightPanel()}
+            </div>
+          )}
         </div>
-        <div style={{ display: "flex", borderTop: `1px solid ${t.panelBorder}`, background: t.footerBg, zIndex: 40 }}>
+
+        {/* Floating district card on map view */}
+        {mobilePanel === "map" && (
+          <div
+            onClick={() => setMobilePanel("details")}
+            style={{
+              position: "absolute", bottom: 52, left: 8, right: 8, zIndex: 30,
+              background: `linear-gradient(135deg, ${riskBg(selected.risk)}, hsla(225,22%,10%,0.97))`,
+              border: `1px solid ${riskColor(selected.risk)}25`,
+              borderRadius: 14, padding: "10px 14px", cursor: "pointer",
+              backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)",
+              boxShadow: "0 -4px 24px rgba(0,0,0,0.4)",
+            }}
+          >
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <div style={{ minWidth: 0, flex: 1 }}>
+                <div style={{ fontSize: 14, fontWeight: 700, color: "hsl(210,25%,96%)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{selected.name}</div>
+                <div style={{ fontSize: 9, color: "hsl(215,18%,50%)", marginTop: 2 }}>{selected.state} · Tap for details</div>
+              </div>
+              <div style={{ fontSize: 24, fontWeight: 800, color: riskColor(selected.risk), fontFamily: "'JetBrains Mono', monospace", flexShrink: 0, marginLeft: 12 }}>{(selected.risk * 100).toFixed(0)}</div>
+            </div>
+          </div>
+        )}
+
+        {/* Bottom tabs */}
+        <div style={{ display: "flex", borderTop: `1px solid ${t.panelBorder}`, background: t.footerBg, zIndex: 40, flexShrink: 0, paddingBottom: "env(safe-area-inset-bottom, 0px)" }}>
           {[
-            { key: "map" as const, label: "🗺️ Map" },
-            { key: "districts" as const, label: "📊 Districts" },
-            { key: "details" as const, label: "📋 Details" },
-          ].map(t => (
-            <button key={t.key} onClick={() => setMobilePanel(t.key)} style={{
-              flex: 1, padding: "11px 0", border: "none", cursor: "pointer",
-              background: mobilePanel === t.key ? "hsla(25,95%,55%,0.08)" : "transparent",
-              color: mobilePanel === t.key ? "hsl(25,95%,60%)" : "hsl(215,18%,45%)",
-              fontSize: 11, fontWeight: mobilePanel === t.key ? 700 : 400,
-              borderTop: mobilePanel === t.key ? "2px solid hsl(25,95%,55%)" : "2px solid transparent",
+            { key: "map" as const, icon: "🗺️", label: "Map" },
+            { key: "districts" as const, icon: "📊", label: "Districts" },
+            { key: "details" as const, icon: "📋", label: "Details" },
+          ].map(tab => (
+            <button key={tab.key} onClick={() => setMobilePanel(tab.key)} style={{
+              flex: 1, padding: "8px 0 6px", border: "none", cursor: "pointer",
+              background: mobilePanel === tab.key ? "hsla(25,95%,55%,0.08)" : "transparent",
+              color: mobilePanel === tab.key ? "hsl(25,95%,60%)" : "hsl(215,18%,45%)",
+              fontSize: 10, fontWeight: mobilePanel === tab.key ? 700 : 400,
+              borderTop: mobilePanel === tab.key ? "2px solid hsl(25,95%,55%)" : "2px solid transparent",
               fontFamily: "'Inter', sans-serif",
-            }}>{t.label}</button>
+              display: "flex", flexDirection: "column", alignItems: "center", gap: 1,
+            }}>
+              <span style={{ fontSize: 16 }}>{tab.icon}</span>
+              {tab.label}
+            </button>
           ))}
-        </div>
-        <div style={{ borderTop: `1px solid ${t.panelBorder}`, padding: "5px 12px", background: t.footerBg, fontSize: 8, color: t.textMuted, textAlign: "center", fontFamily: "'JetBrains Mono', monospace" }}>
-          Data: NFHS-5 (2019-21) · rchiips.org/nfhs
         </div>
       </div>
     );
