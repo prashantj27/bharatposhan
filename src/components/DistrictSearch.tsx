@@ -55,7 +55,7 @@ export default function DistrictSearch({ onSelect }: DistrictSearchProps) {
           value={query}
           onChange={e => { setQuery(e.target.value); setOpen(true); }}
           onFocus={() => query && setOpen(true)}
-          placeholder="Search 594 districts…"
+          placeholder="Search 707 districts…"
           style={{
             background: "transparent", border: "none", outline: "none",
             color: "hsl(210,25%,92%)", fontSize: 12, padding: "9px 0", width: "100%",

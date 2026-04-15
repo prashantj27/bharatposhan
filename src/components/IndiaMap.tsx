@@ -356,7 +356,7 @@ const IndiaMap = forwardRef<IndiaMapHandle, IndiaMapProps>(function IndiaMap({ a
     <div style={{ position: "relative", width: "100%", height: "100%" }}>
       {loading && (
         <div style={{ position: "absolute", inset: 0, zIndex: 10, display: "flex", alignItems: "center", justifyContent: "center", background: "rgba(7,13,26,0.95)", color: "#6b7fa3", fontSize: 12 }}>
-          Loading Map with 594 Districts…
+          Loading Map with 707 Districts…
         </div>
       )}
       <div ref={mapContainerRef} style={{ width: "100%", height: "100%" }} />
@@ -401,7 +401,7 @@ const IndiaMap = forwardRef<IndiaMapHandle, IndiaMapProps>(function IndiaMap({ a
           </div>
         ))}
         <div style={{ fontSize: 9, color: "hsl(215,12%,38%)", marginTop: 6, borderTop: "1px solid hsla(220,15%,18%,0.5)", paddingTop: 6, fontFamily: "'JetBrains Mono', monospace" }}>
-          Source: NFHS-5 (2019-21) · 594 Districts
+          Source: NFHS-5 (2019-21) · 707 Districts
         </div>
       </div>
     </div>
