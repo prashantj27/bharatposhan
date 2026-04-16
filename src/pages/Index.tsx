@@ -10,6 +10,7 @@ import { generateInterventionPdf, generateFullDistrictReport, generateAiEnhanced
 import { supabase } from "@/integrations/supabase/client";
 import nfhsData from "@/data/nfhsDistrictData.json";
 import logoImg from "@/assets/logo.png";
+import { trackEvent } from "@/lib/umami";
 
 const nfhsLookup = nfhsData as Record<string, { female_literacy?: number; sanitation?: number; [k: string]: any }>;
 
@@ -170,18 +171,23 @@ export default function Index() {
 
   const fetchAiAnalysis = useCallback(async (district: string, state: string, indicators: any) => {
     setAiLoading(true); setAiError(null); setAiAnalysis(null);
+    trackEvent("ai_analysis_requested", { district, state });
+    const t0 = performance.now();
     try {
       const { data, error } = await supabase.functions.invoke("analyze-district", { body: { district, state, indicators } });
       if (error) throw new Error(error.message || "AI analysis failed");
       if (data?.error) throw new Error(data.error);
       if (data?.analysis) setAiAnalysis(data.analysis);
+      trackEvent("ai_analysis_success", { district, state, duration_ms: Math.round(performance.now() - t0) });
     } catch (e: any) {
       console.error("AI analysis error:", e);
       setAiError(e.message || "Failed to generate AI analysis");
+      trackEvent("ai_analysis_failed", { district, state, error: e?.message?.slice(0, 120) });
     } finally { setAiLoading(false); }
   }, []);
 
   const handleDistrictSearch = useCallback((district: string, state: string) => {
+    trackEvent("district_search_select", { district, state });
     mapRef.current?.zoomToDistrict(district, state);
     if (isMobile) setMobilePanel("map");
   }, [isMobile]);
@@ -202,6 +208,7 @@ export default function Index() {
   }, []);
 
   const handleStateClick = useCallback((name: string) => {
+    trackEvent("state_click", { state: name });
     const match = DISTRICTS.find(d => {
       const dn = d.state.toLowerCase();
       const sn = name.toLowerCase();
@@ -211,6 +218,7 @@ export default function Index() {
   }, []);
 
   const handleDistrictClick = useCallback((district: string, state: string, data: any) => {
+    trackEvent("district_select", { district, state, risk: Number(data?.risk?.toFixed?.(2) ?? data?.risk) });
     const { drivers, interventions } = computeDistrictDrivers({
       stunting: data.stunting, wasting: data.wasting, underweight: data.underweight,
       anemia_children: data.anemia_children ?? 67, anemia_women: data.anemia_women ?? 57,
@@ -244,7 +252,7 @@ export default function Index() {
       display: "flex", gap: 5,
     }}>
       {["malnutrition", "literacy", "sanitation"].map(l => (
-        <button key={l} onClick={() => setActiveLayer(l)} style={{
+        <button key={l} onClick={() => { trackEvent("layer_change", { layer: l }); setActiveLayer(l); }} style={{
           padding: isMobile ? "4px 9px" : "5px 14px", borderRadius: 7,
           border: `1px solid ${activeLayer === l ? "hsl(25,95%,55%)" : "hsla(220,15%,40%,0.4)"}`,
           background: activeLayer === l ? "hsla(25,95%,55%,0.18)" : "hsla(225,24%,8%,0.75)",
@@ -498,7 +506,19 @@ export default function Index() {
                     {impact && <div style={{ fontSize: 9, color: "#22c55e", marginTop: 4, fontWeight: 500 }}>📈 {impact}</div>}
                   </div>
                   <button
-                    onClick={async (e) => { e.stopPropagation(); setPdfLoading(name); try { await generateAiEnhancedInterventionPdf(name, { ...selected, aiAnalysis: isAi ? inv : null, districtContext: aiAnalysis?.district_context, fiveYearProjection: aiAnalysis?.five_year_projection }); } finally { setPdfLoading(null); } }}
+                    onClick={async (e) => {
+                      e.stopPropagation();
+                      setPdfLoading(name);
+                      trackEvent("pdf_intervention_requested", { intervention: name, district: selected.name, state: selected.state, ai_enhanced: !!isAi });
+                      const t0 = performance.now();
+                      try {
+                        await generateAiEnhancedInterventionPdf(name, { ...selected, aiAnalysis: isAi ? inv : null, districtContext: aiAnalysis?.district_context, fiveYearProjection: aiAnalysis?.five_year_projection });
+                        trackEvent("pdf_intervention_success", { intervention: name, district: selected.name, state: selected.state, duration_ms: Math.round(performance.now() - t0) });
+                      } catch (err: any) {
+                        trackEvent("pdf_intervention_failed", { intervention: name, district: selected.name, error: err?.message?.slice(0, 120) });
+                        throw err;
+                      } finally { setPdfLoading(null); }
+                    }}
                     disabled={pdfLoading === name}
                     style={{
                       flexShrink: 0, padding: "5px 10px", borderRadius: 7,
@@ -525,7 +545,18 @@ export default function Index() {
         </div>
         {(aiAnalysis?.interventions?.length > 0 || selected.interventions?.length > 0) && (
           <button
-            onClick={async () => { setPdfLoading("full"); try { await generateAiEnhancedFullReport({ ...selected, aiAnalysis, districtContext: aiAnalysis?.district_context, fiveYearProjection: aiAnalysis?.five_year_projection }); } finally { setPdfLoading(null); } }}
+            onClick={async () => {
+              setPdfLoading("full");
+              trackEvent("pdf_full_report_requested", { district: selected.name, state: selected.state, ai_enhanced: !!aiAnalysis });
+              const t0 = performance.now();
+              try {
+                await generateAiEnhancedFullReport({ ...selected, aiAnalysis, districtContext: aiAnalysis?.district_context, fiveYearProjection: aiAnalysis?.five_year_projection });
+                trackEvent("pdf_full_report_success", { district: selected.name, state: selected.state, duration_ms: Math.round(performance.now() - t0) });
+              } catch (err: any) {
+                trackEvent("pdf_full_report_failed", { district: selected.name, error: err?.message?.slice(0, 120) });
+                throw err;
+              } finally { setPdfLoading(null); }
+            }}
             disabled={aiLoading || pdfLoading === "full"}
             style={{
               width: "100%", padding: "12px 16px", borderRadius: 12,
@@ -649,7 +680,7 @@ export default function Index() {
             { key: "districts" as const, icon: "📊", label: "Districts" },
             { key: "details" as const, icon: "📋", label: "Details" },
           ].map(tab => (
-            <button key={tab.key} onClick={() => setMobilePanel(tab.key)} style={{
+            <button key={tab.key} onClick={() => { trackEvent("mobile_tab_switch", { tab: tab.key }); setMobilePanel(tab.key); }} style={{
               flex: 1, padding: "8px 0 6px", border: "none", cursor: "pointer",
               background: mobilePanel === tab.key ? "hsla(25,95%,55%,0.08)" : "transparent",
               color: mobilePanel === tab.key ? "hsl(25,95%,60%)" : "hsl(215,18%,45%)",
