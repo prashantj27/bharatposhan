@@ -147,12 +147,71 @@ export default function Index() {
   const { isMobile, isTablet, w } = useScreenSize();
   const [mobilePanel, setMobilePanel] = useState<"map" | "districts" | "details">("map");
   const [mobileDetailOpen, setMobileDetailOpen] = useState(false);
+  const rightPanelRef = useRef<HTMLDivElement>(null);
 
   // Force dark mode
   useEffect(() => {
     document.documentElement.classList.add("dark");
     document.documentElement.classList.remove("light");
   }, []);
+
+  // ---- District detail-view engagement tracking (scroll depth + time on view) ----
+  // A "view" starts when a district detail panel becomes visible
+  // (always on desktop; only when mobilePanel==="details" on mobile),
+  // and ends when the district changes, the panel hides, the tab is hidden,
+  // or the page unloads.
+  const detailVisible = !isMobile || mobilePanel === "details";
+  useEffect(() => {
+    if (!detailVisible) return;
+    const district = selected.name;
+    const state = selected.state;
+    const startedAt = performance.now();
+    let maxScrollPct = 0;
+    const milestonesFired = new Set<number>();
+
+    trackEvent("district_view_start", { district, state });
+
+    const scrollEl = rightPanelRef.current;
+    const onScroll = () => {
+      if (!scrollEl) return;
+      const { scrollTop, scrollHeight, clientHeight } = scrollEl;
+      const scrollable = scrollHeight - clientHeight;
+      if (scrollable <= 0) return;
+      const pct = Math.min(100, Math.round((scrollTop / scrollable) * 100));
+      if (pct > maxScrollPct) maxScrollPct = pct;
+      [25, 50, 75, 100].forEach(m => {
+        if (pct >= m && !milestonesFired.has(m)) {
+          milestonesFired.add(m);
+          trackEvent("district_scroll_depth", { district, state, depth_pct: m });
+        }
+      });
+    };
+    scrollEl?.addEventListener("scroll", onScroll, { passive: true });
+
+    let ended = false;
+    const endView = (reason: string) => {
+      if (ended) return;
+      ended = true;
+      const duration_ms = Math.round(performance.now() - startedAt);
+      // Skip ultra-short views that are usually accidental
+      if (duration_ms < 500) return;
+      trackEvent("district_view_end", {
+        district, state, duration_ms,
+        max_scroll_pct: maxScrollPct,
+        reason,
+      });
+    };
+
+    const onVisibility = () => { if (document.hidden) endView("tab_hidden"); };
+    document.addEventListener("visibilitychange", onVisibility);
+    window.addEventListener("pagehide", () => endView("pagehide"));
+
+    return () => {
+      scrollEl?.removeEventListener("scroll", onScroll);
+      document.removeEventListener("visibilitychange", onVisibility);
+      endView("changed");
+    };
+  }, [detailVisible, selected.name, selected.state]);
 
   // Static dark theme colors
   const t = {
@@ -398,13 +457,13 @@ export default function Index() {
 
   // ---- RIGHT PANEL ----
   const renderRightPanel = () => (
-    <div className="glass-panel" style={{
+    <div ref={rightPanelRef} className="glass-panel" style={{
       width: isMobile ? "100%" : isTablet ? 290 : 340, flexShrink: 0,
       zIndex: 10, position: "relative",
       borderLeft: isMobile ? "none" : "1px solid hsl(220,15%,14%)",
-      overflowY: isMobile ? "visible" : "auto", padding: isMobile ? "14px" : "18px 16px",
+      overflowY: "auto", padding: isMobile ? "14px" : "18px 16px",
       display: "flex", flexDirection: "column", gap: 16,
-      ...(isMobile ? {} : { minHeight: 0 }),
+      ...(isMobile ? { height: "100%" } : { minHeight: 0 }),
     }}>
       {/* District header */}
       <div style={{
