@@ -703,7 +703,7 @@ export default function Index() {
             </div>
           )}
           {mobilePanel === "details" && (
-            <div style={{ flex: 1, overflowY: "auto", WebkitOverflowScrolling: "touch" }}>
+            <div style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column", WebkitOverflowScrolling: "touch" }}>
               {renderRightPanel()}
             </div>
           )}
