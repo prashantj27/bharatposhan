@@ -213,6 +213,94 @@ export default function Index() {
     };
   }, [detailVisible, selected.name, selected.state]);
 
+  // ---- Session-level journey tracking ----
+  // Records the ordered sequence of districts a user views in a single session,
+  // so we can analyze comparison and exploration patterns.
+  const journeyRef = useRef<{
+    sessionId: string;
+    startedAt: number;
+    steps: { district: string; state: string; t_ms: number }[];
+    lastEmittedCount: number;
+    flushed: boolean;
+  } | null>(null);
+
+  if (!journeyRef.current) {
+    const sessionId =
+      typeof crypto !== "undefined" && "randomUUID" in crypto
+        ? crypto.randomUUID()
+        : `s_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
+    journeyRef.current = {
+      sessionId,
+      startedAt: performance.now(),
+      steps: [],
+      lastEmittedCount: 0,
+      flushed: false,
+    };
+    trackEvent("session_start", { session_id: sessionId });
+  }
+
+  // Append the current district to the journey when it changes & is being viewed
+  useEffect(() => {
+    if (!detailVisible) return;
+    const j = journeyRef.current!;
+    const last = j.steps[j.steps.length - 1];
+    if (last && last.district === selected.name && last.state === selected.state) return;
+    const step = {
+      district: selected.name,
+      state: selected.state,
+      t_ms: Math.round(performance.now() - j.startedAt),
+    };
+    j.steps.push(step);
+    trackEvent("district_journey_step", {
+      session_id: j.sessionId,
+      step: j.steps.length,
+      district: step.district,
+      state: step.state,
+      t_ms: step.t_ms,
+    });
+  }, [detailVisible, selected.name, selected.state]);
+
+  // Periodic + end-of-session journey summary
+  useEffect(() => {
+    const flush = (reason: string) => {
+      const j = journeyRef.current;
+      if (!j) return;
+      if (reason === "pagehide" && j.flushed) return;
+      if (j.steps.length === 0) return;
+      if (reason === "checkpoint" && j.steps.length === j.lastEmittedCount) return;
+
+      const uniqueKeys = new Set(j.steps.map(s => `${s.state}|${s.district}`));
+      const states = new Set(j.steps.map(s => s.state));
+      // Compact path string; cap to last 50 entries to respect Umami payload limits
+      const path = j.steps.map(s => `${s.state}|${s.district}`).slice(-50).join(" → ");
+
+      trackEvent("district_journey_summary", {
+        session_id: j.sessionId,
+        reason,
+        total_views: j.steps.length,
+        unique_districts: uniqueKeys.size,
+        unique_states: states.size,
+        session_duration_ms: Math.round(performance.now() - j.startedAt),
+        path,
+      });
+      j.lastEmittedCount = j.steps.length;
+      if (reason === "pagehide") j.flushed = true;
+    };
+
+    const onVisibility = () => { if (document.hidden) flush("tab_hidden"); };
+    const onPageHide = () => flush("pagehide");
+    const checkpoint = window.setInterval(() => flush("checkpoint"), 120_000);
+
+    document.addEventListener("visibilitychange", onVisibility);
+    window.addEventListener("pagehide", onPageHide);
+
+    return () => {
+      window.clearInterval(checkpoint);
+      document.removeEventListener("visibilitychange", onVisibility);
+      window.removeEventListener("pagehide", onPageHide);
+    };
+  }, []);
+
   // Static dark theme colors
   const t = {
     bg: "hsl(225,20%,6%)",
