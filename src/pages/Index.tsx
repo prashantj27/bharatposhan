@@ -11,6 +11,7 @@ import { supabase } from "@/integrations/supabase/client";
 import nfhsData from "@/data/nfhsDistrictData.json";
 import logoImg from "@/assets/logo.png";
 import { trackEvent } from "@/lib/umami";
+import ScrollHint from "@/components/ScrollHint";
 
 const nfhsLookup = nfhsData as Record<string, { female_literacy?: number; sanitation?: number; [k: string]: any }>;
 
