@@ -867,10 +867,22 @@ export default function Index() {
   // ---- DESKTOP / TABLET LAYOUT ----
   return (
     <div style={{ fontFamily: "'Inter', sans-serif", background: t.bg, height: "100vh", color: t.text2, display: "flex", flexDirection: "column", overflow: "hidden" }}>
-      <div style={{ display: "flex", flex: 1, overflow: "hidden" }}>
+      <div style={{ display: "flex", flex: 1, overflow: "hidden", position: "relative" }}>
         {renderLeftSidebar()}
         {renderMapArea()}
         {renderRightPanel()}
+
+        {/* Floating collapse toggles (tablet + desktop) */}
+        <PanelToggle
+          side="left"
+          collapsed={leftCollapsed}
+          onClick={() => { trackEvent("panel_toggle", { side: "left", collapsed: !leftCollapsed }); setLeftCollapsed(v => !v); }}
+        />
+        <PanelToggle
+          side="right"
+          collapsed={rightCollapsed}
+          onClick={() => { trackEvent("panel_toggle", { side: "right", collapsed: !rightCollapsed }); setRightCollapsed(v => !v); }}
+        />
       </div>
       <div style={{ borderTop: `1px solid ${t.panelBorder}`, padding: "7px 24px", background: t.footerBg, fontSize: 9, color: t.textMuted, display: "flex", gap: 20, flexWrap: "wrap", fontFamily: "'JetBrains Mono', monospace", flexShrink: 0 }}>
         <span>Data: NFHS-5 (2019-21) · rchiips.org/nfhs</span>
