@@ -452,7 +452,7 @@ export default function Index() {
       }}>
       <div>
         <SectionLabel>National KPIs</SectionLabel>
-        <div style={{ display: isMobile ? "grid" : "flex", gridTemplateColumns: isMobile ? "1fr 1fr 1fr" : undefined, flexDirection: isMobile ? undefined : "column", gap: 8 }}>
+        <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr 1fr 1fr" : "1fr", gap: 8 }}>
           <KpiCard label="Avg Stunting" val="35.5%" delta="2.9%" />
           <KpiCard label="Avg Wasting" val="19.3%" delta="1.7%" />
           <KpiCard label="Avg Underweight" val="32.1%" delta="3.7%" />
