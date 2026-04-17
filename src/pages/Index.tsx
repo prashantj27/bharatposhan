@@ -61,7 +61,13 @@ function useScreenSize() {
     window.addEventListener("resize", onResize);
     return () => window.removeEventListener("resize", onResize);
   }, []);
-  return { isMobile: size.w < 768, isTablet: size.w >= 768 && size.w < 1024, w: size.w };
+  return {
+    isMobile: size.w < 768,
+    isTablet: size.w >= 768 && size.w < 1024,
+    isSmallMobile: size.w < 380,
+    w: size.w,
+    h: size.h,
+  };
 }
 
 // -- Styled sub-components --
@@ -145,7 +151,7 @@ export default function Index() {
   const [aiLoading, setAiLoading] = useState(false);
   const [aiError, setAiError] = useState<string | null>(null);
   const [pdfLoading, setPdfLoading] = useState<string | null>(null); // tracks which PDF is generating (intervention name or "full");
-  const { isMobile, isTablet, w } = useScreenSize();
+  const { isMobile, isTablet, isSmallMobile, w } = useScreenSize();
   const [mobilePanel, setMobilePanel] = useState<"map" | "districts" | "details">("map");
   const [mobileDetailOpen, setMobileDetailOpen] = useState(false);
   const rightPanelRef = useRef<HTMLDivElement>(null);
@@ -398,19 +404,19 @@ export default function Index() {
   const renderLayerButtons = () => (
     <div style={{
       position: "absolute", top: 12, left: 14, zIndex: 20,
-      display: "flex", gap: 5,
+      display: "flex", gap: 5, flexWrap: "wrap", maxWidth: "calc(100% - 28px)",
     }}>
       {["malnutrition", "literacy", "sanitation"].map(l => (
         <button key={l} onClick={() => { trackEvent("layer_change", { layer: l }); setActiveLayer(l); }} style={{
-          padding: isMobile ? "4px 9px" : "5px 14px", borderRadius: 7,
+          padding: isMobile ? "6px 10px" : "5px 14px", borderRadius: 7,
           border: `1px solid ${activeLayer === l ? "hsl(25,95%,55%)" : "hsla(220,15%,40%,0.4)"}`,
           background: activeLayer === l ? "hsla(25,95%,55%,0.18)" : "hsla(225,24%,8%,0.75)",
           color: activeLayer === l ? "hsl(25,95%,60%)" : "hsl(215,18%,60%)",
-          fontSize: isMobile ? 8 : 10, fontWeight: 600, letterSpacing: "0.06em",
+          fontSize: isMobile ? 9 : 10, fontWeight: 600, letterSpacing: "0.06em",
           cursor: "pointer", textTransform: "uppercase", transition: "all 0.2s ease",
-          backdropFilter: "blur(12px)",
+          backdropFilter: "blur(12px)", minHeight: isMobile ? 30 : undefined,
         }}>
-          {isMobile ? l.slice(0, 3).toUpperCase() : l}
+          {isSmallMobile ? l.slice(0, 3).toUpperCase() : l}
         </button>
       ))}
     </div>
@@ -419,7 +425,7 @@ export default function Index() {
   // ---- LEFT SIDEBAR ----
   const renderLeftSidebar = () => (
     <div style={{
-      width: isMobile ? "100%" : isTablet ? 190 : 240, flexShrink: 0,
+      width: isMobile ? "100%" : isTablet ? 210 : 240, flexShrink: 0,
       zIndex: 10, position: "relative",
       borderRight: isMobile ? "none" : "1px solid hsl(220,15%,14%)",
       display: "flex", flexDirection: "column",
@@ -446,7 +452,7 @@ export default function Index() {
       }}>
       <div>
         <SectionLabel>National KPIs</SectionLabel>
-        <div style={{ display: isMobile ? "grid" : "flex", gridTemplateColumns: isMobile ? "1fr 1fr 1fr" : undefined, flexDirection: isMobile ? undefined : "column", gap: 8 }}>
+        <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr 1fr 1fr" : "1fr", gap: 8 }}>
           <KpiCard label="Avg Stunting" val="35.5%" delta="2.9%" />
           <KpiCard label="Avg Wasting" val="19.3%" delta="1.7%" />
           <KpiCard label="Avg Underweight" val="32.1%" delta="3.7%" />
@@ -550,7 +556,7 @@ export default function Index() {
   // ---- RIGHT PANEL ----
   const renderRightPanel = () => (
     <div ref={rightPanelRef} className="glass-panel" style={{
-      width: isMobile ? "100%" : isTablet ? 290 : 340, flexShrink: 0,
+      width: isMobile ? "100%" : isTablet ? 300 : 340, flexShrink: 0,
       zIndex: 10, position: "relative",
       borderLeft: isMobile ? "none" : "1px solid hsl(220,15%,14%)",
       overflowY: "auto", padding: isMobile ? "14px" : "18px 16px",
@@ -571,7 +577,7 @@ export default function Index() {
             <div style={{ fontSize: 11, color: "hsl(215,18%,50%)", marginTop: 6, fontFamily: "'JetBrains Mono', monospace" }}>{selected.state} · District</div>
           </div>
           <div style={{ textAlign: "right", flexShrink: 0, paddingTop: 2 }}>
-            <div style={{ fontSize: isMobile ? 28 : 34, fontWeight: 800, color: riskColor(selected.risk), lineHeight: 1.1, letterSpacing: "-0.01em" }}>{(selected.risk * 100).toFixed(0)}</div>
+            <div style={{ fontSize: isMobile ? 30 : isTablet ? 30 : 34, fontWeight: 800, color: riskColor(selected.risk), lineHeight: 1.1, letterSpacing: "-0.01em" }}>{(selected.risk * 100).toFixed(0)}</div>
             <div style={{ fontSize: 9, color: riskColor(selected.risk), letterSpacing: "0.15em", fontWeight: 700, fontFamily: "'JetBrains Mono', monospace", marginTop: 4 }}>{riskLabel(selected.risk)}</div>
           </div>
         </div>
@@ -583,7 +589,7 @@ export default function Index() {
       {/* Nutrition Indicators */}
       <div>
         <SectionLabel>Nutrition Indicators · NFHS-5</SectionLabel>
-        <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr 1fr 1fr" : "1fr 1fr", gap: 8 }}>
+        <div style={{ display: "grid", gridTemplateColumns: isSmallMobile ? "1fr 1fr" : "1fr 1fr 1fr", gap: 8 }}>
           {[
             { label: "Stunting", val: selected.stunting, color: "#ef4444" },
             { label: "Wasting", val: selected.wasting, color: "#f97316" },
@@ -740,7 +746,7 @@ export default function Index() {
 
   // ---- MAP AREA ----
   const renderMapArea = () => (
-    <div style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", overflow: "hidden", minHeight: isMobile ? "50vh" : undefined }}>
+    <div style={{ flex: 1, minWidth: 0, minHeight: 0, display: "flex", flexDirection: "column", overflow: "hidden" }}>
       <div style={{ flex: 1, position: "relative", overflow: "hidden", background: "hsl(225,25%,5%)" }}>
         <IndiaMap
           ref={mapRef}
@@ -807,10 +813,10 @@ export default function Index() {
           <div
             onClick={() => setMobilePanel("details")}
             style={{
-              position: "absolute", bottom: 52, left: 8, right: 8, zIndex: 30,
+              position: "absolute", bottom: 12, left: 8, right: 8, zIndex: 30,
               background: `linear-gradient(135deg, ${riskBg(selected.risk)}, hsla(225,22%,10%,0.97))`,
               border: `1px solid ${riskColor(selected.risk)}25`,
-              borderRadius: 14, padding: "10px 14px", cursor: "pointer",
+              borderRadius: 14, padding: "12px 14px", cursor: "pointer",
               backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)",
               boxShadow: "0 -4px 24px rgba(0,0,0,0.4)",
             }}
@@ -833,15 +839,16 @@ export default function Index() {
             { key: "details" as const, icon: "📋", label: "Details" },
           ].map(tab => (
             <button key={tab.key} onClick={() => { trackEvent("mobile_tab_switch", { tab: tab.key }); setMobilePanel(tab.key); }} style={{
-              flex: 1, padding: "8px 0 6px", border: "none", cursor: "pointer",
+              flex: 1, padding: "10px 0 8px", border: "none", cursor: "pointer", minHeight: 54,
               background: mobilePanel === tab.key ? "hsla(25,95%,55%,0.08)" : "transparent",
-              color: mobilePanel === tab.key ? "hsl(25,95%,60%)" : "hsl(215,18%,45%)",
-              fontSize: 10, fontWeight: mobilePanel === tab.key ? 700 : 400,
+              color: mobilePanel === tab.key ? "hsl(25,95%,60%)" : "hsl(215,18%,55%)",
+              fontSize: 10, fontWeight: mobilePanel === tab.key ? 700 : 500,
               borderTop: mobilePanel === tab.key ? "2px solid hsl(25,95%,55%)" : "2px solid transparent",
               fontFamily: "'Inter', sans-serif",
-              display: "flex", flexDirection: "column", alignItems: "center", gap: 1,
+              display: "flex", flexDirection: "column", alignItems: "center", gap: 3,
+              transition: "all 0.2s ease",
             }}>
-              <span style={{ fontSize: 16 }}>{tab.icon}</span>
+              <span style={{ fontSize: 18 }}>{tab.icon}</span>
               {tab.label}
             </button>
           ))}
