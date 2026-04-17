@@ -734,6 +734,7 @@ export default function Index() {
         )}
       </div>
 
+      <ScrollHint targetRef={rightPanelRef} side="left" />
     </div>
   );
 
