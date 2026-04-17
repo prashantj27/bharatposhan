@@ -156,6 +156,8 @@ export default function Index() {
   const [mobileDetailOpen, setMobileDetailOpen] = useState(false);
   const rightPanelRef = useRef<HTMLDivElement>(null);
   const leftPanelRef = useRef<HTMLDivElement>(null);
+  const [leftCollapsed, setLeftCollapsed] = useState(false);
+  const [rightCollapsed, setRightCollapsed] = useState(false);
 
   // Force dark mode
   useEffect(() => {
@@ -422,13 +424,53 @@ export default function Index() {
     </div>
   );
 
+  // ---- PANEL COLLAPSE TOGGLE (tablet + desktop) ----
+  const PanelToggle = ({ side, collapsed, onClick }: { side: "left" | "right"; collapsed: boolean; onClick: () => void }) => {
+    if (isMobile) return null;
+    const pointsLeft = side === "left" ? !collapsed : collapsed;
+    return (
+      <button
+        onClick={onClick}
+        aria-label={`${collapsed ? "Show" : "Hide"} ${side} panel`}
+        title={`${collapsed ? "Show" : "Hide"} ${side} panel`}
+        style={{
+          position: "absolute",
+          top: "50%",
+          transform: "translateY(-50%)",
+          [side]: 0,
+          zIndex: 50,
+          width: 22,
+          height: 56,
+          borderRadius: side === "left" ? "0 8px 8px 0" : "8px 0 0 8px",
+          border: "1px solid hsl(220,15%,18%)",
+          background: "linear-gradient(135deg, hsla(225,24%,10%,0.92), hsla(225,22%,6%,0.96))",
+          backdropFilter: "blur(12px)",
+          WebkitBackdropFilter: "blur(12px)",
+          color: "hsl(25,95%,60%)",
+          cursor: "pointer",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          boxShadow: "0 4px 16px rgba(0,0,0,0.45), 0 0 12px hsla(25,95%,55%,0.15)",
+          transition: "all 0.2s ease",
+        }}
+      >
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none" style={{ transform: pointsLeft ? "rotate(0deg)" : "rotate(180deg)", transition: "transform 0.2s ease" }}>
+          <path d="M8 2L4 6L8 10" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
+        </svg>
+      </button>
+    );
+  };
+
   // ---- LEFT SIDEBAR ----
   const renderLeftSidebar = () => (
     <div style={{
-      width: isMobile ? "100%" : isTablet ? 210 : 240, flexShrink: 0,
+      width: isMobile ? "100%" : leftCollapsed ? 0 : isTablet ? 210 : 240,
+      flexShrink: 0,
       zIndex: 10, position: "relative",
-      borderRight: isMobile ? "none" : "1px solid hsl(220,15%,14%)",
-      display: "flex", flexDirection: "column",
+      borderRight: isMobile || leftCollapsed ? "none" : "1px solid hsl(220,15%,14%)",
+      display: leftCollapsed && !isMobile ? "none" : "flex", flexDirection: "column",
+      transition: "width 0.25s ease",
       ...(isMobile ? { height: "100%" } : { minHeight: 0 }),
     }}>
       {/* Fixed logo header */}
@@ -556,11 +598,14 @@ export default function Index() {
   // ---- RIGHT PANEL ----
   const renderRightPanel = () => (
     <div ref={rightPanelRef} className="glass-panel" style={{
-      width: isMobile ? "100%" : isTablet ? 300 : 340, flexShrink: 0,
+      width: isMobile ? "100%" : rightCollapsed ? 0 : isTablet ? 300 : 340,
+      flexShrink: 0,
       zIndex: 10, position: "relative",
-      borderLeft: isMobile ? "none" : "1px solid hsl(220,15%,14%)",
-      overflowY: "auto", padding: isMobile ? "14px" : "18px 16px",
-      display: "flex", flexDirection: "column", gap: 16,
+      borderLeft: isMobile || rightCollapsed ? "none" : "1px solid hsl(220,15%,14%)",
+      overflowY: rightCollapsed && !isMobile ? "hidden" : "auto",
+      padding: rightCollapsed && !isMobile ? 0 : isMobile ? "14px" : "18px 16px",
+      display: rightCollapsed && !isMobile ? "none" : "flex", flexDirection: "column", gap: 16,
+      transition: "width 0.25s ease",
       ...(isMobile ? { height: "100%" } : { minHeight: 0 }),
     }}>
       {/* District header */}
@@ -860,10 +905,22 @@ export default function Index() {
   // ---- DESKTOP / TABLET LAYOUT ----
   return (
     <div style={{ fontFamily: "'Inter', sans-serif", background: t.bg, height: "100vh", color: t.text2, display: "flex", flexDirection: "column", overflow: "hidden" }}>
-      <div style={{ display: "flex", flex: 1, overflow: "hidden" }}>
+      <div style={{ display: "flex", flex: 1, overflow: "hidden", position: "relative" }}>
         {renderLeftSidebar()}
         {renderMapArea()}
         {renderRightPanel()}
+
+        {/* Floating collapse toggles (tablet + desktop) */}
+        <PanelToggle
+          side="left"
+          collapsed={leftCollapsed}
+          onClick={() => { trackEvent("panel_toggle", { side: "left", collapsed: !leftCollapsed }); setLeftCollapsed(v => !v); }}
+        />
+        <PanelToggle
+          side="right"
+          collapsed={rightCollapsed}
+          onClick={() => { trackEvent("panel_toggle", { side: "right", collapsed: !rightCollapsed }); setRightCollapsed(v => !v); }}
+        />
       </div>
       <div style={{ borderTop: `1px solid ${t.panelBorder}`, padding: "7px 24px", background: t.footerBg, fontSize: 9, color: t.textMuted, display: "flex", gap: 20, flexWrap: "wrap", fontFamily: "'JetBrains Mono', monospace", flexShrink: 0 }}>
         <span>Data: NFHS-5 (2019-21) · rchiips.org/nfhs</span>
