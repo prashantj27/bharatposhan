@@ -589,7 +589,7 @@ export default function Index() {
       {/* Nutrition Indicators */}
       <div>
         <SectionLabel>Nutrition Indicators · NFHS-5</SectionLabel>
-        <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr 1fr 1fr" : "1fr 1fr", gap: 8 }}>
+        <div style={{ display: "grid", gridTemplateColumns: isSmallMobile ? "1fr 1fr" : "1fr 1fr 1fr", gap: 8 }}>
           {[
             { label: "Stunting", val: selected.stunting, color: "#ef4444" },
             { label: "Wasting", val: selected.wasting, color: "#f97316" },
