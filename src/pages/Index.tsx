@@ -61,7 +61,13 @@ function useScreenSize() {
     window.addEventListener("resize", onResize);
     return () => window.removeEventListener("resize", onResize);
   }, []);
-  return { isMobile: size.w < 768, isTablet: size.w >= 768 && size.w < 1024, w: size.w };
+  return {
+    isMobile: size.w < 768,
+    isTablet: size.w >= 768 && size.w < 1024,
+    isSmallMobile: size.w < 380,
+    w: size.w,
+    h: size.h,
+  };
 }
 
 // -- Styled sub-components --
