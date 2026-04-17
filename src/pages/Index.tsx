@@ -746,7 +746,7 @@ export default function Index() {
 
   // ---- MAP AREA ----
   const renderMapArea = () => (
-    <div style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", overflow: "hidden", minHeight: isMobile ? "50vh" : undefined }}>
+    <div style={{ flex: 1, minWidth: 0, minHeight: 0, display: "flex", flexDirection: "column", overflow: "hidden" }}>
       <div style={{ flex: 1, position: "relative", overflow: "hidden", background: "hsl(225,25%,5%)" }}>
         <IndiaMap
           ref={mapRef}
