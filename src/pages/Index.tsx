@@ -560,11 +560,14 @@ export default function Index() {
   // ---- RIGHT PANEL ----
   const renderRightPanel = () => (
     <div ref={rightPanelRef} className="glass-panel" style={{
-      width: isMobile ? "100%" : isTablet ? 300 : 340, flexShrink: 0,
+      width: isMobile ? "100%" : rightCollapsed ? 0 : isTablet ? 300 : 340,
+      flexShrink: 0,
       zIndex: 10, position: "relative",
-      borderLeft: isMobile ? "none" : "1px solid hsl(220,15%,14%)",
-      overflowY: "auto", padding: isMobile ? "14px" : "18px 16px",
-      display: "flex", flexDirection: "column", gap: 16,
+      borderLeft: isMobile || rightCollapsed ? "none" : "1px solid hsl(220,15%,14%)",
+      overflowY: rightCollapsed && !isMobile ? "hidden" : "auto",
+      padding: rightCollapsed && !isMobile ? 0 : isMobile ? "14px" : "18px 16px",
+      display: rightCollapsed && !isMobile ? "none" : "flex", flexDirection: "column", gap: 16,
+      transition: "width 0.25s ease",
       ...(isMobile ? { height: "100%" } : { minHeight: 0 }),
     }}>
       {/* District header */}
