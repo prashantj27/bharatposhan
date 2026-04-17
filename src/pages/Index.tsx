@@ -424,6 +424,44 @@ export default function Index() {
     </div>
   );
 
+  // ---- PANEL COLLAPSE TOGGLE (tablet + desktop) ----
+  const PanelToggle = ({ side, collapsed, onClick }: { side: "left" | "right"; collapsed: boolean; onClick: () => void }) => {
+    if (isMobile) return null;
+    const pointsLeft = side === "left" ? !collapsed : collapsed;
+    return (
+      <button
+        onClick={onClick}
+        aria-label={`${collapsed ? "Show" : "Hide"} ${side} panel`}
+        title={`${collapsed ? "Show" : "Hide"} ${side} panel`}
+        style={{
+          position: "absolute",
+          top: "50%",
+          transform: "translateY(-50%)",
+          [side]: 0,
+          zIndex: 50,
+          width: 22,
+          height: 56,
+          borderRadius: side === "left" ? "0 8px 8px 0" : "8px 0 0 8px",
+          border: "1px solid hsl(220,15%,18%)",
+          background: "linear-gradient(135deg, hsla(225,24%,10%,0.92), hsla(225,22%,6%,0.96))",
+          backdropFilter: "blur(12px)",
+          WebkitBackdropFilter: "blur(12px)",
+          color: "hsl(25,95%,60%)",
+          cursor: "pointer",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          boxShadow: "0 4px 16px rgba(0,0,0,0.45), 0 0 12px hsla(25,95%,55%,0.15)",
+          transition: "all 0.2s ease",
+        }}
+      >
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none" style={{ transform: pointsLeft ? "rotate(0deg)" : "rotate(180deg)", transition: "transform 0.2s ease" }}>
+          <path d="M8 2L4 6L8 10" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
+        </svg>
+      </button>
+    );
+  };
+
   // ---- LEFT SIDEBAR ----
   const renderLeftSidebar = () => (
     <div style={{
