@@ -813,10 +813,10 @@ export default function Index() {
           <div
             onClick={() => setMobilePanel("details")}
             style={{
-              position: "absolute", bottom: 52, left: 8, right: 8, zIndex: 30,
+              position: "absolute", bottom: 12, left: 8, right: 8, zIndex: 30,
               background: `linear-gradient(135deg, ${riskBg(selected.risk)}, hsla(225,22%,10%,0.97))`,
               border: `1px solid ${riskColor(selected.risk)}25`,
-              borderRadius: 14, padding: "10px 14px", cursor: "pointer",
+              borderRadius: 14, padding: "12px 14px", cursor: "pointer",
               backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)",
               boxShadow: "0 -4px 24px rgba(0,0,0,0.4)",
             }}
