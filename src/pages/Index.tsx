@@ -839,15 +839,16 @@ export default function Index() {
             { key: "details" as const, icon: "📋", label: "Details" },
           ].map(tab => (
             <button key={tab.key} onClick={() => { trackEvent("mobile_tab_switch", { tab: tab.key }); setMobilePanel(tab.key); }} style={{
-              flex: 1, padding: "8px 0 6px", border: "none", cursor: "pointer",
+              flex: 1, padding: "10px 0 8px", border: "none", cursor: "pointer", minHeight: 54,
               background: mobilePanel === tab.key ? "hsla(25,95%,55%,0.08)" : "transparent",
-              color: mobilePanel === tab.key ? "hsl(25,95%,60%)" : "hsl(215,18%,45%)",
-              fontSize: 10, fontWeight: mobilePanel === tab.key ? 700 : 400,
+              color: mobilePanel === tab.key ? "hsl(25,95%,60%)" : "hsl(215,18%,55%)",
+              fontSize: 10, fontWeight: mobilePanel === tab.key ? 700 : 500,
               borderTop: mobilePanel === tab.key ? "2px solid hsl(25,95%,55%)" : "2px solid transparent",
               fontFamily: "'Inter', sans-serif",
-              display: "flex", flexDirection: "column", alignItems: "center", gap: 1,
+              display: "flex", flexDirection: "column", alignItems: "center", gap: 3,
+              transition: "all 0.2s ease",
             }}>
-              <span style={{ fontSize: 16 }}>{tab.icon}</span>
+              <span style={{ fontSize: 18 }}>{tab.icon}</span>
               {tab.label}
             </button>
           ))}
