@@ -427,10 +427,12 @@ export default function Index() {
   // ---- LEFT SIDEBAR ----
   const renderLeftSidebar = () => (
     <div style={{
-      width: isMobile ? "100%" : isTablet ? 210 : 240, flexShrink: 0,
+      width: isMobile ? "100%" : leftCollapsed ? 0 : isTablet ? 210 : 240,
+      flexShrink: 0,
       zIndex: 10, position: "relative",
-      borderRight: isMobile ? "none" : "1px solid hsl(220,15%,14%)",
-      display: "flex", flexDirection: "column",
+      borderRight: isMobile || leftCollapsed ? "none" : "1px solid hsl(220,15%,14%)",
+      display: leftCollapsed && !isMobile ? "none" : "flex", flexDirection: "column",
+      transition: "width 0.25s ease",
       ...(isMobile ? { height: "100%" } : { minHeight: 0 }),
     }}>
       {/* Fixed logo header */}
