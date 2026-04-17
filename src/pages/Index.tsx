@@ -577,7 +577,7 @@ export default function Index() {
             <div style={{ fontSize: 11, color: "hsl(215,18%,50%)", marginTop: 6, fontFamily: "'JetBrains Mono', monospace" }}>{selected.state} · District</div>
           </div>
           <div style={{ textAlign: "right", flexShrink: 0, paddingTop: 2 }}>
-            <div style={{ fontSize: isMobile ? 28 : 34, fontWeight: 800, color: riskColor(selected.risk), lineHeight: 1.1, letterSpacing: "-0.01em" }}>{(selected.risk * 100).toFixed(0)}</div>
+            <div style={{ fontSize: isMobile ? 30 : isTablet ? 30 : 34, fontWeight: 800, color: riskColor(selected.risk), lineHeight: 1.1, letterSpacing: "-0.01em" }}>{(selected.risk * 100).toFixed(0)}</div>
             <div style={{ fontSize: 9, color: riskColor(selected.risk), letterSpacing: "0.15em", fontWeight: 700, fontFamily: "'JetBrains Mono', monospace", marginTop: 4 }}>{riskLabel(selected.risk)}</div>
           </div>
         </div>
