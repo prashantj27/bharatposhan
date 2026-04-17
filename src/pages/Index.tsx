@@ -425,7 +425,7 @@ export default function Index() {
   // ---- LEFT SIDEBAR ----
   const renderLeftSidebar = () => (
     <div style={{
-      width: isMobile ? "100%" : isTablet ? 190 : 240, flexShrink: 0,
+      width: isMobile ? "100%" : isTablet ? 210 : 240, flexShrink: 0,
       zIndex: 10, position: "relative",
       borderRight: isMobile ? "none" : "1px solid hsl(220,15%,14%)",
       display: "flex", flexDirection: "column",
