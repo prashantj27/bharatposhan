@@ -404,19 +404,19 @@ export default function Index() {
   const renderLayerButtons = () => (
     <div style={{
       position: "absolute", top: 12, left: 14, zIndex: 20,
-      display: "flex", gap: 5,
+      display: "flex", gap: 5, flexWrap: "wrap", maxWidth: "calc(100% - 28px)",
     }}>
       {["malnutrition", "literacy", "sanitation"].map(l => (
         <button key={l} onClick={() => { trackEvent("layer_change", { layer: l }); setActiveLayer(l); }} style={{
-          padding: isMobile ? "4px 9px" : "5px 14px", borderRadius: 7,
+          padding: isMobile ? "6px 10px" : "5px 14px", borderRadius: 7,
           border: `1px solid ${activeLayer === l ? "hsl(25,95%,55%)" : "hsla(220,15%,40%,0.4)"}`,
           background: activeLayer === l ? "hsla(25,95%,55%,0.18)" : "hsla(225,24%,8%,0.75)",
           color: activeLayer === l ? "hsl(25,95%,60%)" : "hsl(215,18%,60%)",
-          fontSize: isMobile ? 8 : 10, fontWeight: 600, letterSpacing: "0.06em",
+          fontSize: isMobile ? 9 : 10, fontWeight: 600, letterSpacing: "0.06em",
           cursor: "pointer", textTransform: "uppercase", transition: "all 0.2s ease",
-          backdropFilter: "blur(12px)",
+          backdropFilter: "blur(12px)", minHeight: isMobile ? 30 : undefined,
         }}>
-          {isMobile ? l.slice(0, 3).toUpperCase() : l}
+          {isSmallMobile ? l.slice(0, 3).toUpperCase() : l}
         </button>
       ))}
     </div>
