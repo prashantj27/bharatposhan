@@ -156,6 +156,8 @@ export default function Index() {
   const [mobileDetailOpen, setMobileDetailOpen] = useState(false);
   const rightPanelRef = useRef<HTMLDivElement>(null);
   const leftPanelRef = useRef<HTMLDivElement>(null);
+  const [leftCollapsed, setLeftCollapsed] = useState(false);
+  const [rightCollapsed, setRightCollapsed] = useState(false);
 
   // Force dark mode
   useEffect(() => {
