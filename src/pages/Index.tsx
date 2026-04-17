@@ -11,6 +11,7 @@ import { supabase } from "@/integrations/supabase/client";
 import nfhsData from "@/data/nfhsDistrictData.json";
 import logoImg from "@/assets/logo.png";
 import { trackEvent } from "@/lib/umami";
+import ScrollHint from "@/components/ScrollHint";
 
 const nfhsLookup = nfhsData as Record<string, { female_literacy?: number; sanitation?: number; [k: string]: any }>;
 
@@ -148,6 +149,7 @@ export default function Index() {
   const [mobilePanel, setMobilePanel] = useState<"map" | "districts" | "details">("map");
   const [mobileDetailOpen, setMobileDetailOpen] = useState(false);
   const rightPanelRef = useRef<HTMLDivElement>(null);
+  const leftPanelRef = useRef<HTMLDivElement>(null);
 
   // Force dark mode
   useEffect(() => {
@@ -436,10 +438,11 @@ export default function Index() {
         <img src={logoImg} alt="PoshanAtlas AI" style={{ height: isMobile ? 54 : 70, width: "auto" }} />
       </div>
       {/* Scrollable content */}
-      <div className="glass-panel" style={{
+      <div ref={leftPanelRef} className="glass-panel" style={{
         flex: 1, minHeight: 0, overflowY: "auto",
         padding: isMobile ? "14px" : "18px 14px",
         display: "flex", flexDirection: "column", gap: 18,
+        position: "relative",
       }}>
       <div>
         <SectionLabel>National KPIs</SectionLabel>
@@ -539,6 +542,7 @@ export default function Index() {
         isMobile={isMobile}
         setMobilePanel={setMobilePanel}
       />
+      <ScrollHint targetRef={leftPanelRef} side="right" />
       </div>
     </div>
   );
@@ -730,6 +734,7 @@ export default function Index() {
         )}
       </div>
 
+      <ScrollHint targetRef={rightPanelRef} side="left" />
     </div>
   );
 
