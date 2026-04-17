@@ -556,7 +556,7 @@ export default function Index() {
   // ---- RIGHT PANEL ----
   const renderRightPanel = () => (
     <div ref={rightPanelRef} className="glass-panel" style={{
-      width: isMobile ? "100%" : isTablet ? 290 : 340, flexShrink: 0,
+      width: isMobile ? "100%" : isTablet ? 300 : 340, flexShrink: 0,
       zIndex: 10, position: "relative",
       borderLeft: isMobile ? "none" : "1px solid hsl(220,15%,14%)",
       overflowY: "auto", padding: isMobile ? "14px" : "18px 16px",
