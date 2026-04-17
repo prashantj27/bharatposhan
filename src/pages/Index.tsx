@@ -542,6 +542,7 @@ export default function Index() {
         isMobile={isMobile}
         setMobilePanel={setMobilePanel}
       />
+      <ScrollHint targetRef={leftPanelRef} side="right" />
       </div>
     </div>
   );
